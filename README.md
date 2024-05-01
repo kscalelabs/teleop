@@ -9,6 +9,7 @@ conda create -n teleop python=3.8
 conda activate teleop
 pip install vuer[all]
 pip install opencv-python
+pip install roboticstoolbox-python
 ```
 
 ### Usage
