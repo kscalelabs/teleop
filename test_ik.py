@@ -19,55 +19,90 @@ left_arm_chain = [
     "joint_left_arm_2_x6_2_dof_x6",
     "joint_left_arm_2_x4_1_dof_x4",
     "joint_left_arm_2_hand_1_x4_1_dof_x4",
+    "joint_left_arm_2_hand_1_x4_2_dof_x4",
 ]
+q0_left = [0, 0, 0, 0, 0, 0, 0]
 right_arm_chain = [
     "joint_right_arm_1_x8_1_dof_x8",
     "joint_right_arm_1_x8_2_dof_x8",
     "joint_right_arm_1_x6_1_dof_x6",
     "joint_right_arm_1_x6_2_dof_x6",
     "joint_right_arm_1_x4_1_dof_x4",
+    "joint_right_arm_1_hand_1_x4_1_dof_x4",
     "joint_right_arm_1_hand_1_x4_2_dof_x4",
 ]
+q0_right = [1.7, 1.6, 0.34, 1.6, 1.4, -0.26, -1.2]
 
 @app.add_handler("OBJECT_MOVE")
 async def move_handler(event, session):
     if event.key == "left":
-        Tep = np.array(event.value["matrix"])
+        Tep = np.array(event.value["matrix"]).reshape(4, 4).T
+        print(f'Tep: {Tep}')
+        print(f'Target xyz position: {Tep[:3, 3]}')
+        # change reference frame to match robot
+        Tep = np.dot(Tep, np.array([
+            [0, 1, 0, 0],
+            [0, 0, 1, 0],
+            [1, 0, 0, 0],
+            [0, 0, 0, 1],
+        ]))
+        print(f'Corrected Tep: {Tep}')
+        print(f'Corrected Target xyz position: {Tep[:3, 3]}')
         result = stompy_rtb.ik_LM(
             Tep,
             start="link_left_arm_2_x8_1_outer_1",
             end="link_left_arm_2_hand_1_x4_1_inner_1",
-            tol=0.1,
+            tol=1e-4,
             mask=[1, 1, 1, 0, 0, 0], # which DOF to solve for (this is just xyz)
-            # q0=q0, # intial guess for faster solve
+            q0=q0_left, # intial guess for faster solve
             # joint_limits=True,
         )
         q, success, num_iter, num_search, residual = result
         print(f"success: {bool(success)} after {num_iter} iterations")
         print(f'\t q: {q}')
+        Teg = stompy_rtb.fkine(q, end="link_left_arm_2_hand_1_x4_1_inner_1", start="link_left_arm_2_x8_1_outer_1")
+        Teg = np.array(Teg)
+        print(f'Teg: {Teg}')
+        print(f'Actual xyz position: {Teg[:3, 3]}')
         session.upsert @ Urdf(
             src="http://localhost:8012/static/robot.urdf",
             jointValues={k: v for k, v in zip(left_arm_chain, q)},
-            position=[0, 0, 1],
+            # position=[0, 0, 1],
             key="robot",
         )
     elif event.key == "right":
-        Tep = np.array(event.value["matrix"])
+        Tep = np.array(event.value["matrix"]).reshape(4, 4).T
+        print(f'Tep: {Tep}')
+        print(f'Target xyz position: {Tep[:3, 3]}')
+        # change reference frame to match robot
+        Tep = np.dot(Tep, np.array([
+            [0, 1, 0, 0],
+            [0, 0, 1, 0],
+            [1, 0, 0, 0],
+            [0, 0, 0, 1],
+        ]))
+        print(f'Corrected Tep: {Tep}')
+        print(f'Corrected Target xyz position: {Tep[:3, 3]}')
         result = stompy_rtb.ik_LM(
             Tep,
             start="link_right_arm_1_x8_1_outer_1",
             end="link_right_arm_1_hand_1_x4_2_inner_1",
-            tol=0.1,
+            tol=1e-4,
             mask=[1, 1, 1, 0, 0, 0], # which DOF to solve for (this is just xyz)
-            # q0=q0, # intial guess for faster solve
+            q0=q0_right, # intial guess for faster solve
             # joint_limits=True,
         )
         q, success, num_iter, num_search, residual = result
         print(f"success: {bool(success)} after {num_iter} iterations")
+        print(f'\t q: {q}')
+        Teg = stompy_rtb.fkine(q, end="link_right_arm_1_hand_1_x4_2_inner_1", start="link_right_arm_1_x8_1_outer_1")
+        Teg = np.array(Teg)
+        print(f'Teg: {Teg}')
+        print(f'Actual xyz position: {Teg[:3, 3]}')
         session.upsert @ Urdf(
             src="http://localhost:8012/static/robot.urdf",
             jointValues={k: v for k, v in zip(right_arm_chain, q)},
-            position=[0, 0, 1],
+            # position=[0, 0, 1],
             key="robot",
         )
 
@@ -80,15 +115,17 @@ async def main(app: VuerSession):
             PointLight(intensity=3, position=[0, 1, 2]),
         ],
         grid=True,
-        up=[0, 0, 1],
+        # up=[0, 0, 1],
     )
-    app.upsert @ Movable(Gripper(), position=[-0.1, -0.3, 0.75], key="right")
-    app.upsert @ Movable(Gripper(), position=[0.1, -0.3, 0.75], key="left")
+    # app.upsert @ Movable(Gripper(), position=[-0.1, -0.3, 0.75], key="right")
+    # app.upsert @ Movable(Gripper(), position=[0.1, -0.3, 0.75], key="left")
+    app.upsert @ Movable(Gripper(), position=[-0.1, -0.3, 0.0], key="right")
+    app.upsert @ Movable(Gripper(), position=[0.1, -0.3, 0.0], key="left")
     await sleep(0.1)
     app.upsert @ Urdf(
         src="http://localhost:8012/static/robot.urdf",
         jointValues=StompyFixed.default_standing(),
-        position=[0, 0, 1],
+        # position=[0, 0, 1],
         key="robot",
     )
     while True:
