@@ -330,6 +330,28 @@ def joint_dict_to_list(dicts: List[Dict[str, float]]) -> List[float]:
     return q
 
 
+def qright_to_dict(q):
+    return {
+        "joint_right_arm_1_x8_1_dof_x8": q[0],
+        "joint_right_arm_1_x8_2_dof_x8": q[1],
+        "joint_right_arm_1_x6_1_dof_x6": q[2],
+        "joint_right_arm_1_x6_2_dof_x6": q[3],
+        "joint_right_arm_1_x4_1_dof_x4": q[4],
+        "joint_right_arm_1_hand_1_x4_1_dof_x4": q[5],
+    }
+
+
+def qleft_to_dict(q):
+    return {
+        "joint_left_arm_2_x8_1_dof_x8": q[0],
+        "joint_left_arm_2_x8_2_dof_x8": q[1],
+        "joint_left_arm_2_x6_1_dof_x6": q[2],
+        "joint_left_arm_2_x6_2_dof_x6": q[3],
+        "joint_left_arm_2_x4_1_dof_x4": q[4],
+        "joint_left_arm_2_hand_1_x4_1_dof_x4": q[5],
+    }
+
+
 class StompyFixed(Stompy):
     head = Head()
     torso = Torso()

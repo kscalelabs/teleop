@@ -7,9 +7,9 @@ import spatialmath as sm
 from vuer import Vuer, VuerSession
 from vuer.schemas import Movable, Gripper, Urdf, Scene, AmbientLight, PointLight
 
-from src.stompy import StompyFixed
+from src.stompy import StompyFixed, joint_dict_to_list, qright_to_dict, qleft_to_dict
 
-app = Vuer(static_root=f"{os.path.dirname(__file__)}/urdf/stompy_tiny")
+app = Vuer(static_root=f"{os.path.dirname(__file__)}/urdf/stompy_tiny_glb")
 robot_pos = [0, 0, 1]
 left_ee_start = [0.2479, -0.3074, -0.1344]
 left_ee_start = [p + r for p, r in zip(left_ee_start, robot_pos)]
@@ -17,7 +17,7 @@ right_ee_start = [-0.2479, -0.3074, -0.1344]
 right_ee_start = [p + r for p, r in zip(right_ee_start, robot_pos)]
 
 stompy_rtb = rtb.robot.Robot.URDF(
-    f"{os.path.dirname(__file__)}/urdf/stompy_tiny/robot.urdf"
+    f"{os.path.dirname(__file__)}/urdf/stompy_tiny_glb/robot.urdf"
 )
 robot_inv = sm.SE3.Trans([-rp for rp in robot_pos])
 q_left = [-1.7, -1.6, -0.34, -1.6, -1.4, -1.7]
@@ -35,18 +35,19 @@ async def move_handler(event, session):
         Tg = sm.SE3(Tg) * robot_inv
         print(f"Tg robot\n{Tg}\n")
         print(f"q0\n{q_left}\n")
-        result = stompy_rtb.ik_LM(
+        result = stompy_rtb.ik_GN(
             Tg,
             end="link_left_arm_2_hand_1_x4_2_outer_1",
             tol=tol,
             mask=mask,
             q0=q_left,
-            joint_limits=False,
+            # joint_limits=False,
+            pinv=True,
         )
         q, success, num_iter, num_search, residual = result
         print(f"success: {bool(success)} after {num_iter} iterations {num_search} searches (residual: {residual} < {tol})")
-        # if success:    
-        #     q_left = q
+        if success:
+            q_left = q
         print(f"qt\n{q_left}\n")
         session.upsert @ Urdf(
             src="http://localhost:8012/static/robot.urdf",
@@ -61,24 +62,33 @@ async def move_handler(event, session):
             position=robot_pos,
             key="robot",
         )
+        if success:
+            Tr = stompy_rtb.fkine(q, end='link_left_arm_2_hand_1_x4_2_outer_1')
+            print(f"Tr\n{Tr}\n")
+            q_full = joint_dict_to_list([StompyFixed().default_standing(), qleft_to_dict(q)])
+            Tr_full = stompy_rtb.fkine(q_full)
+            print(f"Tr_full\n{Tr_full}\n")
+            # stompy_rtb.plot(q_full)
     elif event.key == "right":
         Tg = np.array(event.value["matrix"]).reshape(4, 4).T
         print(f"Tg raw\n{Tg}\n")
         Tg = sm.SE3(Tg) * robot_inv
         print(f"Tg robot\n{Tg}\n")
         print(f"q0\n{q_right}\n")
-        result = stompy_rtb.ik_LM(
+        result = stompy_rtb.ik_GN(
             Tg,
             end="link_right_arm_1_hand_1_x4_2_outer_1",
             tol=tol,
             mask=mask,
-            q0=q_right,
-            joint_limits=False,
+            # q0=q_right,
+            q0=joint_dict_to_list([StompyFixed().default_standing(), qright_to_dict(q_right)]),
+            # joint_limits=False,
+            pinv=True,
         )
         q, success, num_iter, num_search, residual = result
         print(f"success: {bool(success)} after {num_iter} iterations {num_search} searches (residual: {residual} < {tol})")
-        # if success:
-        #     q_right = q
+        if success:
+            q_right = q
         print(f"qt\n{q_right}\n")
         session.upsert @ Urdf(
             src="http://localhost:8012/static/robot.urdf",
@@ -93,6 +103,13 @@ async def move_handler(event, session):
             position=robot_pos,
             key="robot",
         )
+        if success:
+            Tr = stompy_rtb.fkine(q, end='link_right_arm_1_hand_1_x4_2_outer_1')
+            print(f"Tr\n{Tr}\n")
+            q_full = joint_dict_to_list([StompyFixed().default_standing(), qright_to_dict(q)])
+            Tr_full = stompy_rtb.fkine(q_full, end='link_right_arm_1_hand_1_x4_2_outer_1')
+            print(f"Tr_full\n{Tr_full}\n")
+            # stompy_rtb.plot(q_full)
 
 
 @app.spawn(start=True)
