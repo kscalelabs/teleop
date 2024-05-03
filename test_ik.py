@@ -7,39 +7,47 @@ import spatialmath as sm
 from vuer import Vuer, VuerSession
 from vuer.schemas import Movable, Gripper, Urdf, Scene, AmbientLight, PointLight
 
-from src.stompy import StompyFixed, joint_dict_to_list
+from src.stompy import StompyFixed
 
 app = Vuer(static_root=f"{os.path.dirname(__file__)}/urdf/stompy_tiny")
 robot_pos = [0, 0, 1]
+left_ee_start = [0.2479, -0.3074, -0.1344]
+left_ee_start = [p + r for p, r in zip(left_ee_start, robot_pos)]
+right_ee_start = [-0.2479, -0.3074, -0.1344]
+right_ee_start = [p + r for p, r in zip(right_ee_start, robot_pos)]
 
 stompy_rtb = rtb.robot.Robot.URDF(
     f"{os.path.dirname(__file__)}/urdf/stompy_tiny/robot.urdf"
 )
+robot_inv = sm.SE3.Trans([-rp for rp in robot_pos])
 q_left = [-1.7, -1.6, -0.34, -1.6, -1.4, -1.7]
 q_right = [1.7, 1.6, 0.34, 1.6, 1.4, -0.26]
 tol = 1e-3
-mask = [1, 1, 1, 0, 0, 1]
+mask = [1, 1, 1, 0, 0, 0]
 
 @app.add_handler("OBJECT_MOVE")
 async def move_handler(event, session):
+    print("------------------------")
     global q_left, q_right
     if event.key == "left":
-        print("------------------------")
         Tg = np.array(event.value["matrix"]).reshape(4, 4).T
-        print(f"Tg\n{Tg}\n")
+        print(f"Tg raw\n{Tg}\n")
+        Tg = sm.SE3(Tg) * robot_inv
+        print(f"Tg robot\n{Tg}\n")
+        print(f"q0\n{q_left}\n")
         result = stompy_rtb.ik_LM(
             Tg,
-            end="link_left_arm_2_hand_1_base_1",
+            end="link_left_arm_2_hand_1_x4_2_outer_1",
             tol=tol,
             mask=mask,
             q0=q_left,
             joint_limits=False,
         )
         q, success, num_iter, num_search, residual = result
-        print(f"success: {bool(success)} after {num_iter} iterations {num_search} searches")
-        print(f"\t q: {q}")
-        if success:
-            q_left = q
+        print(f"success: {bool(success)} after {num_iter} iterations {num_search} searches (residual: {residual} < {tol})")
+        # if success:    
+        #     q_left = q
+        print(f"qt\n{q_left}\n")
         session.upsert @ Urdf(
             src="http://localhost:8012/static/robot.urdf",
             jointValues={
@@ -54,22 +62,24 @@ async def move_handler(event, session):
             key="robot",
         )
     elif event.key == "right":
-        print("------------------------")
         Tg = np.array(event.value["matrix"]).reshape(4, 4).T
-        print(f"Tg\n{Tg}\n")
+        print(f"Tg raw\n{Tg}\n")
+        Tg = sm.SE3(Tg) * robot_inv
+        print(f"Tg robot\n{Tg}\n")
+        print(f"q0\n{q_right}\n")
         result = stompy_rtb.ik_LM(
             Tg,
-            end="link_right_arm_1_hand_1_base_1",
+            end="link_right_arm_1_hand_1_x4_2_outer_1",
             tol=tol,
             mask=mask,
             q0=q_right,
             joint_limits=False,
         )
         q, success, num_iter, num_search, residual = result
-        print(f"success: {bool(success)} after {num_iter} iterations")
-        print(f"\t q: {q}")
-        if success:
-            q_right = q
+        print(f"success: {bool(success)} after {num_iter} iterations {num_search} searches (residual: {residual} < {tol})")
+        # if success:
+        #     q_right = q
+        print(f"qt\n{q_right}\n")
         session.upsert @ Urdf(
             src="http://localhost:8012/static/robot.urdf",
             jointValues={
@@ -86,8 +96,8 @@ async def move_handler(event, session):
 
 
 @app.spawn(start=True)
-async def main(app: VuerSession):
-    app.set @ Scene(
+async def main(session: VuerSession):
+    session.set @ Scene(
         rawChildren=[
             AmbientLight(intensity=1),
             PointLight(intensity=1, position=[0, 0, 2]),
@@ -96,14 +106,10 @@ async def main(app: VuerSession):
         grid=True,
         up=[0, 0, 1],
     )
-    left_gripper_pos = [0.2479, -0.3074, -0.1344]
-    left_gripper_pos = [p + r for p, r in zip(left_gripper_pos, robot_pos)]
-    right_gripper_pos = [-0.2479, -0.3074, -0.1344]
-    right_gripper_pos = [p + r for p, r in zip(right_gripper_pos, robot_pos)]
-    app.upsert @ Movable(Gripper(), position=right_gripper_pos, key="right")
-    app.upsert @ Movable(Gripper(), position=left_gripper_pos, key="left")
+    session.upsert @ Movable(Gripper(), position=right_ee_start, key="right")
+    session.upsert @ Movable(Gripper(), position=left_ee_start, key="left")
     await sleep(0.1)
-    app.upsert @ Urdf(
+    session.upsert @ Urdf(
         src="http://localhost:8012/static/robot.urdf",
         jointValues=StompyFixed.default_standing(),
         position=robot_pos,
