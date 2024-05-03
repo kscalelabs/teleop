@@ -44,22 +44,26 @@ print(f"q0\n{q0}\n")
 # stompy_rtb.plot(q0_full)
 Tg = stompy_rtb.fkine(q0, end=END_LINK)
 print(f"Tg\n{Tg}\n")
-# Tg *= sm.SE3.Trans(0.01, 0, 0) # slightly move forward in X
-# print(f"Tg\n{Tg}\n")
+Tg *= sm.SE3.Trans(0.01, 0, 0) # slightly move forward in X
+print(f"Tg\n{Tg}\n")
 # result = stompy_rtb.ik_NR(
-# result = stompy_rtb.ik_LM(
-result = stompy_rtb.ik_GN(
+result = stompy_rtb.ik_LM(
+# result = stompy_rtb.ik_GN(
 # result = stompy_rtb.ikine_LM(
     Tg,
     end=END_LINK,
     tol=1e-3,
+    # tol=1e-4,
     # ilimit=100,
     # ilimit=1000,
     # slimit=3, 
     # slimit=1000,
-    # mask=[1, 1, 1, 0, 0, 0],  # which DOF to solve for (this is just xyz)
-    # q0=q0, # intial guess for faster solve
-    q0=[q + 0.01 for q in q0],
+    # mask=[1, 1, 1, 0, 0, 0],  # only xyz
+    mask=[100, 100, 100, 0, 0, 1],  # only xyz
+    # mask=[100, 100, 100, 1, 1, 1],  # only xyz
+    q0=q0, # intial guess for faster solve
+    # q0=[q + 0.1 for q in q0],
+    # q0=[q + 0.2 for q in q0],
     # q0=[q0, [q + 0.01 for q in q0], [q - 0.01 for q in q0]], # intial guess for faster solve
     joint_limits=False, # this seems to be necessary
     # method='wampler',

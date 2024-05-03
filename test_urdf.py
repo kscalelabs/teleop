@@ -7,7 +7,7 @@ from vuer.schemas import Scene, Urdf, Movable, PointLight, AmbientLight
 
 from src.stompy import StompyFixed
 
-app = Vuer(static_root=f"{os.path.dirname(__file__)}/urdf/stompy_tiny_glb")
+app = Vuer(static_root=f"{os.path.dirname(__file__)}/urdf/stompy_tiny")
 
 amplitudes = {
     k: abs(v["upper"] - v["lower"])

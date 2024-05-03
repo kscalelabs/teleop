@@ -113,40 +113,6 @@ class Teleop:
                 self.left_landmarks_shared[:] = np.array(event.value["leftLandmarks"]).flatten()
             with self.right_landmarks_shared.get_lock():
                 self.right_landmarks_shared[:] = np.array(event.value["rightLandmarks"]).flatten()
-        """
-            detectPinch: (function () {
-                var thumbTipPosition = new THREE.Vector3();
-                var jointPose = new THREE.Matrix4();
-                return function () {
-                var indexTipPosition = this.indexTipPosition;
-                var pinchEventDetail = this.pinchEventDetail;
-                if (!this.hasPoses) { return; }
-
-                thumbTipPosition.setFromMatrixPosition(jointPose.fromArray(this.jointPoses, THUMB_TIP_INDEX * 16));
-                indexTipPosition.setFromMatrixPosition(jointPose.fromArray(this.jointPoses, INDEX_TIP_INDEX * 16));
-                pinchEventDetail.wristRotation.setFromRotationMatrix(jointPose.fromArray(this.jointPoses, WRIST_INDEX * 16));
-
-                var distance = indexTipPosition.distanceTo(thumbTipPosition);
-
-                if (distance < PINCH_START_DISTANCE && this.isPinched === false) {
-                    this.isPinched = true;
-                    this.pinchDistance = distance;
-                    pinchEventDetail.position.copy(indexTipPosition).add(thumbTipPosition).multiplyScalar(0.5);
-                    this.el.emit('pinchstarted', pinchEventDetail);
-                }
-
-                if (distance > (this.pinchDistance + this.pinchDistance * PINCH_END_PERCENTAGE) && this.isPinched === true) {
-                    this.isPinched = false;
-                    pinchEventDetail.position.copy(indexTipPosition).add(thumbTipPosition).multiplyScalar(0.5);
-                    this.el.emit('pinchended', pinchEventDetail);
-                }
-
-                if (this.isPinched) {
-                    pinchEventDetail.position.copy(indexTipPosition).add(thumbTipPosition).multiplyScalar(0.5);
-                    this.el.emit('pinchmoved', pinchEventDetail);
-                }
-                };
-        """
         except: 
             pass
 
