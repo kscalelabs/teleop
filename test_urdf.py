@@ -7,7 +7,7 @@ from vuer.schemas import Scene, Urdf, Movable, PointLight, AmbientLight
 
 from src.stompy import StompyFixed
 
-app = Vuer(static_root=f"{os.path.dirname(__file__)}/urdf/stompy_tiny_gltf")
+app = Vuer(static_root=f"{os.path.dirname(__file__)}/urdf/stompy_tiny_glb")
 
 amplitudes = {
     k: abs(v["upper"] - v["lower"])
@@ -42,7 +42,7 @@ async def main(app: VuerSession):
                 value + amplitudes[joint_name] * math.sin(i * 0.1) for joint_name, value in StompyFixed.default_standing().items()
             },
             position=[0, 0, 1],
-            key="robot",
+            key="stompy",
         )
         await sleep(0.016)
         i += 1

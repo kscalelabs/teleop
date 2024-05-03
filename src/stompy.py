@@ -11,6 +11,7 @@ tree of the various joint names in the robot.
 import textwrap
 from abc import ABC
 from typing import Dict, List, Union
+from collections import OrderedDict
 
 import numpy as np
 
@@ -20,7 +21,9 @@ class Node(ABC):
     def children(cls) -> List["Union[Node, str]"]:
         return [
             attr
-            for attr in (getattr(cls, attr) for attr in dir(cls) if not attr.startswith("__"))
+            for attr in (
+                getattr(cls, attr) for attr in dir(cls) if not attr.startswith("__")
+            )
             if isinstance(attr, (Node, str))
         ]
 
@@ -28,7 +31,9 @@ class Node(ABC):
     def joints(cls) -> List[str]:
         return [
             attr
-            for attr in (getattr(cls, attr) for attr in dir(cls) if not attr.startswith("__"))
+            for attr in (
+                getattr(cls, attr) for attr in dir(cls) if not attr.startswith("__")
+            )
             if isinstance(attr, str)
         ]
 
@@ -196,6 +201,55 @@ class Stompy(Node):
             Stompy.legs.left.knee: np.deg2rad(-6),
             Stompy.legs.right.knee: np.deg2rad(6),
         }
+
+
+def joint_dict_to_list(dicts: List[Dict[str, float]]) -> List[float]:
+    # This is the order of joints in the URDF file
+    joint_list = [
+        "joint_right_arm_1_x8_1_dof_x8",
+        "joint_left_arm_2_x8_1_dof_x8",
+        "joint_head_1_x4_1_dof_x4",
+        "joint_torso_1_x8_1_dof_x8",
+        "joint_right_arm_1_x8_2_dof_x8",
+        "joint_left_arm_2_x8_2_dof_x8",
+        "joint_legs_1_x8_1_dof_x8",
+        "joint_legs_1_x8_2_dof_x8",
+        "joint_head_1_x4_2_dof_x4",
+        "joint_right_arm_1_x6_1_dof_x6",
+        "joint_left_arm_2_x6_1_dof_x6",
+        "joint_legs_1_right_leg_1_x8_1_dof_x8",
+        "joint_legs_1_left_leg_1_x8_1_dof_x8",
+        "joint_right_arm_1_x6_2_dof_x6",
+        "joint_left_arm_2_x6_2_dof_x6",
+        "joint_legs_1_right_leg_1_x10_2_dof_x10",
+        "joint_legs_1_left_leg_1_x10_1_dof_x10",
+        "joint_legs_1_left_leg_1_knee_revolute",
+        "joint_legs_1_right_leg_1_knee_revolute",
+        "joint_right_arm_1_x4_1_dof_x4",
+        "joint_left_arm_2_x4_1_dof_x4",
+        "joint_legs_1_right_leg_1_x10_1_dof_x10",
+        "joint_legs_1_right_leg_1_ankle_revolute",
+        "joint_legs_1_left_leg_1_x10_2_dof_x10",
+        "joint_legs_1_left_leg_1_ankle_revolute",
+        "joint_legs_1_left_leg_1_x6_1_dof_x6",
+        "joint_legs_1_right_leg_1_x6_1_dof_x6",
+        "joint_legs_1_left_leg_1_x4_1_dof_x4",
+        "joint_legs_1_right_leg_1_x4_1_dof_x4",
+        "joint_right_arm_1_hand_1_x4_1_dof_x4",
+        "joint_left_arm_2_hand_1_x4_1_dof_x4",
+        "joint_right_arm_1_hand_1_slider_1",
+        "joint_right_arm_1_hand_1_slider_2",
+        "joint_left_arm_2_hand_1_slider_1",
+        "joint_left_arm_2_hand_1_slider_2",
+        "joint_right_arm_1_hand_1_x4_2_dof_x4",
+        "joint_left_arm_2_hand_1_x4_2_dof_x4",
+    ]
+    joint_map = OrderedDict((joint, i) for i, joint in enumerate(joint_list))
+    q = [0] * len(joint_list)
+    for d in dicts:
+        for joint, value in d.items():
+            q[joint_map[joint]] = value
+    return q
 
 
 class StompyFixed(Stompy):
