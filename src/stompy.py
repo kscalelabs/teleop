@@ -205,7 +205,7 @@ class Stompy(Node):
 
 def joint_dict_to_list(dicts: List[Dict[str, float]]) -> List[float]:
     # This is the order of joints in the URDF file
-    joint_list = [
+    joint_list_urdf = [
         "joint_right_arm_1_x8_1_dof_x8",
         "joint_left_arm_2_x8_1_dof_x8",
         "joint_head_1_x4_1_dof_x4",
@@ -244,8 +244,86 @@ def joint_dict_to_list(dicts: List[Dict[str, float]]) -> List[float]:
         "joint_right_arm_1_hand_1_x4_2_dof_x4",
         "joint_left_arm_2_hand_1_x4_2_dof_x4",
     ]
-    joint_map = OrderedDict((joint, i) for i, joint in enumerate(joint_list))
-    q = [0] * len(joint_list)
+    link_list_rtb = [
+        "link_head_1_x4_1_outer_1",
+        "link_head_1_x4_2_outer_1",
+        "link_right_arm_1_x8_1_outer_1",
+        "link_right_arm_1_x8_2_outer_1",
+        "link_right_arm_1_x6_1_outer_1",
+        "link_right_arm_1_x6_2_outer_1",
+        "link_right_arm_1_x4_1_outer_1",
+        "link_right_arm_1_hand_1_x4_1_outer_1",
+        "link_right_arm_1_hand_1_base_1",
+        "link_right_arm_1_hand_1_base_1",
+        "link_right_arm_1_hand_1_x4_2_outer_1",
+        "link_left_arm_2_x8_1_outer_1",
+        "link_left_arm_2_x8_2_outer_1",
+        "link_left_arm_2_x6_1_outer_1",
+        "link_left_arm_2_x6_2_outer_1",
+        "link_left_arm_2_x4_1_outer_1",
+        "link_left_arm_2_hand_1_x4_1_outer_1",
+        "link_left_arm_2_hand_1_base_1",
+        "link_left_arm_2_hand_1_base_1",
+        "link_left_arm_2_hand_1_x4_2_outer_1",
+        "link_torso_1_x8_1_outer_1",
+        "link_legs_1_x8_1_outer_1",
+        "link_legs_1_right_leg_1_x8_1_outer_1",
+        "link_legs_1_right_leg_1_x10_2_outer_1",
+        "link_legs_1_right_leg_1_x10_1_outer_1",
+        "link_legs_1_right_leg_1_belt_thigh_right_1",
+        "link_legs_1_right_leg_1_x6_1_outer_1",
+        "link_legs_1_right_leg_1_51t_hdt5_15mm_belt_knee_right_1",
+        "link_legs_1_right_leg_1_x4_1_inner_1",
+        "link_legs_1_x8_2_outer_1",
+        "link_legs_1_left_leg_1_x8_1_outer_1",
+        "link_legs_1_left_leg_1_x10_1_outer_1",
+        "link_legs_1_left_leg_1_x10_2_outer_1",
+        "link_legs_1_left_leg_1_belt_thigh_left_1",
+        "link_legs_1_left_leg_1_51t_hdt5_15mm_belt_knee_left_1",
+        "link_legs_1_left_leg_1_x4_1_inner_1",
+        "link_legs_1_left_leg_1_x6_1_outer_1",
+    ]
+    joint_list_rtb = [
+        "joint_head_1_x4_1_dof_x4",
+        "joint_head_1_x4_2_dof_x4",
+        "joint_right_arm_1_x8_1_dof_x8",
+        "joint_right_arm_1_x8_2_dof_x8",
+        "joint_right_arm_1_x6_1_dof_x6",
+        "joint_right_arm_1_x6_2_dof_x6",
+        "joint_right_arm_1_x4_1_dof_x4",
+        "joint_right_arm_1_hand_1_x4_1_dof_x4",
+        "joint_right_arm_1_hand_1_slider_1",
+        "joint_right_arm_1_hand_1_slider_2",
+        "joint_right_arm_1_hand_1_x4_2_dof_x4",
+        "joint_left_arm_2_x8_1_dof_x8",
+        "joint_left_arm_2_x8_2_dof_x8",
+        "joint_left_arm_2_x6_1_dof_x6",
+        "joint_left_arm_2_x6_2_dof_x6",
+        "joint_left_arm_2_x4_1_dof_x4",
+        "joint_left_arm_2_hand_1_x4_1_dof_x4",
+        "joint_left_arm_2_hand_1_slider_1",
+        "joint_left_arm_2_hand_1_slider_2",
+        "joint_left_arm_2_hand_1_x4_2_dof_x4",
+        "joint_torso_1_x8_1_dof_x8",
+        "joint_legs_1_x8_1_dof_x8",
+        "joint_legs_1_right_leg_1_x8_1_dof_x8",
+        "joint_legs_1_right_leg_1_x10_2_dof_x10",
+        "joint_legs_1_right_leg_1_knee_revolute",
+        "joint_legs_1_right_leg_1_x10_1_dof_x10",
+        "joint_legs_1_right_leg_1_ankle_revolute",
+        "joint_legs_1_right_leg_1_x6_1_dof_x6",
+        "joint_legs_1_right_leg_1_x4_1_dof_x4",
+        "joint_legs_1_x8_2_dof_x8",
+        "joint_legs_1_left_leg_1_x8_1_dof_x8",
+        "joint_legs_1_left_leg_1_x10_1_dof_x10",
+        "joint_legs_1_left_leg_1_knee_revolute",
+        "joint_legs_1_left_leg_1_x10_2_dof_x10",
+        "joint_legs_1_left_leg_1_ankle_revolute",
+        "joint_legs_1_left_leg_1_x6_1_dof_x6",
+        "joint_legs_1_left_leg_1_x4_1_dof_x4",
+    ]
+    joint_map = OrderedDict((joint, i) for i, joint in enumerate(joint_list_rtb))
+    q = [0] * len(joint_list_rtb)
     for d in dicts:
         for joint, value in d.items():
             q[joint_map[joint]] = value
