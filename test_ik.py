@@ -22,98 +22,66 @@ stompy_rtb = rtb.robot.Robot.URDF(
 robot_inv = sm.SE3.Trans([-rp for rp in robot_pos])
 q_left = [-1.7, -1.6, -0.34, -1.6, -1.4, -1.7]
 q_right = [1.7, 1.6, 0.34, 1.6, 1.4, -0.26]
-tol = 1e-3
+joints = StompyFixed.default_standing()
+joints.update(qright_to_dict(q_right))
+joints.update(qleft_to_dict(q_left))
+T_left = sm.SE3()
+T_right = sm.SE3()
+tol = 1e-2
 mask = [1, 1, 1, 0, 0, 0]
+vel = 1e-2
+
+
+async def move_to(T_hand, ee_link, q0, q_map):
+    global joints, q_left, q_right
+    print(f"q0\n{q0}\n")
+    T_ee = stompy_rtb.fkine(q0, end=ee_link)
+    print(f"T_ee\n{T_ee}\n")
+    _T = np.eye(4)
+    _T[:3, :3] = T_ee.R
+    _T[:3, 3] = T_ee.t + np.linalg.norm((T_hand.t - T_ee.t)) * vel
+    print(f"_T\n{_T}\n")
+    result = stompy_rtb.ik_LM(
+        _T,
+        end=ee_link,
+        tol=tol,
+        mask=mask,
+        q0=q0,
+        joint_limits=False,
+        # pinv=True,
+    )
+    q, success, num_iter, num_search, _ = result
+    print(f"--- [{bool(success)}] after {num_iter} iterations {num_search} searches")
+    if success:
+        joints.update(q_map(q))
+        if ee_link == "link_left_arm_2_hand_1_x4_2_outer_1":
+            q_left = q
+        else:
+            q_right = q
+        # q_full = joint_dict_to_list([StompyFixed().default_standing(), qleft_to_dict(q)])
+        # Tr_full = stompy_rtb.fkine(q_full)
+        # print(f"Tr_full\n{Tr_full}\n")
+        # # stompy_rtb.plot(q_full)
+
 
 @app.add_handler("OBJECT_MOVE")
 async def move_handler(event, session):
     print("------------------------")
-    global q_left, q_right
+    global T_left, T_right
+    T_hand = np.array(event.value["matrix"]).reshape(4, 4).T
+    print(f"T_hand raw\n{T_hand}\n")
+    T_hand = sm.SE3(T_hand) * robot_inv
+    print(f"T_hand w/ robot\n{T_hand}\n")
     if event.key == "left":
-        Tg = np.array(event.value["matrix"]).reshape(4, 4).T
-        print(f"Tg raw\n{Tg}\n")
-        Tg = sm.SE3(Tg) * robot_inv
-        print(f"Tg robot\n{Tg}\n")
-        print(f"q0\n{q_left}\n")
-        result = stompy_rtb.ik_GN(
-            Tg,
-            end="link_left_arm_2_hand_1_x4_2_outer_1",
-            tol=tol,
-            mask=mask,
-            q0=q_left,
-            # joint_limits=False,
-            pinv=True,
-        )
-        q, success, num_iter, num_search, residual = result
-        print(f"success: {bool(success)} after {num_iter} iterations {num_search} searches (residual: {residual} < {tol})")
-        if success:
-            q_left = q
-        print(f"qt\n{q_left}\n")
-        session.upsert @ Urdf(
-            src="http://localhost:8012/static/robot.urdf",
-            jointValues={
-                "joint_left_arm_2_x8_1_dof_x8": q_left[0],
-                "joint_left_arm_2_x8_2_dof_x8": q_left[1],
-                "joint_left_arm_2_x6_1_dof_x6": q_left[2],
-                "joint_left_arm_2_x6_2_dof_x6": q_left[3],
-                "joint_left_arm_2_x4_1_dof_x4": q_left[4],
-                "joint_left_arm_2_hand_1_x4_1_dof_x4": q_left[5],
-            },
-            position=robot_pos,
-            key="robot",
-        )
-        if success:
-            Tr = stompy_rtb.fkine(q, end='link_left_arm_2_hand_1_x4_2_outer_1')
-            print(f"Tr\n{Tr}\n")
-            q_full = joint_dict_to_list([StompyFixed().default_standing(), qleft_to_dict(q)])
-            Tr_full = stompy_rtb.fkine(q_full)
-            print(f"Tr_full\n{Tr_full}\n")
-            # stompy_rtb.plot(q_full)
+        T_left = T_hand
     elif event.key == "right":
-        Tg = np.array(event.value["matrix"]).reshape(4, 4).T
-        print(f"Tg raw\n{Tg}\n")
-        Tg = sm.SE3(Tg) * robot_inv
-        print(f"Tg robot\n{Tg}\n")
-        print(f"q0\n{q_right}\n")
-        result = stompy_rtb.ik_GN(
-            Tg,
-            end="link_right_arm_1_hand_1_x4_2_outer_1",
-            tol=tol,
-            mask=mask,
-            # q0=q_right,
-            q0=joint_dict_to_list([StompyFixed().default_standing(), qright_to_dict(q_right)]),
-            # joint_limits=False,
-            pinv=True,
-        )
-        q, success, num_iter, num_search, residual = result
-        print(f"success: {bool(success)} after {num_iter} iterations {num_search} searches (residual: {residual} < {tol})")
-        if success:
-            q_right = q
-        print(f"qt\n{q_right}\n")
-        session.upsert @ Urdf(
-            src="http://localhost:8012/static/robot.urdf",
-            jointValues={
-                "joint_right_arm_1_x8_1_dof_x8": q_right[0],
-                "joint_right_arm_1_x8_2_dof_x8": q_right[1],
-                "joint_right_arm_1_x6_1_dof_x6": q_right[2],
-                "joint_right_arm_1_x6_2_dof_x6": q_right[3],
-                "joint_right_arm_1_x4_1_dof_x4": q_right[4],
-                "joint_right_arm_1_hand_1_x4_1_dof_x4": q_right[5],
-            },
-            position=robot_pos,
-            key="robot",
-        )
-        if success:
-            Tr = stompy_rtb.fkine(q, end='link_right_arm_1_hand_1_x4_2_outer_1')
-            print(f"Tr\n{Tr}\n")
-            q_full = joint_dict_to_list([StompyFixed().default_standing(), qright_to_dict(q)])
-            Tr_full = stompy_rtb.fkine(q_full, end='link_right_arm_1_hand_1_x4_2_outer_1')
-            print(f"Tr_full\n{Tr_full}\n")
-            # stompy_rtb.plot(q_full)
+        T_right = T_hand
+
 
 
 @app.spawn(start=True)
 async def main(session: VuerSession):
+    global joints, q_left, q_right, T_left, T_right
     session.set @ Scene(
         rawChildren=[
             AmbientLight(intensity=1),
@@ -128,9 +96,18 @@ async def main(session: VuerSession):
     await sleep(0.1)
     session.upsert @ Urdf(
         src="http://localhost:8012/static/robot.urdf",
-        jointValues=StompyFixed.default_standing(),
+        jointValues=joints,
         position=robot_pos,
         key="robot",
     )
     while True:
-        await sleep(1)
+        await sleep(1 / 100.0)
+        await move_to(T_left, "link_left_arm_2_hand_1_x4_2_outer_1", q_left, qleft_to_dict)
+        await move_to(T_right, "link_right_arm_1_hand_1_x4_2_outer_1", q_right, qright_to_dict)
+        # print(f"q\n{joints}\n")
+        session.upsert @ Urdf(
+            src="http://localhost:8012/static/robot.urdf",
+            jointValues=joints,
+            position=robot_pos,
+            key="robot",
+        )
