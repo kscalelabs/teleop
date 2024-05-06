@@ -183,7 +183,7 @@ def update_joint_list(
     return joint_list
 
 
-async def ik(lock, arm):
+async def ik(arm):
     # start_time = time.time()
     if arm == "left":
         ee_idx = ee_idx_left
@@ -198,12 +198,11 @@ async def ik(lock, arm):
     # print(f"ik {arm} {pos} {orn}")
     jointPoses = p.calculateInverseKinematics(id, ee_idx, pos, orn, ll, ul, jr, rp)
     jointPoses = make_full_joint_list(jointPoses)
-    async with lock:
-        global joints
-        for j in ee_chain:
-            _index = jNames.index(j)
-            joints[_index] = jointPoses[_index]
-            p.resetJointState(id, _index, jointPoses[_index])
+    global joints
+    for j in ee_chain:
+        _index = jNames.index(j)
+        joints[_index] = jointPoses[_index]
+        p.resetJointState(id, _index, jointPoses[_index])
     # end_time = time.time()
     # print(f"ik {arm} took {end_time - start_time} seconds")
 
@@ -259,8 +258,19 @@ async def main(session: VuerSession):
     session.upsert @ Hands(fps=20, stream=True, key="hands")
     await asyncio.sleep(0.1)
     global joints
-    lock = asyncio.Lock()
-    async with lock:
+    session.upsert @ Urdf(
+        src="https://raw.githubusercontent.com/hu-po/webstompy/main/urdf/stompy/robot.urdf",
+        jointValues=joint_list_to_dict(joints),
+        position=robot_start_pos_vuer,
+        rotation=robot_start_euler_vuer,
+        key="robot",
+    )
+    while True:
+        # await asyncio.sleep(1)
+        await asyncio.gather(
+            ik("left"),
+            ik("right"),
+        )
         session.upsert @ Urdf(
             src="https://raw.githubusercontent.com/hu-po/webstompy/main/urdf/stompy/robot.urdf",
             jointValues=joint_list_to_dict(joints),
@@ -268,17 +278,3 @@ async def main(session: VuerSession):
             rotation=robot_start_euler_vuer,
             key="robot",
         )
-    while True:
-        # await asyncio.sleep(1)
-        await asyncio.gather(
-            ik(lock, "left"),
-            ik(lock, "right"),
-        )
-        async with lock:
-            session.upsert @ Urdf(
-                src="https://raw.githubusercontent.com/hu-po/webstompy/main/urdf/stompy/robot.urdf",
-                jointValues=joint_list_to_dict(joints),
-                position=robot_start_pos_vuer,
-                rotation=robot_start_euler_vuer,
-                key="robot",
-            )
