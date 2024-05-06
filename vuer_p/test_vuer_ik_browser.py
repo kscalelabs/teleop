@@ -6,6 +6,7 @@ from datetime import datetime
 from typing import List, Dict
 
 import numpy as np
+from scipy.spatial.transform import Rotation as R
 import pybullet as p
 import pybullet_data
 from vuer import Vuer, VuerSession
@@ -18,9 +19,9 @@ robot_urdf_path = f"{robot_urdf_dir}/robot.urdf"
 robot_start_pos = [0, 0, 1]
 robot_start_euler = [-math.pi / 4, 0, 0]  # only needed for pybullet somehow
 ee_start_pos_right = [-0.2, -0.2, -0.2]
-ee_start_pos_right = [g+r for g, r in zip(ee_start_pos_right, robot_start_pos)]
+ee_start_pos_right = [g + r for g, r in zip(ee_start_pos_right, robot_start_pos)]
 ee_start_pos_left = [0.2, -0.2, -0.2]
-ee_start_pos_left = [g+r for g, r in zip(ee_start_pos_left, robot_start_pos)]
+ee_start_pos_left = [g + r for g, r in zip(ee_start_pos_left, robot_start_pos)]
 stompy_default_pos = {
     "joint_head_1_x4_1_dof_x4": -0.03490658503988659,
     "joint_legs_1_x8_2_dof_x8": 0.5061454830783556,
@@ -152,9 +153,10 @@ rp = jRestPose
 jd = jDamping
 joints = jRestPose.copy()
 ee_goal_pos_left = ee_start_pos_left
-ee_goal_orn_left = p.getQuaternionFromEuler([-math.pi/2, 0, 0])
+ee_goal_orn_left = p.getQuaternionFromEuler([-math.pi / 2, 0, 0])
 ee_goal_pos_right = ee_start_pos_right
-ee_goal_orn_right = p.getQuaternionFromEuler([-math.pi/2, 0, 0])
+ee_goal_orn_right = p.getQuaternionFromEuler([-math.pi / 2, 0, 0])
+
 
 def joint_list_to_dict(joint_list: List[float]) -> Dict[str, float]:
     joint_dict = {}
@@ -162,18 +164,24 @@ def joint_list_to_dict(joint_list: List[float]) -> Dict[str, float]:
         joint_dict[joint] = joint_list[jNames.index(joint)]
     return joint_dict
 
+
 def make_full_joint_list(ik_joints: List[float]) -> List[float]:
     full_joints = jRestPose.copy()
     for i, j in enumerate(ik_joints):
         full_joints[jNames.index(ik_joints_names[i])] = j
     return full_joints
 
-def update_joint_list(joint_list: List[float], joint_dict: Dict[str, float]) -> List[float]:
+
+def update_joint_list(
+    joint_list: List[float], joint_dict: Dict[str, float]
+) -> List[float]:
     for i, val in enumerate(joint_list):
         joint_list[i] = joint_dict[jNames[i]]
     return joint_list
 
+
 async def ik(lock, arm):
+    # start_time = time.time()
     if arm == "left":
         ee_idx = ee_idx_left
         ee_chain = ee_chain_left
@@ -193,9 +201,12 @@ async def ik(lock, arm):
             _index = jNames.index(j)
             joints[_index] = jointPoses[_index]
             p.resetJointState(id, _index, jointPoses[_index])
+    # end_time = time.time()
+    # print(f"ik {arm} took {end_time - start_time} seconds")
+
 
 # ----- Vuer
-app = Vuer(static_root=robot_urdf_dir + '_glb')
+app = Vuer(static_root=robot_urdf_dir + "_glb")
 
 
 @app.add_handler("OBJECT_MOVE")
@@ -210,10 +221,16 @@ async def move_handler(event, session):
     # Flip X axis
     hand_T[0, 3] = -hand_T[0, 3]
     # print(f"hand_T {event.key} (pybullet frame) \n{hand_T}\n")
+    # Orientation starts with rotation matrix
+    hand_R = R.from_matrix(hand_T[:3, :3])
+    hand_R *= R.from_euler("xyz", [-math.pi / 2, 0, 0])
+    hand_orn = hand_R.as_quat()
     if event.key == "left":
         ee_goal_pos_left = hand_T[:3, 3]
+        ee_goal_orn_left = hand_orn
     else:
         ee_goal_pos_right = hand_T[:3, 3]
+        ee_goal_orn_right = hand_orn
 
 
 @app.spawn(start=True)
