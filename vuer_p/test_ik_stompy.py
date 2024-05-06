@@ -9,8 +9,6 @@ from typing import List, Dict
 clid = p.connect(p.SHARED_MEMORY)
 if (clid < 0):
   p.connect(p.GUI)
-  #p.connect(p.SHARED_MEMORY_GUI)
-
 p.setAdditionalSearchPath(pybullet_data.getDataPath())
 
 robot_start_pos = [0, 0, 1]
