@@ -5,19 +5,20 @@ import time
 import math
 from typing import List, Dict
 
+import cv2
 import numpy as np
 from numpy.typing import NDArray
 import pybullet as p
 import pybullet_data
 from vuer import Vuer, VuerSession
-from vuer.schemas import Urdf, Hands
+from vuer.schemas import AmbientLight, ImageBackground, Hands, Urdf
 
 # web urdf is used for vuer
 URDF_WEB: str = (
     "https://raw.githubusercontent.com/kscalelabs/webstompy/master/urdf/stompy_tiny/robot.urdf"
 )
 # local urdf is used for pybullet
-URDF_LOCAL: str = f"{os.path.dirname(__file__)}/../urdf/stompy_tiny/robot.urdf"
+URDF_LOCAL: str = f"{os.path.dirname(__file__)}/urdf/stompy_tiny/robot.urdf"
 
 # starting positions for robot trunk relative to world frames
 START_POS_TRUNK_VUER: NDArray = np.array([0, 1, 0])
@@ -150,6 +151,42 @@ IK_Q_LIST: List[str] = [
     "joint_legs_1_left_leg_1_x4_1_dof_x4",
 ]
 
+# camera streaming is done throgh OpenCV
+IMAGE_WIDTH: int = 1280
+IMAGE_HEIGHT: int = 480
+aspect_ratio: float = IMAGE_WIDTH / IMAGE_HEIGHT
+CAMERA_FPS: int = 60
+VUER_IMG_QUALITY: int = 20
+BGR_TO_RGB: NDArray = np.array([2, 1, 0], dtype=np.uint8)
+CAMERA_DISTANCE: int = 5
+IMAGE_POS: NDArray = np.array([0, 0, -10])
+IMAGE_EUL: NDArray = np.array([0, 0, 0])
+
+print("Starting camera")
+img_lock = asyncio.Lock()
+img: NDArray[np.uint8] = np.zeros((IMAGE_HEIGHT, IMAGE_WIDTH, 3), dtype=np.uint8)
+cam = cv2.VideoCapture(0)
+cam.set(cv2.CAP_PROP_FRAME_WIDTH, IMAGE_WIDTH)
+cam.set(cv2.CAP_PROP_FRAME_HEIGHT, IMAGE_HEIGHT)
+cam.set(cv2.CAP_PROP_FPS, CAMERA_FPS)
+print("\t ... done")
+
+
+async def update_image() -> None:
+    global cam
+    if not cam.isOpened():
+        raise ValueError("Camera is not available")
+    start = time.time()
+    ret, frame = cam.read()
+    if ret:
+        async with img_lock:
+            global img
+            img = frame[:, :, BGR_TO_RGB]
+    else:
+        print("Failed to read frame")
+    print(f"Time to update image: {time.time() - start}")
+
+
 # PyBullet inverse kinematics (IK) params
 # damping determines which joints are used for ik
 # TODO: more custom damping will allow for legs/torso to help reach ee target
@@ -206,6 +243,9 @@ for i in range(pb_num_joints):
     p.resetJointState(pb_robot_id, i, pb_start_q[i])
 print("\t ... done")
 
+# Vuer rendering params
+MAX_FPS: int = 60
+
 # Vuer hand tracking and pinch detection params
 HAND_FPS: int = 30
 INDEX_FINGER_ID: int = 9
@@ -220,7 +260,7 @@ EE_S_MAX: float = 0.0
 ee_s_range: float = EE_S_MAX - EE_S_MIN
 
 # global variables get updated by various async functions
-lock = asyncio.Lock()
+q_lock = asyncio.Lock()
 q: Dict[str, float] = deepcopy(START_Q)
 goal_pos_eer: NDArray = START_POS_EER_VUER
 goal_orn_eer: NDArray = p.getQuaternionFromEuler(START_EUL_TRUNK_VUER)
@@ -253,7 +293,7 @@ async def ik(arm: str) -> None:
         pb_joint_ranges,
         pb_start_q,
     )
-    async with lock:
+    async with q_lock:
         global q
         for i, val in enumerate(pb_q):
             joint_name = IK_Q_LIST[i]
@@ -285,7 +325,7 @@ async def hand_handler(event, _):
         print(f"goal_pos_eer {goal_pos_eer}")
         print(f"right gripper at {rgrip_dist}")
         _s: float = EE_S_MIN + rgrip_dist * ee_s_range
-        async with lock:
+        async with q_lock:
             q["joint_right_arm_1_hand_1_slider_1"] = _s
             q["joint_right_arm_1_hand_1_slider_2"] = _s
     # left hand
@@ -301,13 +341,14 @@ async def hand_handler(event, _):
         print(f"goal_pos_eel {goal_pos_eel}")
         print(f"left gripper at {lgrip_dist}")
         _s: float = EE_S_MIN + lgrip_dist * ee_s_range
-        async with lock:
+        async with q_lock:
             q["joint_left_arm_2_hand_1_slider_1"] = _s
             q["joint_left_arm_2_hand_1_slider_2"] = _s
 
 
 @app.spawn(start=True)
 async def main(session: VuerSession):
+    session.upsert @ AmbientLight(intensity=1.0, key="light"),
     session.upsert @ Hands(fps=HAND_FPS, stream=True, key="hands")
     await asyncio.sleep(0.1)
     session.upsert @ Urdf(
@@ -317,15 +358,36 @@ async def main(session: VuerSession):
         rotation=START_EUL_TRUNK_VUER,
         key="robot",
     )
-    global q
+    global q, img
     while True:
-        await asyncio.sleep(1 / HAND_FPS)
-        await asyncio.gather(ik("left"), ik("right"))
-        async with lock:
+        await asyncio.gather(
+            ik("left"),  # ~1ms
+            ik("right"),  # ~1ms
+            update_image(),  # ~10ms
+            asyncio.sleep(1 / MAX_FPS),  # ~16ms @ 60fps
+        )
+        async with q_lock:
             session.upsert @ Urdf(
                 src=URDF_WEB,
                 jointValues=q,
                 position=START_POS_TRUNK_VUER,
                 rotation=START_EUL_TRUNK_VUER,
                 key="robot",
+            )
+        async with img_lock:
+            session.upsert(
+                ImageBackground(
+                    img,
+                    # TODO: test ['b64png', 'b64jpeg']
+                    format="jpg",
+                    quality=VUER_IMG_QUALITY,
+                    interpolate=True,
+                    fixed=True,
+                    aspect=aspect_ratio,
+                    distanceToCamera=CAMERA_DISTANCE,
+                    position=IMAGE_POS,
+                    rotation=IMAGE_EUL,
+                    key="video",
+                ),
+                to="bgChildren",
             )
