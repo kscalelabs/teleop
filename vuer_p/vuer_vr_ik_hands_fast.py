@@ -156,12 +156,16 @@ IK_Q_LIST: List[str] = [
 DAMPING_CHAIN: float = 0.1
 DAMPING_NON_CHAIN: float = 10.0
 
-# initialization for PyBullet
-print("Starting PyBullet...")
-# TODO: headless mode
-clid = p.connect(p.SHARED_MEMORY)
-if clid < 0:
-    p.connect(p.GUI)
+# PyBullet init
+HEADLESS: bool = True
+if HEADLESS:
+    print("Starting PyBullet in headless mode.")
+    clid = p.connect(p.DIRECT)
+else:
+    print("Starting PyBullet in GUI mode.")
+    clid = p.connect(p.SHARED_MEMORY)
+    if clid < 0:
+        p.connect(p.GUI)
 p.setAdditionalSearchPath(pybullet_data.getDataPath())
 pb_robot_id = p.loadURDF(URDF_LOCAL, [0, 0, 0], useFixedBase=True)
 p.setGravity(0, 0, 0)
