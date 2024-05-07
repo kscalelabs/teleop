@@ -3,7 +3,7 @@ from copy import deepcopy
 import os
 import time
 import math
-from typing import List, Dict, Tuple
+from typing import List, Dict
 
 import numpy as np
 from numpy.typing import NDArray
@@ -11,11 +11,10 @@ import pybullet as p
 import pybullet_data
 from vuer import Vuer, VuerSession
 from vuer.schemas import Urdf, Hands
-from vuer.events import Event
 
 # web urdf is used for vuer
 URDF_WEB: str = (
-    "https://raw.githubusercontent.com/kscalelabs/webstompy/master/urdf/stompy_tiny_glb/robot.urdf"
+    "https://raw.githubusercontent.com/kscalelabs/webstompy/master/urdf/stompy_tiny/robot.urdf"
 )
 # local urdf is used for pybullet
 URDF_LOCAL: str = f"{os.path.dirname(__file__)}/../urdf/stompy_tiny/robot.urdf"
@@ -35,6 +34,7 @@ START_POS_EEL_VUER += START_POS_TRUNK_VUER
 
 # conversion between PyBullet and Vuer axes
 PB_TO_VUER_AXES: NDArray = np.array([0, 2, 1])
+PB_TO_VUER_AXES_SIGN: NDArray = np.array([-1, 1, 1])
 
 # starting joint positions (Q means "joint angles")
 START_Q: Dict[str, float] = {
@@ -211,18 +211,9 @@ PINCH_DIST_OPENED: float = 0.10  # 10cm
 PINCH_DIST_CLOSED: float = 0.01  # 1cm
 
 # pre-compute left and right gripper "slider" limits for faster callback
-eer_s1_id: int = pb_joint_names.index(EER_CHAIN_HAND[0])
-eer_s1_ul: float = pb_joint_upper_limit[eer_s1_id]
-eer_s1_ll: float = pb_joint_lower_limit[eer_s1_id]
-eer_s2_id: int = pb_joint_names.index(EER_CHAIN_HAND[1])
-eer_s2_ul: float = pb_joint_upper_limit[eer_s2_id]
-eer_s2_ll: float = pb_joint_lower_limit[eer_s2_id]
-eel_s1_id: int = pb_joint_names.index(EEL_CHAIN_HAND[0])
-eel_s1_ul: float = pb_joint_upper_limit[eel_s1_id]
-eel_s1_ll: float = pb_joint_lower_limit[eel_s1_id]
-eel_s2_id: int = pb_joint_names.index(EEL_CHAIN_HAND[1])
-eel_s2_ul: float = pb_joint_upper_limit[eel_s2_id]
-eel_s2_ll: float = pb_joint_lower_limit[eel_s2_id]
+EE_S_MIN: float = -0.034
+EE_S_MAX: float = 0.0
+ee_s_range: float = EE_S_MAX - EE_S_MIN
 
 # global variables get updated by various async functions
 lock = asyncio.Lock()
@@ -234,7 +225,7 @@ goal_orn_eel: NDArray = p.getQuaternionFromEuler(START_EUL_TRUNK_VUER)
 
 
 async def ik(arm: str) -> None:
-    # start_time = time.time()
+    start_time = time.time()
     if arm == "right":
         global goal_pos_eer, goal_orn_eer
         ee_id = pb_eer_id
@@ -261,18 +252,18 @@ async def ik(arm: str) -> None:
     async with lock:
         global q
         for i, val in enumerate(pb_q):
-            joint_name = pb_joint_names[i]
+            joint_name = IK_Q_LIST[i]
             if joint_name in ee_chain:
                 q[joint_name] = val
                 p.resetJointState(pb_robot_id, pb_q_map[joint_name], val)
-    # print(f"ik {arm} took {time.time() - start_time} seconds")
+    print(f"ik {arm} took {time.time() - start_time} seconds")
 
 
 app = Vuer()
 
 
 @app.add_handler("HAND_MOVE")
-async def hand_handler(event, session):
+async def hand_handler(event, _):
     """
     middle finger pinch turns tracking on
     index finger pinch used for gripper
@@ -280,57 +271,35 @@ async def hand_handler(event, session):
     # right hand
     rindex_pos: NDArray = np.array(event.value["rightLandmarks"][INDEX_FINGER_ID])
     rthumb_pos: NDArray = np.array(event.value["rightLandmarks"][THUMB_FINGER_ID])
-    rmiddl_pos: NDArray = np.array(event.value["rightLandmarks"][MIDLE_FINGER_ID])
     rpinch_dist: NDArray = np.linalg.norm(rindex_pos - rthumb_pos)
-    rgrip_dist: float = (
-        float(np.linalg.norm(rindex_pos - rmiddl_pos)) / PINCH_DIST_OPENED
-    )
+    rmiddl_pos: NDArray = np.array(event.value["rightLandmarks"][MIDLE_FINGER_ID])
+    rgrip_dist: float = np.linalg.norm(rthumb_pos - rmiddl_pos) / PINCH_DIST_OPENED
     if rpinch_dist < PINCH_DIST_CLOSED:
         print("Pinch detected in right hand")
         global goal_pos_eer, goal_orn_eer
-        goal_pos_eer = rthumb_pos[PB_TO_VUER_AXES]
+        goal_pos_eer = np.multiply(rthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN)
         print(f"goal_pos_eer {goal_pos_eer}")
         print(f"right gripper at {rgrip_dist}")
-        s1 = eer_s1_ll + rgrip_dist * (eer_s1_ul - eer_s1_ll)
-        s2 = eer_s2_ll + rgrip_dist * (eer_s2_ul - eer_s2_ll)
-        # update the robot grippers in vuer
-        session.upsert @ Urdf(
-            src=URDF_WEB,
-            jointValues={
-                "joint_right_arm_1_hand_1_slider_1": s1,
-                "joint_right_arm_1_hand_1_slider_2": s2,
-            },
-            position=START_POS_TRUNK_VUER,
-            rotation=START_EUL_TRUNK_VUER,
-            key="robot",
-        )
+        _s: float = EE_S_MIN + rgrip_dist * ee_s_range
+        async with lock:
+            q["joint_right_arm_1_hand_1_slider_1"] = _s
+            q["joint_right_arm_1_hand_1_slider_2"] = _s
     # left hand
     lindex_pos: NDArray = np.array(event.value["leftLandmarks"][INDEX_FINGER_ID])
     lthumb_pos: NDArray = np.array(event.value["leftLandmarks"][THUMB_FINGER_ID])
-    lmiddl_pos: NDArray = np.array(event.value["leftLandmarks"][MIDLE_FINGER_ID])
     lpinch_dist: NDArray = np.linalg.norm(lindex_pos - lthumb_pos)
-    lgrip_dist: float = (
-        float(np.linalg.norm(lindex_pos - lmiddl_pos)) / PINCH_DIST_OPENED
-    )
+    lmiddl_pos: NDArray = np.array(event.value["leftLandmarks"][MIDLE_FINGER_ID])
+    lgrip_dist: float = np.linalg.norm(lthumb_pos - lmiddl_pos) / PINCH_DIST_OPENED
     if lpinch_dist < PINCH_DIST_CLOSED:
         print("Pinch detected in left hand")
         global goal_pos_eel, goal_orn_eel
-        goal_pos_eel = lthumb_pos[PB_TO_VUER_AXES]
+        goal_pos_eel = np.multiply(lthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN)
         print(f"goal_pos_eel {goal_pos_eel}")
         print(f"left gripper at {lgrip_dist}")
-        s1 = eel_s1_ll + lgrip_dist * (eel_s1_ul - eel_s1_ll)
-        s2 = eel_s2_ll + lgrip_dist * (eel_s2_ul - eel_s2_ll)
-        # update the robot grippers in vuer
-        session.upsert @ Urdf(
-            src=URDF_WEB,
-            jointValues={
-                "joint_left_arm_2_hand_1_slider_1": s1,
-                "joint_left_arm_2_hand_1_slider_2": s2,
-            },
-            position=START_POS_TRUNK_VUER,
-            rotation=START_EUL_TRUNK_VUER,
-            key="robot",
-        )
+        _s: float = EE_S_MIN + lgrip_dist * ee_s_range
+        async with lock:
+            q["joint_left_arm_2_hand_1_slider_1"] = _s
+            q["joint_left_arm_2_hand_1_slider_2"] = _s
 
 
 @app.spawn(start=True)
