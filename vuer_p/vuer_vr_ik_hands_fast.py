@@ -15,7 +15,7 @@ from vuer.events import Event
 
 # web urdf is used for vuer
 URDF_WEB: str = (
-    "https://raw.githubusercontent.com/kscalelabs/webstompy/master/urdf/stompy_tiny/robot.urdf"
+    "https://raw.githubusercontent.com/kscalelabs/webstompy/master/urdf/stompy_tiny_glb/robot.urdf"
 )
 # local urdf is used for pybullet
 URDF_LOCAL: str = f"{os.path.dirname(__file__)}/../urdf/stompy_tiny/robot.urdf"
@@ -110,45 +110,45 @@ EEL_CHAIN_HAND: List[str] = [
 ]
 
 # PyBullet IK will output a 37dof list in this exact order
-IK_Q_MAP: Dict[str, int] = {
-    "joint_head_1_x4_1_dof_x4": 0,
-    "joint_head_1_x4_2_dof_x4": 1,
-    "joint_right_arm_1_x8_1_dof_x8": 2,
-    "joint_right_arm_1_x8_2_dof_x8": 3,
-    "joint_right_arm_1_x6_1_dof_x6": 4,
-    "joint_right_arm_1_x6_2_dof_x6": 5,
-    "joint_right_arm_1_x4_1_dof_x4": 6,
-    "joint_right_arm_1_hand_1_x4_1_dof_x4": 7,
-    "joint_right_arm_1_hand_1_slider_1": 8,
-    "joint_right_arm_1_hand_1_slider_2": 9,
-    "joint_right_arm_1_hand_1_x4_2_dof_x4": 10,
-    "joint_left_arm_2_x8_1_dof_x8": 11,
-    "joint_left_arm_2_x8_2_dof_x8": 12,
-    "joint_left_arm_2_x6_1_dof_x6": 13,
-    "joint_left_arm_2_x6_2_dof_x6": 14,
-    "joint_left_arm_2_x4_1_dof_x4": 15,
-    "joint_left_arm_2_hand_1_x4_1_dof_x4": 16,
-    "joint_left_arm_2_hand_1_slider_1": 17,
-    "joint_left_arm_2_hand_1_slider_2": 18,
-    "joint_left_arm_2_hand_1_x4_2_dof_x4": 19,
-    "joint_torso_1_x8_1_dof_x8": 20,
-    "joint_legs_1_x8_1_dof_x8": 21,
-    "joint_legs_1_right_leg_1_x8_1_dof_x8": 22,
-    "joint_legs_1_right_leg_1_x10_2_dof_x10": 23,
-    "joint_legs_1_right_leg_1_knee_revolute": 24,
-    "joint_legs_1_right_leg_1_x10_1_dof_x10": 25,
-    "joint_legs_1_right_leg_1_ankle_revolute": 26,
-    "joint_legs_1_right_leg_1_x6_1_dof_x6": 27,
-    "joint_legs_1_right_leg_1_x4_1_dof_x4": 28,
-    "joint_legs_1_x8_2_dof_x8": 29,
-    "joint_legs_1_left_leg_1_x8_1_dof_x8": 30,
-    "joint_legs_1_left_leg_1_x10_1_dof_x10": 31,
-    "joint_legs_1_left_leg_1_knee_revolute": 32,
-    "joint_legs_1_left_leg_1_x10_2_dof_x10": 33,
-    "joint_legs_1_left_leg_1_ankle_revolute": 34,
-    "joint_legs_1_left_leg_1_x6_1_dof_x6": 35,
-    "joint_legs_1_left_leg_1_x4_1_dof_x4": 36,
-}
+IK_Q_LIST: List[str] = [
+    "joint_head_1_x4_1_dof_x4",
+    "joint_head_1_x4_2_dof_x4",
+    "joint_right_arm_1_x8_1_dof_x8",
+    "joint_right_arm_1_x8_2_dof_x8",
+    "joint_right_arm_1_x6_1_dof_x6",
+    "joint_right_arm_1_x6_2_dof_x6",
+    "joint_right_arm_1_x4_1_dof_x4",
+    "joint_right_arm_1_hand_1_x4_1_dof_x4",
+    "joint_right_arm_1_hand_1_slider_1",
+    "joint_right_arm_1_hand_1_slider_2",
+    "joint_right_arm_1_hand_1_x4_2_dof_x4",
+    "joint_left_arm_2_x8_1_dof_x8",
+    "joint_left_arm_2_x8_2_dof_x8",
+    "joint_left_arm_2_x6_1_dof_x6",
+    "joint_left_arm_2_x6_2_dof_x6",
+    "joint_left_arm_2_x4_1_dof_x4",
+    "joint_left_arm_2_hand_1_x4_1_dof_x4",
+    "joint_left_arm_2_hand_1_slider_1",
+    "joint_left_arm_2_hand_1_slider_2",
+    "joint_left_arm_2_hand_1_x4_2_dof_x4",
+    "joint_torso_1_x8_1_dof_x8",
+    "joint_legs_1_x8_1_dof_x8",
+    "joint_legs_1_right_leg_1_x8_1_dof_x8",
+    "joint_legs_1_right_leg_1_x10_2_dof_x10",
+    "joint_legs_1_right_leg_1_knee_revolute",
+    "joint_legs_1_right_leg_1_x10_1_dof_x10",
+    "joint_legs_1_right_leg_1_ankle_revolute",
+    "joint_legs_1_right_leg_1_x6_1_dof_x6",
+    "joint_legs_1_right_leg_1_x4_1_dof_x4",
+    "joint_legs_1_x8_2_dof_x8",
+    "joint_legs_1_left_leg_1_x8_1_dof_x8",
+    "joint_legs_1_left_leg_1_x10_1_dof_x10",
+    "joint_legs_1_left_leg_1_knee_revolute",
+    "joint_legs_1_left_leg_1_x10_2_dof_x10",
+    "joint_legs_1_left_leg_1_ankle_revolute",
+    "joint_legs_1_left_leg_1_x6_1_dof_x6",
+    "joint_legs_1_left_leg_1_x4_1_dof_x4",
+]
 
 # PyBullet inverse kinematics (IK) params
 # damping determines which joints are used for ik
@@ -179,6 +179,7 @@ pb_joint_lower_limit: List[float] = [0.0] * pb_num_joints
 pb_joint_ranges: List[float] = [0.0] * pb_num_joints
 pb_start_q: List[float] = [0.0] * pb_num_joints
 pb_damping: List[float] = [0.0] * pb_num_joints
+pb_q_map: Dict[str, int] = {}
 for i in range(pb_num_joints):
     info = p.getJointInfo(pb_robot_id, i)
     name = info[1].decode("utf-8")
@@ -191,6 +192,10 @@ for i in range(pb_num_joints):
         pb_start_q[i] = START_Q[name]
     if name in EER_CHAIN_ARM or name in EEL_CHAIN_ARM:
         pb_damping[i] = DAMPING_CHAIN
+    else:
+        pb_damping[i] = DAMPING_NON_CHAIN
+    if name in IK_Q_LIST:
+        pb_q_map[name] = i
 pb_eer_id = pb_child_link_names.index(EER_LINK)
 pb_eel_id = pb_child_link_names.index(EEL_LINK)
 for i in range(pb_num_joints):
@@ -205,7 +210,7 @@ MIDLE_FINGER_ID: int = 14
 PINCH_DIST_OPENED: float = 0.10  # 10cm
 PINCH_DIST_CLOSED: float = 0.01  # 1cm
 
-# pre-compute left and right gripper "slider" limits
+# pre-compute left and right gripper "slider" limits for faster callback
 eer_s1_id: int = pb_joint_names.index(EER_CHAIN_HAND[0])
 eer_s1_ul: float = pb_joint_upper_limit[eer_s1_id]
 eer_s1_ll: float = pb_joint_lower_limit[eer_s1_id]
@@ -221,7 +226,7 @@ eel_s2_ll: float = pb_joint_lower_limit[eel_s2_id]
 
 # global variables get updated by various async functions
 lock = asyncio.Lock()
-q: Dict[str, float] = {}
+q: Dict[str, float] = deepcopy(START_Q)
 goal_pos_eer: NDArray = START_POS_EER_VUER
 goal_orn_eer: NDArray = p.getQuaternionFromEuler(START_EUL_TRUNK_VUER)
 goal_pos_eel: NDArray = START_POS_EEL_VUER
@@ -229,18 +234,20 @@ goal_orn_eel: NDArray = p.getQuaternionFromEuler(START_EUL_TRUNK_VUER)
 
 
 async def ik(arm: str) -> None:
-    start_time = time.time()
+    # start_time = time.time()
     if arm == "right":
+        global goal_pos_eer, goal_orn_eer
         ee_id = pb_eer_id
         ee_chain = EER_CHAIN_ARM
         pos = goal_pos_eer
         orn = goal_orn_eer
     else:
+        global goal_pos_eel, goal_orn_eel
         ee_id = pb_eel_id
         ee_chain = EEL_CHAIN_ARM
         pos = goal_pos_eel
         orn = goal_orn_eel
-    print(f"ik {arm} {pos} {orn}")
+    # print(f"ik {arm} {pos} {orn}")
     pb_q = p.calculateInverseKinematics(
         pb_robot_id,
         ee_id,
@@ -257,19 +264,8 @@ async def ik(arm: str) -> None:
             joint_name = pb_joint_names[i]
             if joint_name in ee_chain:
                 q[joint_name] = val
-                p.resetJointState(pb_robot_id, IK_Q_MAP[joint_name], val)
-    print(f"ik {arm} took {time.time() - start_time} seconds")
-
-
-def detect_pinch(
-    event: Event, hand: str, finger_id: int, min_distance: float = PINCH_DIST_CLOSED
-) -> Tuple[bool, float]:
-    finger_tip_position = np.array(event.value[f"{hand}Landmarks"][finger_id])
-    thumb_tip_position = np.array(event.value[f"{hand}Landmarks"][4])
-    distance = np.linalg.norm(finger_tip_position - thumb_tip_position)
-    if distance < min_distance:
-        return True, distance
-    return False, distance
+                p.resetJointState(pb_robot_id, pb_q_map[joint_name], val)
+    # print(f"ik {arm} took {time.time() - start_time} seconds")
 
 
 app = Vuer()
@@ -350,6 +346,7 @@ async def main(session: VuerSession):
     )
     global q
     while True:
+        await asyncio.sleep(1 / HAND_FPS)
         await asyncio.gather(ik("left"), ik("right"))
         async with lock:
             session.upsert @ Urdf(
