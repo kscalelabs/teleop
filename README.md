@@ -9,3 +9,5 @@ various attempts at open source robotic teleop. see readmes in subfolders.
 not teleop, asset optimization:
 
 - [opt_urdf](opt_urdf/README.md) urdf optimization, 3D file conversion (python)
+
+the current working best example is `teleop.py`, hilariously a single python file
