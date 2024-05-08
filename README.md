@@ -10,4 +10,6 @@ not teleop, asset optimization:
 
 - [opt_urdf](opt_urdf/README.md) urdf optimization, 3D file conversion (python)
 
-the current working best example is `teleop.py`, hilariously a single python file
+if you just want to run a demo you can pick from 
+
+- `demo_ik_hands_stereo.py` uses VR hands with pinch gestures to control left and right robot end effectors while streaming a usb stereo camera to the headset

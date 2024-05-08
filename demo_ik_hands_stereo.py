@@ -254,7 +254,7 @@ MIDLE_FINGER_ID: int = 14
 PINCH_DIST_OPENED: float = 0.10  # 10cm
 PINCH_DIST_CLOSED: float = 0.01  # 1cm
 
-# pre-compute left and right gripper "slider" limits for faster callback
+# pre-compute gripper "slider" ranges for faster callback
 EE_S_MIN: float = -0.034
 EE_S_MAX: float = 0.0
 ee_s_range: float = EE_S_MAX - EE_S_MIN
