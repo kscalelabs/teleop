@@ -12,21 +12,21 @@
 [![Wiki](https://img.shields.io/badge/wiki-humanoids-black)](https://humanoids.wiki)
 
 </div>
+<h1 align="center">
+    <p>Bi-Manual Remote Robotic Teleoperation</p>
+</h1>
 <p align="center">
   <picture>
     <img alt="dalle3" src="assets/cover.png" style="max-width: 100%;">
   </picture>
   <br/>
   <picture>
-    <img alt="demo" src="https://giphy.com/gifs/GyOOrsqLv77JgJiSBT" style="max-width: 100%;">
+    <img alt="demo" src="https://media.giphy.com/media/GyOOrsqLv77JgJiSBT/giphy.gif" style="max-width: 100%;">
   </picture>
   <br/>
 </p>
 
-
-<h1 align="center">
-    <p>Bi-Manual Remote Robotic Teleoperation</p>
-</h1>
+---
 
 A minimal implementation of a bi-manual remote robotic teleoperation system using VR hand tracking and camera streaming.
 
