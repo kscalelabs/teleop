@@ -14,11 +14,16 @@
 </div>
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/cover.png">
-    <img alt="Teleop" src="assets/cover.png" style="max-width: 100%;">
+    <img alt="dalle3" src="assets/cover.png" style="max-width: 100%;">
+  </picture>
+  <br/>
+  <picture>
+    <img alt="demo" src="https://giphy.com/gifs/GyOOrsqLv77JgJiSBT" style="max-width: 100%;">
   </picture>
   <br/>
 </p>
+
+
 <h1 align="center">
     <p>Bi-Manual Remote Robotic Teleoperation</p>
 </h1>
@@ -29,7 +34,7 @@ A minimal implementation of a bi-manual remote robotic teleoperation system usin
 
 ✅ bi-manual hand gesture control
 
-✅ camera streaming
+✅ camera streaming (mono + stereo)
 
 ✅ inverse kinematics
 
@@ -39,7 +44,9 @@ A minimal implementation of a bi-manual remote robotic teleoperation system usin
 
 ✅ 3dof end effector control
 
-⬜️ 6dof end effector control
+⬜️ debug 6dof end effector control
+
+⬜️ resets to various default pose 
 
 ⬜️ tested on real world robot
 
@@ -59,7 +66,7 @@ pip install -r requirements.txt
 Start the server on the robot computer.
 
 ```bash
-python demo_ik_hands_stereo.py
+python demo_hands_stereo_ik3dof.py
 ```
 
 Start ngrok on the robot computer.

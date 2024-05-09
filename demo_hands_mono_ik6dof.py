@@ -12,11 +12,11 @@ import pybullet as p
 import pybullet_data
 from scipy.spatial.transform import Rotation as R
 from vuer import Vuer, VuerSession
-from vuer.schemas import AmbientLight, ImageBackground, Hands, Urdf
+from vuer.schemas import  Hands, ImageBackground, PointLight, Urdf
 
 # web urdf is used for vuer
 URDF_WEB: str = (
-    "https://raw.githubusercontent.com/kscalelabs/webstompy/master/urdf/stompy_tiny/robot.urdf"
+    "https://raw.githubusercontent.com/kscalelabs/webstompy/master/urdf/stompy_tiny_glb/robot.urdf"
 )
 # local urdf is used for pybullet
 URDF_LOCAL: str = f"{os.path.dirname(__file__)}/urdf/stompy_tiny/robot.urdf"
@@ -41,7 +41,7 @@ PB_TO_VUER_AXES_SIGN: NDArray = np.array([-1, 1, 1], dtype=np.int8)
 # starting joint positions (Q means "joint angles")
 START_Q: Dict[str, float] = {
     # head (2dof)
-    "joint_head_1_x4_1_dof_x4": -0.03,
+    "joint_head_1_x4_1_dof_x4": -1.0,
     "joint_head_1_x4_2_dof_x4": 0.0,
     # right leg (10dof)
     "joint_legs_1_x8_1_dof_x8": -0.50,
@@ -246,13 +246,14 @@ print("\t ... done")
 
 # Vuer rendering params
 MAX_FPS: int = 60
+VUER_LIGHT_POS: NDArray = np.array([0, 2, 2])
+VUER_LIGHT_INTENSITY: float = 10.0
 
 # Vuer hand tracking and pinch detection params
 HAND_FPS: int = 30
-INDEX_FINGER_TIP_ID: int = 9
-INDEX_FINGER_BASE_ID: int = 6
-THUMB_FINGER_TIP_ID: int = 4
-MIDLE_FINGER_TIP_ID: int = 14
+INDEX_FINGER_ID: int = 9
+THUMB_FINGER_ID: int = 4
+MIDLE_FINGER_ID: int = 14
 PINCH_DIST_OPENED: float = 0.10  # 10cm
 PINCH_DIST_CLOSED: float = 0.01  # 1cm
 
@@ -311,8 +312,8 @@ app = Vuer()
 @app.add_handler("HAND_MOVE")
 async def hand_handler(event, _):
     # right hand
-    rindex_pos: NDArray = np.array(event.value["rightLandmarks"][INDEX_FINGER_TIP_ID])
-    rthumb_pos: NDArray = np.array(event.value["rightLandmarks"][THUMB_FINGER_TIP_ID])
+    rindex_pos: NDArray = np.array(event.value["rightLandmarks"][INDEX_FINGER_ID])
+    rthumb_pos: NDArray = np.array(event.value["rightLandmarks"][THUMB_FINGER_ID])
     rpinch_dist: NDArray = np.linalg.norm(rindex_pos - rthumb_pos)
     # index finger to thumb pinch turns on tracking
     if rpinch_dist < PINCH_DIST_CLOSED:
@@ -321,21 +322,19 @@ async def hand_handler(event, _):
         goal_pos_eer = np.multiply(rthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN)
         print(f"goal_pos_eer {goal_pos_eer}")
         # pinching with middle finger controls gripper
-        rmiddl_pos: NDArray = np.array(event.value["rightLandmarks"][MIDLE_FINGER_TIP_ID])
+        rmiddl_pos: NDArray = np.array(event.value["rightLandmarks"][MIDLE_FINGER_ID])
         rgrip_dist: float = np.linalg.norm(rthumb_pos - rmiddl_pos) / PINCH_DIST_OPENED
         print(f"right gripper at {rgrip_dist}")
         _s: float = EE_S_MIN + rgrip_dist * ee_s_range
         async with q_lock:
             q["joint_right_arm_1_hand_1_slider_1"] = _s
             q["joint_right_arm_1_hand_1_slider_2"] = _s
-        # orientation is calculated from cross product of thumb and index finger vectors
-        rindex_base_pos: NDArray = np.array(event.value["rightLandmarks"][INDEX_FINGER_BASE_ID])
-        orientation_vec: NDArray = np.cross(rthumb_pos - rindex_base_pos, rindex_pos - rindex_base_pos)
-        orientation_vec /= np.linalg.norm(orientation_vec)
-        goal_orn_eer = R.from_rotvec(orientation_vec).as_quat()
+        # orientation is calculated from wrist rotation matrix
+        wrist_rotation: NDArray = np.array(event.value["rightHand"]).reshape(4, 4)[:3, :3]
+        goal_orn_eer = R.from_matrix(wrist_rotation).as_quat()
     # left hand
-    lindex_pos: NDArray = np.array(event.value["leftLandmarks"][INDEX_FINGER_TIP_ID])
-    lthumb_pos: NDArray = np.array(event.value["leftLandmarks"][THUMB_FINGER_TIP_ID])
+    lindex_pos: NDArray = np.array(event.value["leftLandmarks"][INDEX_FINGER_ID])
+    lthumb_pos: NDArray = np.array(event.value["leftLandmarks"][THUMB_FINGER_ID])
     lpinch_dist: NDArray = np.linalg.norm(lindex_pos - lthumb_pos)
     # index finger to thumb pinch turns on tracking
     if lpinch_dist < PINCH_DIST_CLOSED:
@@ -344,23 +343,21 @@ async def hand_handler(event, _):
         goal_pos_eel = np.multiply(lthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN)
         print(f"goal_pos_eel {goal_pos_eel}")
         # pinching with middle finger controls gripper
-        lmiddl_pos: NDArray = np.array(event.value["leftLandmarks"][MIDLE_FINGER_TIP_ID])
+        lmiddl_pos: NDArray = np.array(event.value["leftLandmarks"][MIDLE_FINGER_ID])
         lgrip_dist: float = np.linalg.norm(lthumb_pos - lmiddl_pos) / PINCH_DIST_OPENED
         _s: float = EE_S_MIN + lgrip_dist * ee_s_range
         print(f"left gripper at {lgrip_dist}")
         async with q_lock:
             q["joint_left_arm_2_hand_1_slider_1"] = _s
             q["joint_left_arm_2_hand_1_slider_2"] = _s
-        # orientation is calculated from cross product of thumb and index finger vectors
-        lindex_base_pos: NDArray = np.array(event.value["leftLandmarks"][INDEX_FINGER_BASE_ID])
-        orientation_vec: NDArray = np.cross(lthumb_pos - lindex_base_pos, lindex_pos - lindex_base_pos)
-        orientation_vec /= np.linalg.norm(orientation_vec)
-        goal_orn_eel = R.from_rotvec(orientation_vec).as_quat()
+        # orientation is calculated from wrist rotation matrix
+        wrist_rotation: NDArray = np.array(event.value["leftHand"]).reshape(4, 4)[:3, :3]
+        goal_orn_eer = R.from_matrix(wrist_rotation).as_quat()
 
 
 @app.spawn(start=True)
 async def main(session: VuerSession):
-    session.upsert @ AmbientLight(intensity=1.0, key="light"),
+    session.upsert @ PointLight(intensity=VUER_LIGHT_INTENSITY, position=VUER_LIGHT_POS)
     session.upsert @ Hands(fps=HAND_FPS, stream=True, key="hands")
     await asyncio.sleep(0.1)
     session.upsert @ Urdf(
@@ -390,7 +387,6 @@ async def main(session: VuerSession):
             session.upsert(
                 ImageBackground(
                     img,
-                    # TODO: test ['b64png', 'b64jpeg']
                     format="jpg",
                     quality=VUER_IMG_QUALITY,
                     interpolate=True,
