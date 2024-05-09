@@ -1,16 +1,27 @@
 <p align="center">
   <picture>
+    <img alt="K-Scale Open Source Robotics" src="https://media.kscale.dev/kscale-open-source-header.png" style="max-width: 100%;">
+  </picture>
+</p>
+
+<div align="center">
+
+[![License](https://img.shields.io/badge/license-MIT-green)](https://github.com/kscalelabs/onshape/blob/main/LICENSE)
+[![Version](https://img.shields.io/pypi/v/kscale-onshape-library)](https://pypi.org/project/kscale-onshape-library/)
+[![Discord](https://dcbadge.limes.pink/api/server/k5mSvCkYQh?style=flat)](https://discord.gg/k5mSvCkYQh)
+[![Wiki](https://img.shields.io/badge/wiki-humanoids-black)](https://humanoids.wiki)
+
+</div>
+<p align="center">
+  <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/cover.png">
     <img alt="Teleop" src="assets/cover.png" style="max-width: 100%;">
   </picture>
   <br/>
-  <br/>
 </p>
-<h3 align="center">
+<h1 align="center">
     <p>Bi-Manual Remote Robotic Teleoperation</p>
-</h3>
-
----
+</h1>
 
 A minimal implementation of a bi-manual remote robotic teleoperation system using VR hand tracking and camera streaming.
 
@@ -23,6 +34,12 @@ A minimal implementation of a bi-manual remote robotic teleoperation system usin
 ✅ inverse kinematics
 
 ✅ Meta Quest Pro HMD + NVIDIA® Jetson AGX Orin™ Developer Kit
+
+✅ `.urdf` robot model
+
+✅ 3dof end effector control
+
+⬜️ 6dof end effector control
 
 ⬜️ tested on real world robot
 
