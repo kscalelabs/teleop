@@ -1,15 +1,72 @@
-# T-E-L-E-O-P
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/cover.png">
+    <img alt="Teleop" src="assets/cover.png" style="max-width: 100%;">
+  </picture>
+  <br/>
+  <br/>
+</p>
+<h3 align="center">
+    <p>Bi-Manual Remote Robotic Teleoperation</p>
+</h3>
 
-various attempts at open source robotic teleop. see readmes in subfolders.
+---
 
-- [vuer_rbt](vuer_rbt/README.md) vuer (python and js) + roboticstoolbox-python (python and C)
-- [pc](pc/README.md) playcanvas (js) + k (rust)
-- [vuer_p](vuer_p/README.md) vuer (python and js) + pybullet (python and C)
+A minimal implementation of a bi-manual remote robotic teleoperation system using VR hand tracking and camera streaming.
 
-not teleop, asset optimization:
+✅ VR and browser visualization
 
-- [opt_urdf](opt_urdf/README.md) urdf optimization, 3D file conversion (python)
+✅ bi-manual hand gesture control
 
-if you just want to run a demo you can pick from 
+✅ camera streaming
 
-- `demo_ik_hands_stereo.py` uses VR hands with pinch gestures to control left and right robot end effectors while streaming a usb stereo camera to the headset
+✅ inverse kinematics
+
+✅ Meta Quest Pro HMD + NVIDIA® Jetson AGX Orin™ Developer Kit
+
+⬜️ tested on real world robot
+
+⬜️ record & playback trajectories
+
+
+### Setup
+
+```bash
+git clone https://github.com/kscalelabs/teleop.git && cd teleop
+conda create -y -n teleop python=3.8 && conda activate teleop
+pip install -r requirements.txt
+```
+
+### Usage
+
+Start the server on the robot computer.
+
+```bash
+python demo_ik_hands_stereo.py
+```
+
+Start ngrok on the robot computer.
+
+```bash
+ngrok http 8012
+```
+
+Open the browser app on the HMD and go to the ngrok URL.
+
+### Dependencies
+
+- [Vuer](https://github.com/vuer-ai/vuer) is used for visualization
+- [PyBullet](https://pybullet.org/wordpress/) is used for IK
+- [ngrok](https://ngrok.com/download) is used for networking
+
+
+### Citation
+
+```
+@misc{teleop-2024,
+  title={Bi-Manual Remote Robotic Teleoperation},
+  author={Hugo Ponte},
+  year={2024},
+  url={https://github.com/kscalelabs/teleop}
+}
+```
