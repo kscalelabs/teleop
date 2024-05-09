@@ -10,6 +10,7 @@ import numpy as np
 from numpy.typing import NDArray
 import pybullet as p
 import pybullet_data
+from scipy.spatial.transform import Rotation as R
 from vuer import Vuer, VuerSession
 from vuer.schemas import AmbientLight, ImageBackground, Hands, Urdf
 
@@ -248,9 +249,10 @@ MAX_FPS: int = 60
 
 # Vuer hand tracking and pinch detection params
 HAND_FPS: int = 30
-INDEX_FINGER_ID: int = 9
-THUMB_FINGER_ID: int = 4
-MIDLE_FINGER_ID: int = 14
+INDEX_FINGER_TIP_ID: int = 9
+INDEX_FINGER_BASE_ID: int = 6
+THUMB_FINGER_TIP_ID: int = 4
+MIDLE_FINGER_TIP_ID: int = 14
 PINCH_DIST_OPENED: float = 0.10  # 10cm
 PINCH_DIST_CLOSED: float = 0.01  # 1cm
 
@@ -308,42 +310,52 @@ app = Vuer()
 
 @app.add_handler("HAND_MOVE")
 async def hand_handler(event, _):
-    """
-    middle finger pinch turns tracking on
-    index finger pinch used for gripper
-    """
     # right hand
-    rindex_pos: NDArray = np.array(event.value["rightLandmarks"][INDEX_FINGER_ID])
-    rthumb_pos: NDArray = np.array(event.value["rightLandmarks"][THUMB_FINGER_ID])
+    rindex_pos: NDArray = np.array(event.value["rightLandmarks"][INDEX_FINGER_TIP_ID])
+    rthumb_pos: NDArray = np.array(event.value["rightLandmarks"][THUMB_FINGER_TIP_ID])
     rpinch_dist: NDArray = np.linalg.norm(rindex_pos - rthumb_pos)
-    rmiddl_pos: NDArray = np.array(event.value["rightLandmarks"][MIDLE_FINGER_ID])
-    rgrip_dist: float = np.linalg.norm(rthumb_pos - rmiddl_pos) / PINCH_DIST_OPENED
+    # index finger to thumb pinch turns on tracking
     if rpinch_dist < PINCH_DIST_CLOSED:
         print("Pinch detected in right hand")
         global goal_pos_eer, goal_orn_eer
         goal_pos_eer = np.multiply(rthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN)
         print(f"goal_pos_eer {goal_pos_eer}")
+        # pinching with middle finger controls gripper
+        rmiddl_pos: NDArray = np.array(event.value["rightLandmarks"][MIDLE_FINGER_TIP_ID])
+        rgrip_dist: float = np.linalg.norm(rthumb_pos - rmiddl_pos) / PINCH_DIST_OPENED
         print(f"right gripper at {rgrip_dist}")
         _s: float = EE_S_MIN + rgrip_dist * ee_s_range
         async with q_lock:
             q["joint_right_arm_1_hand_1_slider_1"] = _s
             q["joint_right_arm_1_hand_1_slider_2"] = _s
+        # orientation is calculated from cross product of thumb and index finger vectors
+        rindex_base_pos: NDArray = np.array(event.value["rightLandmarks"][INDEX_FINGER_BASE_ID])
+        orientation_vec: NDArray = np.cross(rthumb_pos - rindex_base_pos, rindex_pos - rindex_base_pos)
+        orientation_vec /= np.linalg.norm(orientation_vec)
+        goal_orn_eer = R.from_rotvec(orientation_vec).as_quat()
     # left hand
-    lindex_pos: NDArray = np.array(event.value["leftLandmarks"][INDEX_FINGER_ID])
-    lthumb_pos: NDArray = np.array(event.value["leftLandmarks"][THUMB_FINGER_ID])
+    lindex_pos: NDArray = np.array(event.value["leftLandmarks"][INDEX_FINGER_TIP_ID])
+    lthumb_pos: NDArray = np.array(event.value["leftLandmarks"][THUMB_FINGER_TIP_ID])
     lpinch_dist: NDArray = np.linalg.norm(lindex_pos - lthumb_pos)
-    lmiddl_pos: NDArray = np.array(event.value["leftLandmarks"][MIDLE_FINGER_ID])
-    lgrip_dist: float = np.linalg.norm(lthumb_pos - lmiddl_pos) / PINCH_DIST_OPENED
+    # index finger to thumb pinch turns on tracking
     if lpinch_dist < PINCH_DIST_CLOSED:
         print("Pinch detected in left hand")
         global goal_pos_eel, goal_orn_eel
         goal_pos_eel = np.multiply(lthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN)
         print(f"goal_pos_eel {goal_pos_eel}")
-        print(f"left gripper at {lgrip_dist}")
+        # pinching with middle finger controls gripper
+        lmiddl_pos: NDArray = np.array(event.value["leftLandmarks"][MIDLE_FINGER_TIP_ID])
+        lgrip_dist: float = np.linalg.norm(lthumb_pos - lmiddl_pos) / PINCH_DIST_OPENED
         _s: float = EE_S_MIN + lgrip_dist * ee_s_range
+        print(f"left gripper at {lgrip_dist}")
         async with q_lock:
             q["joint_left_arm_2_hand_1_slider_1"] = _s
             q["joint_left_arm_2_hand_1_slider_2"] = _s
+        # orientation is calculated from cross product of thumb and index finger vectors
+        lindex_base_pos: NDArray = np.array(event.value["leftLandmarks"][INDEX_FINGER_BASE_ID])
+        orientation_vec: NDArray = np.cross(lthumb_pos - lindex_base_pos, lindex_pos - lindex_base_pos)
+        orientation_vec /= np.linalg.norm(orientation_vec)
+        goal_orn_eel = R.from_rotvec(orientation_vec).as_quat()
 
 
 @app.spawn(start=True)
