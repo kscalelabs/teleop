@@ -14,21 +14,18 @@ from vuer import Vuer, VuerSession
 from vuer.schemas import  Hands, PointLight, Urdf
 
 # web urdf is used for vuer
+
 URDF_WEB: str = (
-    "https://raw.githubusercontent.com/kscalelabs/webstompy/master/urdf/stompy_tiny_glb/robot.urdf"
-)
-URDF_WEB: str = (
-    "https://raw.githubusercontent.com/kscalelabs/webstompy/28c7f636326dd1ffd140247b9640287ea3603b93/urdf/stompy_new/robot_7dof_arm_simplified.urdf"
+    "https://raw.githubusercontent.com/kscalelabs/webstompy/pawel/new_stomp/urdf/stompy_new/upper_limb_assembly_5_dof_merged_simplified.urdf"
 )
 # local urdf is used for pybullet
 URDF_LOCAL: str = f"urdf/robot2/upper_limb_assembly_5_dof_merged_simplified.urdf"
-# URDF_LOCAL: str = f"urdf/stompy_tiny/robot.urdf"
 
 # starting positions for robot trunk relative to world frames
-START_POS_TRUNK_VUER: NDArray = np.array([0, 1, 0])
-START_EUL_TRUNK_VUER: NDArray = np.array([-math.pi / 2, 0, 0])
-START_POS_TRUNK_PYBULLET: NDArray = np.array([0, 0, 1])
-START_EUL_TRUNK_PYBULLET: NDArray = np.array([-math.pi / 4, 0, 0])
+START_POS_TRUNK_VUER: NDArray =  np.array([0, .5, 0]) #np.array([0, 1, 0])
+START_EUL_TRUNK_VUER: NDArray = np.array([-math.pi, 0, 0])
+START_POS_TRUNK_PYBULLET: NDArray = np.array([0, 0, 0.5])
+START_EUL_TRUNK_PYBULLET: NDArray = np.array([-math.pi/2, 0, 0])
 
 # starting positions for robot end effectors are defined relative to robot trunk frame
 # which is right in the middle of the chest
@@ -47,24 +44,24 @@ START_Q: Dict[str, float] = {
     "joint_torso_1_rmd_x8_90_mock_1_dof_x8": 0.0,
 
     # left arm (7dof)
-    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8": 2.11,
+    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8": 2.42,
     "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8": 4.42,
-    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4": 1.7,
-    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4": 2.33,
-    "joint_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4": -2.89,
-    "joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_rmd_x4_24_mock_1_dof_x4": 1.92, # not working
+    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4": 1.85,
+    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4": 1.74,
+    "joint_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4": -2.09,
+    "joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_rmd_x4_24_mock_1_dof_x4": 0, # not working
 
     # left hand (2dof)
     "joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1": 0.0,
     "joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2": 0.0,
 
     # right arm (7dof)
-    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8": .15,
-    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8": 2.02,
-    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4": 1.92,
-    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4": 3.59,
-    "joint_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4": -0.18,
-    "joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_rmd_x4_24_mock_1_dof_x4": -0.15,
+    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8": 2.42,
+    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8": 1.61,
+    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4": -1.31,
+    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4": 2.88,
+    "joint_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4": -1.88,
+    "joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_rmd_x4_24_mock_1_dof_x4": 0, # not working
 
     # right hand (2dof)
     "joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_1": 0.0,
@@ -110,18 +107,18 @@ IK_Q_LIST: List[str] = ['joint_torso_1_rmd_x8_90_mock_1_dof_x8',
     'joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8',
     'joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4',
     'joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4',
-        'joint_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4',
-        'joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_rmd_x4_24_mock_1_dof_x4',
-            'joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1',
-            'joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2',
-                'joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8', 
-                'joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8', 
-                'joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4',
-                'joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4',
-                    'joint_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4',
-                    'joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_rmd_x4_24_mock_1_dof_x4', 
-                    'joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_1', 
-                    'joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_2'
+    'joint_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4',
+    'joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_rmd_x4_24_mock_1_dof_x4',
+    'joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1',
+    'joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2',
+    'joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8', 
+    'joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8', 
+    'joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4',
+    'joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4',
+    'joint_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4',
+    'joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_rmd_x4_24_mock_1_dof_x4', 
+    'joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_1', 
+    'joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_2'
 ]
 
 # PyBullet inverse kinematics (IK) params
@@ -142,7 +139,7 @@ else:
         p.connect(p.GUI)
 p.setAdditionalSearchPath(pybullet_data.getDataPath())
 pb_robot_id = p.loadURDF(URDF_LOCAL, [0, 0, 0], useFixedBase=True)
-p.setGravity(0, 0, 0)
+p.setGravity(0, 0, -9.81)
 
 
 pb_num_joints: int = p.getNumJoints(pb_robot_id)
@@ -166,22 +163,7 @@ for i in range(pb_num_joints):
         joint_index_to_name[i] = joint_name
         joint_name_to_index[joint_name] = i
 
-# # Iterate over each joint and print details for non-fixed joints
-# for joint_index in range(pb_num_joints):
-#     joint_info = p.getJointInfo(pb_robot_id, joint_index)
-#     joint_type = joint_info[2]
-    
-#     # Print only if the joint is not fixed
-#     if joint_type == p.JOINT_REVOLUTE:
-#         print(f"Joint {joint_index}:")
-#         print(f"  Name: {joint_info[1].decode('utf-8')}")
-#         print(f"  Type: {joint_type}")
-#         print(f"  Lower limit: {joint_info[8]}")
-#         print(f"  Upper limit: {joint_info[9]}")
-#         print(f"  Max force: {joint_info[10]}")
-#         print(f"  Max velocity: {joint_info[11]}")
-#         print()
-
+p.setGravity(0, 0, -9.81)
 p.resetBasePositionAndOrientation(
     pb_robot_id,
     START_POS_TRUNK_PYBULLET,
@@ -360,7 +342,7 @@ async def main(session: VuerSession):
     # standard position of left hand: [0.12057996 0.31537491 0.94372624]
     while True:
         await asyncio.gather(
-            ik("left"),  # ~1ms
+            # ik("left"),  # ~1ms
             ik("right"),  # ~1ms
             # TODO pfb30
             asyncio.sleep(1 / MAX_FPS),  # ~16ms @ 60fps
