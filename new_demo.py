@@ -1,26 +1,11 @@
 """
-# kol urdf https://cad.onshape.com/documents/71f793a23ab7562fb9dec82d/w/e879bcf272425973f9b3d8ad/e/1a95e260677a2d2d5a3b1eb3 --remove_inertia --
-# 
-kol urdf https://cad.onshape.com/documents/77f178833017912bdc0eaaa8/w/958f1684049f1413f6dd7831/e/348cad65143f892a40e33206 --remove_inertia 
-
-
-
-kol simplify-all robot/robot_7dof_arm.urdf
-
-
-NEw one:
-
-kol urdf https://cad.onshape.com/documents/77f178833017912bdc0eaaa8/w/958f1684049f1413f6dd7831/e/348cad65143f892a40e33206 --override-central-node "torso_1_hip_mount_1" --remove_inertia --skip-small-parts -o test
-kol merge-fixed-joints  test/upper_limb_assembly_7_dof.urdf
-
-kol simplify-all test/upper_limb_assembly_7_dof_merged.urdf
 """
 import asyncio
 from copy import deepcopy
 import os
 import math
 from typing import List, Dict
-
+import time
 import numpy as np
 from numpy.typing import NDArray
 import pybullet as p
@@ -36,9 +21,8 @@ URDF_WEB: str = (
     "https://raw.githubusercontent.com/kscalelabs/webstompy/28c7f636326dd1ffd140247b9640287ea3603b93/urdf/stompy_new/robot_7dof_arm_simplified.urdf"
 )
 # local urdf is used for pybullet
-URDF_LOCAL: str = f"urdf/robot/robot_7dof_arm_simplified.urdf"
+URDF_LOCAL: str = f"urdf/robot2/upper_limb_assembly_5_dof_merged_simplified.urdf"
 # URDF_LOCAL: str = f"urdf/stompy_tiny/robot.urdf"
-
 
 # starting positions for robot trunk relative to world frames
 START_POS_TRUNK_VUER: NDArray = np.array([0, 1, 0])
@@ -59,130 +43,85 @@ PB_TO_VUER_AXES_SIGN: NDArray = np.array([-1, 1, 1], dtype=np.int8)
 
 # starting joint positions (Q means "joint angles")
 START_Q: Dict[str, float] = {
-    # right arm (7dof)
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8": 1.7,
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8": 1.6,
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4": 0.34,
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4": 1.6,
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_lower_arm_3_dof_1_rmd_x4_24_mock_1_dof_x4": 1.4,
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_lower_arm_3_dof_1_rmd_x4_24_mock_2_dof_x4": -0.26,
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_lower_arm_3_dof_1_rmd_x4_24_mock_3_dof_x4": 0.0,
+    # torso
+    "joint_torso_1_rmd_x8_90_mock_1_dof_x8": 0.0,
+
     # left arm (7dof)
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8": -1.7,
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8": -1.6,
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4": -0.34,
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4": -1.6,
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_lower_arm_3_dof_1_rmd_x4_24_mock_1_dof_x4": -1.4,
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_lower_arm_3_dof_1_rmd_x4_24_mock_2_dof_x4": -1.7,
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_lower_arm_3_dof_1_rmd_x4_24_mock_3_dof_x4": 0.0,
-    # right hand (2dof)
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_lower_arm_3_dof_1_hand_1_slider_1": 0.0,
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_lower_arm_3_dof_1_hand_1_slider_2": 0.0,
-    # WHat is this?
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_lower_arm_3_dof_1_hand_1_rmd_x4_24_mock_1_dof_x4": 0.0,
+    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8": 2.11,
+    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8": 4.42,
+    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4": 1.7,
+    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4": 2.33,
+    "joint_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4": -2.89,
+    "joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_rmd_x4_24_mock_1_dof_x4": 1.92, # not working
+
     # left hand (2dof)
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_lower_arm_3_dof_1_hand_1_slider_1": 0.0,
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_lower_arm_3_dof_1_hand_1_slider_2": 0.0,
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_lower_arm_3_dof_1_hand_1_rmd_x4_24_mock_1_dof_x4": 0.0,
-}
+    "joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1": 0.0,
+    "joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2": 0.0,
+
+    # right arm (7dof)
+    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8": .15,
+    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8": 2.02,
+    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4": 1.92,
+    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4": 3.59,
+    "joint_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4": -0.18,
+    "joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_rmd_x4_24_mock_1_dof_x4": -0.15,
+
+    # right hand (2dof)
+    "joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_1": 0.0,
+    "joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_2": 0.0,
+}   
 
 # link names are based on the URDF
 # EER means "end effector right"
 # EEL means "end effector left"
-EER_LINK: str = "link_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_lower_arm_3_dof_1_hand_1_slide_2"
-# possibly this:
-# link_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_lower_arm_3_dof_1_rmd_x4_24_mock_2_outer_rmd_x4_24_1
-EEL_LINK: str = "link_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_lower_arm_3_dof_1_hand_1_slide_1"
+EEL_LINK: str = "fused_component_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slide_1"
+EER_LINK: str = "fused_component_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slide_1"
 
 # kinematic chains for each arm and hand
 EER_CHAIN_ARM: List[str] = [
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8",
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8",
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4",
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4",
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_lower_arm_3_dof_1_rmd_x4_24_mock_1_dof_x4",
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_lower_arm_3_dof_1_rmd_x4_24_mock_2_dof_x4",
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_lower_arm_3_dof_1_rmd_x4_24_mock_3_dof_x4",
-]
-EEL_CHAIN_ARM: List[str] = [
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8",
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8",
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4",
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4",
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_lower_arm_3_dof_1_rmd_x4_24_mock_1_dof_x4",
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_lower_arm_3_dof_1_rmd_x4_24_mock_2_dof_x4",
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_lower_arm_3_dof_1_rmd_x4_24_mock_3_dof_x4",
-]
-EER_CHAIN_HAND: List[str] = [
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_lower_arm_3_dof_1_hand_1_slider_1",
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_lower_arm_3_dof_1_hand_1_slider_2",
+    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8",
+    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8",
+    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4",
+    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4",
+    "joint_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4",
+    "joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_rmd_x4_24_mock_1_dof_x4",
 ]
 EEL_CHAIN_HAND: List[str] = [
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_lower_arm_3_dof_1_hand_1_slider_1",
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_lower_arm_3_dof_1_hand_1_slider_2",
+    "joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1",
+    "joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2",
 ]
 
+EEL_CHAIN_ARM: List[str] = [
+    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8",
+    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8",
+    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4",
+    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4",
+    "joint_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4",
+    "joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_rmd_x4_24_mock_1_dof_x4",
+]
+EER_CHAIN_HAND: List[str] = [
+    "joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_1",
+    "joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_2",
+]
 # PyBullet IK will output a 37dof list in this exact order
-IK_Q_LIST: List[str] = [
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8",
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8",
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4",
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4",
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_lower_arm_3_dof_1_rmd_x4_24_mock_1_dof_x4",
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_lower_arm_3_dof_1_rmd_x4_24_mock_2_dof_x4",
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_lower_arm_3_dof_1_rmd_x4_24_mock_3_dof_x4",
-
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8",
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8",
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4",
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4",
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_lower_arm_3_dof_1_rmd_x4_24_mock_1_dof_x4",
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_lower_arm_3_dof_1_rmd_x4_24_mock_2_dof_x4",
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_lower_arm_3_dof_1_rmd_x4_24_mock_3_dof_x4",
-
-
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_lower_arm_3_dof_1_hand_1_slider_1",
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_lower_arm_3_dof_1_hand_1_slider_2",
-
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_lower_arm_3_dof_1_hand_1_slider_1",
-    "joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_lower_arm_3_dof_1_hand_1_slider_2",
-]
-
 # THATS THE LIST
-IK_Q_LIST =['joint_lower_limbs_1_leg_assembly_1_rmd_x12_150_mock_1_dof_x12', 
-'joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_lower_arm_3_dof_1_rmd_x4_24_mock_2_dof_x4',
-'joint_lower_limbs_1_leg_assembly_2_rmd_x12_150_mock_1_dof_x12', 
-'joint_lower_limbs_1_leg_assembly_1_rmd_x8_90_mock_2_dof_x8', 
-'joint_lower_limbs_1_leg_assembly_2_rmd_x4_24_mock_1_dof_x4',
-'joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_lower_arm_3_dof_1_hand_1_slider_2',
-'joint_lower_limbs_1_leg_assembly_1_rmd_x8_90_mock_3_dof_x8',
-'joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_lower_arm_3_dof_1_rmd_x4_24_mock_2_dof_x4',
-'joint_lower_limbs_1_right_foot_1_rmd_x4_24_mock_1_dof_x4',
-'joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_lower_arm_3_dof_1_rmd_x4_24_mock_3_dof_x4', 
-'joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4', 
-'joint_lower_limbs_1_left_foot_1_rmd_x4_24_mock_1_dof_x4', 
-
-'joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_lower_arm_3_dof_1_rmd_x4_24_mock_1_dof_x4', 
-'joint_lower_limbs_1_leg_assembly_2_rmd_x8_90_mock_1_dof_x8', 
-'joint_lower_limbs_1_leg_assembly_2_rmd_x8_90_mock_2_dof_x8',
-'joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4',
-'joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4',
-'joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_lower_arm_3_dof_1_hand_1_slider_1',
-'joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8', 
-'joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8', 
-'joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_lower_arm_3_dof_1_hand_1_slider_1',
-'joint_lower_limbs_1_leg_assembly_2_rmd_x8_90_mock_3_dof_x8', 
-'joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_lower_arm_3_dof_1_hand_1_rmd_x4_24_mock_1_dof_x4',
-'joint_lower_limbs_1_leg_assembly_1_rmd_x8_90_mock_1_dof_x8',
-'joint_upper_limb_assembly_7_dof_1_torso_1_rmd_x8_90_mock_1_dof_x8',
-'joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8',
-'joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_lower_arm_3_dof_1_hand_1_slider_2',
-'joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4', 
-'joint_lower_limbs_1_leg_assembly_1_rmd_x4_24_mock_1_dof_x4', 
-'joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_lower_arm_3_dof_1_rmd_x4_24_mock_3_dof_x4',
-'joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8',
-'joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_lower_arm_3_dof_1_hand_1_rmd_x4_24_mock_1_dof_x4',
-'joint_upper_limb_assembly_7_dof_1_full_arm_7_dof_1_lower_arm_3_dof_1_rmd_x4_24_mock_1_dof_x4'
+IK_Q_LIST: List[str] = ['joint_torso_1_rmd_x8_90_mock_1_dof_x8',
+    'joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8',
+    'joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8',
+    'joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4',
+    'joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4',
+        'joint_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4',
+        'joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_rmd_x4_24_mock_1_dof_x4',
+            'joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1',
+            'joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2',
+                'joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8', 
+                'joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8', 
+                'joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4',
+                'joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4',
+                    'joint_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4',
+                    'joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_rmd_x4_24_mock_1_dof_x4', 
+                    'joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_1', 
+                    'joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_2'
 ]
 
 # PyBullet inverse kinematics (IK) params
@@ -192,7 +131,7 @@ DAMPING_CHAIN: float = 0.1
 DAMPING_NON_CHAIN: float = 10.0
 
 # PyBullet init
-HEADLESS: bool = True
+HEADLESS: bool = False
 if HEADLESS:
     print("Starting PyBullet in headless mode.")
     clid = p.connect(p.DIRECT)
@@ -205,7 +144,28 @@ p.setAdditionalSearchPath(pybullet_data.getDataPath())
 pb_robot_id = p.loadURDF(URDF_LOCAL, [0, 0, 0], useFixedBase=True)
 p.setGravity(0, 0, 0)
 
+
 pb_num_joints: int = p.getNumJoints(pb_robot_id)
+
+# Create a list to store movable joint indices and names
+movable_joint_indices = []
+joint_names = []
+joint_index_to_name = {}
+joint_name_to_index = {}
+
+# Iterate through all joints
+for i in range(pb_num_joints):
+    joint_info = p.getJointInfo(pb_robot_id, i)
+    joint_name = joint_info[1].decode('utf-8')
+    joint_type = joint_info[2]
+    
+    # Check if the joint is not fixed (i.e., it's movable)
+    if joint_type != p.JOINT_FIXED:
+        movable_joint_indices.append(i)
+        joint_names.append(joint_name)
+        joint_index_to_name[i] = joint_name
+        joint_name_to_index[joint_name] = i
+
 # # Iterate over each joint and print details for non-fixed joints
 # for joint_index in range(pb_num_joints):
 #     joint_info = p.getJointInfo(pb_robot_id, joint_index)
@@ -221,8 +181,6 @@ pb_num_joints: int = p.getNumJoints(pb_robot_id)
 #         print(f"  Max force: {joint_info[10]}")
 #         print(f"  Max velocity: {joint_info[11]}")
 #         print()
-
-
 
 p.resetBasePositionAndOrientation(
     pb_robot_id,
@@ -259,6 +217,7 @@ for i in range(pb_num_joints):
 
 pb_eer_id = pb_child_link_names.index(EER_LINK)
 pb_eel_id = pb_child_link_names.index(EEL_LINK)
+
 for i in range(pb_num_joints):
     p.resetJointState(pb_robot_id, i, pb_start_q[i])
 print("\t ... done")
@@ -289,7 +248,6 @@ goal_orn_eer: NDArray = p.getQuaternionFromEuler(START_EUL_TRUNK_VUER)
 goal_pos_eel: NDArray = START_POS_EEL_VUER
 goal_orn_eel: NDArray = p.getQuaternionFromEuler(START_EUL_TRUNK_VUER)
 
-
 async def ik(arm: str) -> None:
     # start_time = time.time()
     if arm == "right":
@@ -304,7 +262,7 @@ async def ik(arm: str) -> None:
         ee_chain = EEL_CHAIN_ARM
         pos = goal_pos_eel
         orn = goal_orn_eel
-    print(f"ik {arm} {pos} {orn}")
+    # print(f"ik {arm} {pos} {orn}")
     pb_q = p.calculateInverseKinematics(
         pb_robot_id,
         ee_id,
@@ -315,15 +273,27 @@ async def ik(arm: str) -> None:
         pb_joint_ranges,
         pb_start_q,
     )
+
+    # Create a dictionary mapping joint names to their calculated IK values
+    joint_name_to_ik_value = {joint_names[i]: pb_q[i] for i in range(len(pb_q))}
+
     async with q_lock:
         global q
+        new_changes = {}
         for i, val in enumerate(pb_q):
             joint_name = IK_Q_LIST[i]
             if joint_name in ee_chain:
                 q[joint_name] = val
+                new_changes[joint_name[-10:]] = val
                 p.resetJointState(pb_robot_id, pb_q_map[joint_name], val)
-    # print(f"ik {arm} took {time.time() - start_time} seconds")
 
+        # # If you want to set the joint positions:
+        # for i, joint_index in enumerate(movable_joint_indices):
+        #     if joint_name in ee_chain:
+        #         p.resetJointState(pb_robot_id, joint_index, pb_q[i])
+
+        # print(new_changes)
+    # print(f"ik {arm} took {time.time() - start_time} seconds")
 
 app = Vuer()
 
@@ -339,6 +309,8 @@ async def hand_handler(event, _):
         # NOTE: right hand controls left arm and left gripper
         global goal_pos_eel
         goal_pos_eel = np.multiply(rthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN)
+
+        print(f"goal_pos_eel {goal_pos_eel}")
         # print(f"goal_pos_eer {goal_pos_eer}")
         # pinching with middle finger controls gripper
         rmiddl_pos: NDArray = np.array(event.value["rightLandmarks"][MIDDLE_FINGER_TIP_ID])
@@ -358,8 +330,8 @@ async def hand_handler(event, _):
         # NOTE: left hand controls right arm and right gripper
         global goal_pos_eer
         goal_pos_eer = np.multiply(lthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN)
-        print(goal_pos_eer)
-        # print(f"goal_pos_eel {goal_pos_eel}")
+
+        print(f"goal_pos_eer {goal_pos_eer}")
         # pinching with middle finger controls gripper
         lmiddl_pos: NDArray = np.array(event.value["leftLandmarks"][MIDDLE_FINGER_TIP_ID])
         lgrip_dist: float = np.linalg.norm(lthumb_pos - lmiddl_pos) / PINCH_DIST_OPENED
@@ -385,9 +357,10 @@ async def main(session: VuerSession):
     global q, img
     # TODO: ved add canbus controller
     #motor_controller = CanBusController()
+    # standard position of left hand: [0.12057996 0.31537491 0.94372624]
     while True:
         await asyncio.gather(
-            # ik("left"),  # ~1ms
+            ik("left"),  # ~1ms
             ik("right"),  # ~1ms
             # TODO pfb30
             asyncio.sleep(1 / MAX_FPS),  # ~16ms @ 60fps
