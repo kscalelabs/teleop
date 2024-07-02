@@ -32,8 +32,8 @@ START_POS_EER_VUER += START_POS_TRUNK_PYBULLET
 START_POS_EEL_VUER += START_POS_TRUNK_PYBULLET
 
 # conversion between PyBullet and Vuer axes
-VUER_TO_PB_AXES: NDArray = np.array([0, 2, 1], dtype=np.uint8)
-VUER_TO_PB_AXES_SIGN: NDArray = np.array([-1, 1, -1], dtype=np.int8)
+VUER_TO_PB_AXES: NDArray = np.array([2, 0, 1], dtype=np.uint8)
+VUER_TO_PB_AXES_SIGN: NDArray = np.array([1, 1, 1], dtype=np.int8)
 
 # starting joint positions (Q means "joint angles")
 START_Q: Dict[str, float] = {
@@ -304,7 +304,7 @@ async def hand_handler(event, _):
         global goal_pos_eel
         goal_pos_eel = np.multiply(rthumb_pos[VUER_TO_PB_AXES], VUER_TO_PB_AXES_SIGN)
         # pfb30
-        goal_pos_eel = np.array([-.5, 0.2, 1.])
+        # goal_pos_eel = np.array([-.5, 0.2, 1.])
         print(f"goal_pos_eel {goal_pos_eel}")
         # # pinching with middle finger controls gripper
         # rmiddl_pos: NDArray = np.array(event.value["rightLandmarks"][MIDDLE_FINGER_TIP_ID])
