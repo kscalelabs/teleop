@@ -14,7 +14,6 @@ from vuer import Vuer, VuerSession
 from vuer.schemas import  Hands, PointLight, Urdf
 
 # web urdf is used for vuer
-
 URDF_WEB: str = (
     "https://raw.githubusercontent.com/kscalelabs/webstompy/pawel/new_stomp/urdf/stompy_new/upper_limb_assembly_5_dof_merged_simplified.urdf"
 )
@@ -29,8 +28,8 @@ START_EUL_TRUNK_PYBULLET: NDArray = np.array([-math.pi/2, 0, 0])
 
 # starting positions for robot end effectors are defined relative to robot trunk frame
 # which is right in the middle of the chest
-START_POS_EER_VUER: NDArray = np.array([-0.2, -0.2, -0.2])
-START_POS_EEL_VUER: NDArray = np.array([0.2, -0.2, -0.2])
+START_POS_EER_VUER: NDArray = np.array([-.2, .3, .2]) # np.array([-0.2, -0.2, -0.2])
+START_POS_EEL_VUER: NDArray = np.array([.02, .3, -.4]) #np.array([0.2, -0.2, -0.2])
 START_POS_EER_VUER += START_POS_TRUNK_VUER
 START_POS_EEL_VUER += START_POS_TRUNK_VUER
 
@@ -41,7 +40,7 @@ PB_TO_VUER_AXES_SIGN: NDArray = np.array([-1, 1, 1], dtype=np.int8)
 # starting joint positions (Q means "joint angles")
 START_Q: Dict[str, float] = {
     # torso
-    "joint_torso_1_rmd_x8_90_mock_1_dof_x8": 0.0,
+    "joint_torso_1_rmd_x8_90_mock_1_dof_x8": 0.5,
 
     # left arm (7dof)
     "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8": 2.42,
@@ -75,26 +74,20 @@ EEL_LINK: str = "fused_component_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slide
 EER_LINK: str = "fused_component_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slide_1"
 
 # kinematic chains for each arm and hand
-EER_CHAIN_ARM: List[str] = [
-    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8",
-    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8",
-    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4",
-    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4",
-    "joint_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4",
-    "joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_rmd_x4_24_mock_1_dof_x4",
+EEL_CHAIN_ARM: List[str] = [
+    'joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8',
+    'joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8',
+    'joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4',
+    'joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4',
+    'joint_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4',
 ]
 EEL_CHAIN_HAND: List[str] = [
-    "joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1",
-    "joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2",
+    'joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1', 
+    'joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2'
 ]
 
-EEL_CHAIN_ARM: List[str] = [
+EER_CHAIN_ARM: List[str] = [
     "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8",
-    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8",
-    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4",
-    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4",
-    "joint_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4",
-    "joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_rmd_x4_24_mock_1_dof_x4",
 ]
 EER_CHAIN_HAND: List[str] = [
     "joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_1",
@@ -102,23 +95,15 @@ EER_CHAIN_HAND: List[str] = [
 ]
 # PyBullet IK will output a 37dof list in this exact order
 # THATS THE LIST
-IK_Q_LIST: List[str] = ['joint_torso_1_rmd_x8_90_mock_1_dof_x8',
+IK_Q_LIST: List[str] = [
     'joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8',
     'joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8',
     'joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4',
     'joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4',
     'joint_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4',
-    'joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_rmd_x4_24_mock_1_dof_x4',
-    'joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1',
-    'joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2',
-    'joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8', 
-    'joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8', 
-    'joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4',
-    'joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4',
-    'joint_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4',
-    'joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_rmd_x4_24_mock_1_dof_x4', 
-    'joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_1', 
-    'joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_2'
+    # slider
+    'joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1', 
+    'joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2'
 ]
 
 # PyBullet inverse kinematics (IK) params
@@ -157,13 +142,12 @@ for i in range(pb_num_joints):
     joint_type = joint_info[2]
     
     # Check if the joint is not fixed (i.e., it's movable)
-    if joint_type != p.JOINT_FIXED:
+    if joint_type != p.JOINT_FIXED and joint_type != p.JOINT_PRISMATIC:
         movable_joint_indices.append(i)
         joint_names.append(joint_name)
         joint_index_to_name[i] = joint_name
         joint_name_to_index[joint_name] = i
 
-p.setGravity(0, 0, -9.81)
 p.resetBasePositionAndOrientation(
     pb_robot_id,
     START_POS_TRUNK_PYBULLET,
@@ -196,7 +180,6 @@ for i in range(pb_num_joints):
     if name in IK_Q_LIST:
         pb_q_map[name] = i
 
-
 pb_eer_id = pb_child_link_names.index(EER_LINK)
 pb_eel_id = pb_child_link_names.index(EEL_LINK)
 
@@ -224,7 +207,7 @@ ee_s_range: float = EE_S_MAX - EE_S_MIN
 
 # global variables get updated by various async functions
 q_lock = asyncio.Lock()
-q: Dict[str, float] = deepcopy(START_Q)
+q = deepcopy(START_Q)
 goal_pos_eer: NDArray = START_POS_EER_VUER
 goal_orn_eer: NDArray = p.getQuaternionFromEuler(START_EUL_TRUNK_VUER)
 goal_pos_eel: NDArray = START_POS_EEL_VUER
@@ -256,25 +239,31 @@ async def ik(arm: str) -> None:
         pb_start_q,
     )
 
-    # Create a dictionary mapping joint names to their calculated IK values
-    joint_name_to_ik_value = {joint_names[i]: pb_q[i] for i in range(len(pb_q))}
-
     async with q_lock:
         global q
-        new_changes = {}
+        new_changes = []
         for i, val in enumerate(pb_q):
             joint_name = IK_Q_LIST[i]
             if joint_name in ee_chain:
                 q[joint_name] = val
-                new_changes[joint_name[-10:]] = val
+                new_changes.append((joint_name[-20:], val))
                 p.resetJointState(pb_robot_id, pb_q_map[joint_name], val)
 
+
+                # p.setJointMotorControl2(bodyIndex=pb_robot_id,
+                #                         jointIndex=pb_q_map[joint_name],
+                #                         controlMode=p.POSITION_CONTROL,
+                #                         targetPosition=val,
+                #                         targetVelocity=0,
+                #                         force=500,
+                #                         positionGain=0.03,
+                #                         velocityGain=1)
         # # If you want to set the joint positions:
         # for i, joint_index in enumerate(movable_joint_indices):
-        #     if joint_name in ee_chain:
-        #         p.resetJointState(pb_robot_id, joint_index, pb_q[i])
+        #     new_changes.append((joint_names[i], pb_q[i]))
+        #     p.resetJointState(pb_robot_id, joint_index, pb_q[i])
 
-        # print(new_changes)
+        print(new_changes)
     # print(f"ik {arm} took {time.time() - start_time} seconds")
 
 app = Vuer()
@@ -293,15 +282,14 @@ async def hand_handler(event, _):
         goal_pos_eel = np.multiply(rthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN)
 
         print(f"goal_pos_eel {goal_pos_eel}")
-        # print(f"goal_pos_eer {goal_pos_eer}")
-        # pinching with middle finger controls gripper
-        rmiddl_pos: NDArray = np.array(event.value["rightLandmarks"][MIDDLE_FINGER_TIP_ID])
-        rgrip_dist: float = np.linalg.norm(rthumb_pos - rmiddl_pos) / PINCH_DIST_OPENED
-        # print(f"right gripper at {rgrip_dist}")
-        _s: float = EE_S_MIN + rgrip_dist * ee_s_range
-        async with q_lock:
-            q["joint_left_arm_2_hand_1_slider_1"] = _s
-            q["joint_left_arm_2_hand_1_slider_2"] = _s
+        # # pinching with middle finger controls gripper
+        # rmiddl_pos: NDArray = np.array(event.value["rightLandmarks"][MIDDLE_FINGER_TIP_ID])
+        # rgrip_dist: float = np.linalg.norm(rthumb_pos - rmiddl_pos) / PINCH_DIST_OPENED
+        # # print(f"right gripper at {rgrip_dist}")
+        # _s: float = EE_S_MIN + rgrip_dist * ee_s_range
+        # async with q_lock:
+        #     q["joint_left_arm_2_hand_1_slider_1"] = _s
+        #     q["joint_left_arm_2_hand_1_slider_2"] = _s
     # left hand
     lindex_pos: NDArray = np.array(event.value["leftLandmarks"][INDEX_FINGER_TIP_ID])
     lthumb_pos: NDArray = np.array(event.value["leftLandmarks"][THUMB_FINGER_TIP_ID])
@@ -314,14 +302,14 @@ async def hand_handler(event, _):
         goal_pos_eer = np.multiply(lthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN)
 
         print(f"goal_pos_eer {goal_pos_eer}")
-        # pinching with middle finger controls gripper
-        lmiddl_pos: NDArray = np.array(event.value["leftLandmarks"][MIDDLE_FINGER_TIP_ID])
-        lgrip_dist: float = np.linalg.norm(lthumb_pos - lmiddl_pos) / PINCH_DIST_OPENED
-        _s: float = EE_S_MIN + lgrip_dist * ee_s_range
-        # print(f"left gripper at {lgrip_dist}")
-        async with q_lock:
-            q["joint_right_arm_1_hand_1_slider_1"] = _s
-            q["joint_right_arm_1_hand_1_slider_2"] = _s
+        # # pinching with middle finger controls gripper
+        # lmiddl_pos: NDArray = np.array(event.value["leftLandmarks"][MIDDLE_FINGER_TIP_ID])
+        # lgrip_dist: float = np.linalg.norm(lthumb_pos - lmiddl_pos) / PINCH_DIST_OPENED
+        # # _s: float = EE_S_MIN + lgrip_dist * ee_s_range
+        # # # print(f"left gripper at {lgrip_dist}")
+        # # async with q_lock:
+        # #     q["joint_right_arm_1_hand_1_slider_1"] = _s
+        # #     q["joint_right_arm_1_hand_1_slider_2"] = _s
 
 
 @app.spawn(start=True)
@@ -342,9 +330,8 @@ async def main(session: VuerSession):
     # standard position of left hand: [0.12057996 0.31537491 0.94372624]
     while True:
         await asyncio.gather(
-            # ik("left"),  # ~1ms
-            ik("right"),  # ~1ms
-            # TODO pfb30
+            ik("left"),  # ~1ms
+            # ik("right"),  # ~1ms
             asyncio.sleep(1 / MAX_FPS),  # ~16ms @ 60fps
             # update the joints
             # ved
