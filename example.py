@@ -16,7 +16,7 @@ URDF_WEB: str = (
     "https://raw.githubusercontent.com/kscalelabs/webstompy/pawel/new_stomp/urdf/stompy_new/upper_limb_assembly_5_dof_merged_simplified.urdf"
 )
 # local urdf is used for pybullet
-URDF_LOCAL: str = f"urdf/robot2/upper_limb_assembly_5_dof_merged_simplified.urdf"
+URDF_LOCAL: str = f"urdf/stompy_new/upper_limb_assembly_5_dof_merged_simplified.urdf"
 
 # starting positions for robot trunk relative to world frames
 START_POS_TRUNK_PYBULLET: NDArray = np.array([0, 0, 1.])
@@ -46,10 +46,10 @@ START_Q: Dict[str, float] = {
     "joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2": 0.0,
 
     # right arm (7dof)
-    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8": 2.42,
-    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8": 1.61,
-    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4": -1.31,
-    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4": 2.88,
+    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8": 4.42,
+    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8": 4.61,
+    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4": 4.31,
+    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4": 4.88,
     "joint_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4": -1.88,
     "joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_rmd_x4_24_mock_1_dof_x4": 0, # not working
 
@@ -116,7 +116,6 @@ else:
 p.setAdditionalSearchPath(pybullet_data.getDataPath())
 pb_robot_id = p.loadURDF(URDF_LOCAL, [0, 0, 0], useFixedBase=True)
 p.setGravity(0, 0, -9.81)
-
 
 pb_num_joints: int = p.getNumJoints(pb_robot_id)
 
@@ -240,18 +239,18 @@ def ik(arm: str) -> None:
         if joint_name in ee_chain:
             q[joint_name] = val
             new_changes.append((joint_name[-20:], val))
-            p.resetJointState(pb_robot_id, pb_q_map[joint_name], val)
+            # p.resetJointState(pb_robot_id, pb_q_map[joint_name], val)
 
             # take into account dynamics
-        #     p.setJointMotorControl2(bodyIndex=pb_robot_id,
-        #                             jointIndex=pb_q_map[joint_name],
-        #                             controlMode=p.POSITION_CONTROL,
-        #                             targetPosition=val,
-        #                             targetVelocity=0,
-        #                             force=200,
-        #                             positionGain=0.03,
-        #                             velocityGain=1)
-        # p.stepSimulation()
+            p.setJointMotorControl2(bodyIndex=pb_robot_id,
+                                    jointIndex=pb_q_map[joint_name],
+                                    controlMode=p.POSITION_CONTROL,
+                                    targetPosition=val,
+                                    targetVelocity=0,
+                                    force=200,
+                                    positionGain=0.03,
+                                    velocityGain=1)
+        p.stepSimulation()
         # # If you want to set the joint positions:
         # for i, joint_index in enumerate(movable_joint_indices):
         #     new_changes.append((joint_names[i], pb_q[i]))
@@ -263,8 +262,11 @@ def ik(arm: str) -> None:
 counter = 0
 while True:
     counter += 1
-    # time.sleep(0.16)
-    ik("left")
+    # time.sleep(0.016)
+    p.stepSimulation()
+    # ik("left")
     print(goal_pos_eel)
-    # if counter > 1000:
-    #     goal_pos_eel = np.array([-0.5, 0.2, 3.5])
+    if counter > 500:
+        goal_pos_eel = np.array([-0.5, 0.2, 3.5])
+    if counter > 1000:
+        goal_pos_eel = np.array([-0.5, 0.2, 0.5])
