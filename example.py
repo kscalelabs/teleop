@@ -260,7 +260,11 @@ def ik(arm: str) -> None:
     print(new_changes)
     # print(f"ik {arm} took {time.time() - start_time} seconds")
 
+counter = 0
 while True:
-    time.sleep(0.1)
+    counter += 1
+    # time.sleep(0.16)
     ik("left")
     print(goal_pos_eel)
+    # if counter > 1000:
+    #     goal_pos_eel = np.array([-0.5, 0.2, 3.5])

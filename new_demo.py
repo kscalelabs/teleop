@@ -1,5 +1,3 @@
-"""
-"""
 import asyncio
 from copy import deepcopy
 import os
@@ -21,26 +19,26 @@ URDF_WEB: str = (
 URDF_LOCAL: str = f"urdf/robot2/upper_limb_assembly_5_dof_merged_simplified.urdf"
 
 # starting positions for robot trunk relative to world frames
-START_POS_TRUNK_VUER: NDArray =  np.array([0, .5, 0]) #np.array([0, 1, 0])
-START_EUL_TRUNK_VUER: NDArray = np.array([-math.pi, 0, 0])
-START_POS_TRUNK_PYBULLET: NDArray = np.array([0, 0, 0.5])
-START_EUL_TRUNK_PYBULLET: NDArray = np.array([-math.pi/2, 0, 0])
+START_POS_TRUNK_VUER: NDArray =  np.array([0, 1., 0]) #np.array([0, 1, 0])
+START_EUL_TRUNK_VUER: NDArray = np.array([-math.pi, -3.8, 0])
+START_POS_TRUNK_PYBULLET: NDArray = np.array([0, 0, 1.])
+START_EUL_TRUNK_PYBULLET: NDArray = np.array([-math.pi/2, 0, -1.])
 
 # starting positions for robot end effectors are defined relative to robot trunk frame
 # which is right in the middle of the chest
 START_POS_EER_VUER: NDArray = np.array([-.2, .3, .2]) # np.array([-0.2, -0.2, -0.2])
-START_POS_EEL_VUER: NDArray = np.array([.02, .3, -.4]) #np.array([0.2, -0.2, -0.2])
-START_POS_EER_VUER += START_POS_TRUNK_VUER
-START_POS_EEL_VUER += START_POS_TRUNK_VUER
+START_POS_EEL_VUER: NDArray = np.array([-.5, 0.2 , 0]) #np.array([0.2, -0.2, -0.2])
+START_POS_EER_VUER += START_POS_TRUNK_PYBULLET
+START_POS_EEL_VUER += START_POS_TRUNK_PYBULLET
 
 # conversion between PyBullet and Vuer axes
-PB_TO_VUER_AXES: NDArray = np.array([0, 2, 1], dtype=np.uint8)
-PB_TO_VUER_AXES_SIGN: NDArray = np.array([-1, 1, 1], dtype=np.int8)
+VUER_TO_PB_AXES: NDArray = np.array([0, 2, 1], dtype=np.uint8)
+VUER_TO_PB_AXES_SIGN: NDArray = np.array([-1, 1, -1], dtype=np.int8)
 
 # starting joint positions (Q means "joint angles")
 START_Q: Dict[str, float] = {
     # torso
-    "joint_torso_1_rmd_x8_90_mock_1_dof_x8": 0.5,
+    "joint_torso_1_rmd_x8_90_mock_1_dof_x8": 0,
 
     # left arm (7dof)
     "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8": 2.42,
@@ -153,6 +151,18 @@ p.resetBasePositionAndOrientation(
     START_POS_TRUNK_PYBULLET,
     p.getQuaternionFromEuler(START_EUL_TRUNK_PYBULLET),
 )
+# Set the camera view
+target_position = START_POS_TRUNK_PYBULLET  # Use the robot's starting position as the target
+camera_distance = 2.0  # Distance from the target (adjust as needed)
+camera_yaw = 50  # Camera yaw angle in degrees
+camera_pitch = -35  # Camera pitch angle in degrees
+
+p.resetDebugVisualizerCamera(
+    cameraDistance=camera_distance,
+    cameraYaw=camera_yaw,
+    cameraPitch=camera_pitch,
+    cameraTargetPosition=target_position
+)
 
 print(f"\t number of joints: {pb_num_joints}")
 pb_joint_names: List[str] = [""] * pb_num_joints
@@ -168,9 +178,9 @@ for i in range(pb_num_joints):
     name = info[1].decode("utf-8")
     pb_joint_names[i] = name
     pb_child_link_names[i] = info[12].decode("utf-8")
-    pb_joint_lower_limit[i] = info[9]
-    pb_joint_upper_limit[i] = info[10]
-    pb_joint_ranges[i] = abs(info[10] - info[9])
+    pb_joint_lower_limit[i] = info[8]
+    pb_joint_upper_limit[i] = info[9]
+    pb_joint_ranges[i] = abs(info[9] - info[8])
     if name in START_Q:
         pb_start_q[i] = START_Q[name]
     if name in EER_CHAIN_ARM or name in EEL_CHAIN_ARM:
@@ -212,6 +222,16 @@ goal_pos_eer: NDArray = START_POS_EER_VUER
 goal_orn_eer: NDArray = p.getQuaternionFromEuler(START_EUL_TRUNK_VUER)
 goal_pos_eel: NDArray = START_POS_EEL_VUER
 goal_orn_eel: NDArray = p.getQuaternionFromEuler(START_EUL_TRUNK_VUER)
+# pfb30
+goal_orn_eel = p.getQuaternionFromEuler([0, 0, 0])
+# Define the point coordinates
+point_coords = [goal_pos_eel]
+# Define the color (RGB, values from 0 to 1)
+point_color = [[1, 0, 0]]  # Red color
+# Define the point size
+point_size = 20  # Adjust this value to make the point larger or smaller
+# Add the point to the simulation
+p.addUserDebugPoints(point_coords, point_color, pointSize=point_size)
 
 async def ik(arm: str) -> None:
     # start_time = time.time()
@@ -249,21 +269,24 @@ async def ik(arm: str) -> None:
                 new_changes.append((joint_name[-20:], val))
                 p.resetJointState(pb_robot_id, pb_q_map[joint_name], val)
 
-
+                # take into account dynamics
                 # p.setJointMotorControl2(bodyIndex=pb_robot_id,
                 #                         jointIndex=pb_q_map[joint_name],
                 #                         controlMode=p.POSITION_CONTROL,
                 #                         targetPosition=val,
                 #                         targetVelocity=0,
-                #                         force=500,
+                #                         force=200,
                 #                         positionGain=0.03,
                 #                         velocityGain=1)
+        # p.stepSimulation()
         # # If you want to set the joint positions:
         # for i, joint_index in enumerate(movable_joint_indices):
         #     new_changes.append((joint_names[i], pb_q[i]))
         #     p.resetJointState(pb_robot_id, joint_index, pb_q[i])
 
         print(new_changes)
+        
+        print(goal_pos_eel)
     # print(f"ik {arm} took {time.time() - start_time} seconds")
 
 app = Vuer()
@@ -279,8 +302,9 @@ async def hand_handler(event, _):
         # print("Pinch detected in right hand")
         # NOTE: right hand controls left arm and left gripper
         global goal_pos_eel
-        goal_pos_eel = np.multiply(rthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN)
-
+        goal_pos_eel = np.multiply(rthumb_pos[VUER_TO_PB_AXES], VUER_TO_PB_AXES_SIGN)
+        # pfb30
+        goal_pos_eel = np.array([-.5, 0.2, 1.])
         print(f"goal_pos_eel {goal_pos_eel}")
         # # pinching with middle finger controls gripper
         # rmiddl_pos: NDArray = np.array(event.value["rightLandmarks"][MIDDLE_FINGER_TIP_ID])
@@ -299,7 +323,7 @@ async def hand_handler(event, _):
         # print("Pinch detected in left hand")
         # NOTE: left hand controls right arm and right gripper
         global goal_pos_eer
-        goal_pos_eer = np.multiply(lthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN)
+        goal_pos_eer = np.multiply(lthumb_pos[VUER_TO_PB_AXES], VUER_TO_PB_AXES_SIGN)
 
         print(f"goal_pos_eer {goal_pos_eer}")
         # # pinching with middle finger controls gripper
