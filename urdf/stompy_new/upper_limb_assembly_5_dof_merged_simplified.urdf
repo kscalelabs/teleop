@@ -1,0 +1,430 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot name="upper_limb_assembly_5_dof">
+  <link name="fused_component_torso_1_hip_mount_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/fused_component_torso_1_hip_mount_1_simple.stl" />
+        </geometry>
+      <material name="fused_component_torso_1_hip_mount_1.stl_material">
+        <color rgba="0.8137254899999999 0.680392155 0.32549019430000004 1.0" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/fused_component_torso_1_hip_mount_1_collision_simple.stl" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="fused_component_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slide_2">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/fused_component_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slide_2_simple.stl" />
+        </geometry>
+      <material name="fused_component_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slide_2.stl_material">
+        <color rgba="0.42352941 0.5960784349999999 0.817647055 1.0" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/fused_component_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slide_2_collision_simple.stl" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="fused_component_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slide_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/fused_component_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slide_1_simple.stl" />
+        </geometry>
+      <material name="fused_component_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slide_1.stl_material">
+        <color rgba="0.42352941 0.5960784349999999 0.817647055 1.0" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/fused_component_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slide_1_collision_simple.stl" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="fused_component_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slide_2">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/fused_component_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slide_2_simple.stl" />
+        </geometry>
+      <material name="fused_component_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slide_2.stl_material">
+        <color rgba="0.42352941 0.5960784349999999 0.817647055 1.0" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/fused_component_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slide_2_collision_simple.stl" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="fused_component_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slide_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/fused_component_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slide_1_simple.stl" />
+        </geometry>
+      <material name="fused_component_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slide_1.stl_material">
+        <color rgba="0.42352941 0.5960784349999999 0.817647055 1.0" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/fused_component_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slide_1_collision_simple.stl" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="fused_component_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_outer_rmd_x4_24_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/fused_component_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_outer_rmd_x4_24_1_simple.stl" />
+        </geometry>
+      <material name="fused_component_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_outer_rmd_x4_24_1.stl_material">
+        <color rgba="0.68210784 0.78014706 0.838970585 1.0" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/fused_component_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_outer_rmd_x4_24_1_collision_simple.stl" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="fused_component_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_outer_rmd_x4_24_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/fused_component_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_outer_rmd_x4_24_1_simple.stl" />
+        </geometry>
+      <material name="fused_component_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_outer_rmd_x4_24_1.stl_material">
+        <color rgba="0.68210784 0.78014706 0.838970585 1.0" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/fused_component_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_outer_rmd_x4_24_1_collision_simple.stl" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="fused_component_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_inner_rmd_x4_24_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/fused_component_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_inner_rmd_x4_24_1_simple.stl" />
+        </geometry>
+      <material name="fused_component_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_inner_rmd_x4_24_1.stl_material">
+        <color rgba="0.7419117631250001 0.862009804375 0.930882355 1.0" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/fused_component_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_inner_rmd_x4_24_1_collision_simple.stl" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="fused_component_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_inner_rmd_x4_24_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/fused_component_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_inner_rmd_x4_24_1_simple.stl" />
+        </geometry>
+      <material name="fused_component_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_inner_rmd_x4_24_1.stl_material">
+        <color rgba="0.7419117631250001 0.862009804375 0.930882355 1.0" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/fused_component_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_inner_rmd_x4_24_1_collision_simple.stl" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="fused_component_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_outer_rmd_x4_24_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/fused_component_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_outer_rmd_x4_24_1_simple.stl" />
+        </geometry>
+      <material name="fused_component_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_outer_rmd_x4_24_1.stl_material">
+        <color rgba="0.76421568625 0.7828431375 0.82352941125 1.0" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/fused_component_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_outer_rmd_x4_24_1_collision_simple.stl" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="fused_component_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_1_outer_rmd_x4_24_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/fused_component_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_1_outer_rmd_x4_24_1_simple.stl" />
+        </geometry>
+      <material name="fused_component_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_1_outer_rmd_x4_24_1.stl_material">
+        <color rgba="0.76421568625 0.7828431375 0.82352941125 1.0" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/fused_component_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_1_outer_rmd_x4_24_1_collision_simple.stl" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="fused_component_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_inner_rmd_x8_90_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/fused_component_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_inner_rmd_x8_90_1_simple.stl" />
+        </geometry>
+      <material name="fused_component_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_inner_rmd_x8_90_1.stl_material">
+        <color rgba="0.7720588225 0.868137255625 0.8884803942875 1.0" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/fused_component_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_inner_rmd_x8_90_1_collision_simple.stl" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="fused_component_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_inner_rmd_x8_90_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/fused_component_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_inner_rmd_x8_90_1_simple.stl" />
+        </geometry>
+      <material name="fused_component_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_inner_rmd_x8_90_1.stl_material">
+        <color rgba="0.7720588225 0.868137255625 0.8884803942875 1.0" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/fused_component_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_inner_rmd_x8_90_1_collision_simple.stl" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="fused_component_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_inner_rmd_x8_90_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/fused_component_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_inner_rmd_x8_90_1_simple.stl" />
+        </geometry>
+      <material name="fused_component_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_inner_rmd_x8_90_1.stl_material">
+        <color rgba="0.51029412 0.51421568875 0.5068627460749999 1.0" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/fused_component_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_inner_rmd_x8_90_1_collision_simple.stl" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="fused_component_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_inner_rmd_x8_90_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/fused_component_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_inner_rmd_x8_90_1_simple.stl" />
+        </geometry>
+      <material name="fused_component_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_inner_rmd_x8_90_1.stl_material">
+        <color rgba="0.51029412 0.51421568875 0.5068627460749999 1.0" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/fused_component_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_inner_rmd_x8_90_1_collision_simple.stl" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="fused_component_torso_1_rmd_x8_90_mock_1_outer_rmd_x8_90_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/fused_component_torso_1_rmd_x8_90_mock_1_outer_rmd_x8_90_1_simple.stl" />
+        </geometry>
+      <material name="fused_component_torso_1_rmd_x8_90_mock_1_outer_rmd_x8_90_1.stl_material">
+        <color rgba="0.45441942377929684 0.4746017173339844 0.7023973639257812 1.0" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/fused_component_torso_1_rmd_x8_90_mock_1_outer_rmd_x8_90_1_collision_simple.stl" />
+        </geometry>
+      </collision>
+    </link>
+  <joint name="joint_torso_1_rmd_x8_90_mock_1_dof_x8" type="fixed">
+    <origin xyz="0.0 -0.016025876669872412 9.378214524402573e-11" rpy="-1.5707963339744877 -1.0471975999999992 4.6410127629847864e-08" />
+    <parent link="fused_component_torso_1_hip_mount_1" />
+    <child link="fused_component_torso_1_rmd_x8_90_mock_1_outer_rmd_x8_90_1" />
+    <limit effort="6" velocity="5" lower="-3.1415927" upper="3.1415927" />
+    <axis xyz="0 0 -1" />
+    </joint>
+  <joint name="joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8" type="revolute">
+    <origin xyz="3.632331079304939e-09 -0.15141101143947305 -0.3735403429607214" rpy="1.8604925928204135 0.0 0.0" />
+    <parent link="fused_component_torso_1_rmd_x8_90_mock_1_outer_rmd_x8_90_1" />
+    <child link="fused_component_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_inner_rmd_x8_90_1" />
+    <limit effort="6" velocity="5" lower="-3.1415927" upper="3.1415927" />
+    <axis xyz="0 0 1" />
+    </joint>
+  <joint name="joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8" type="fixed">
+    <origin xyz="-5.44053855182642e-10 0.15141103766358163 -0.37354032938585285" rpy="-1.8604924071795867 0.0 0.0" />
+    <parent link="fused_component_torso_1_rmd_x8_90_mock_1_outer_rmd_x8_90_1" />
+    <child link="fused_component_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_inner_rmd_x8_90_1" />
+    <limit effort="6" velocity="5" lower="-3.1415927" upper="3.1415927" />
+    <axis xyz="0 0 1" />
+    </joint>
+  <joint name="joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8" type="revolute">
+    <origin xyz="-0.019702076440961135 0.011374995762635065 0.08700000172996042" rpy="-0.5235986339744828 -1.5707962935875648 0.0" />
+    <parent link="fused_component_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_inner_rmd_x8_90_1" />
+    <child link="fused_component_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_inner_rmd_x8_90_1" />
+    <limit effort="6" velocity="5" lower="-4.97738438" upper="5.3058009" />
+    <axis xyz="0 0 1" />
+    </joint>
+  <joint name="joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8" type="fixed">
+    <origin xyz="-0.019702076440961093 0.01137499576263512 0.08700000172996053" rpy="-0.523598633974483 -1.5707962935875648 0.0" />
+    <parent link="fused_component_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_inner_rmd_x8_90_1" />
+    <child link="fused_component_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_inner_rmd_x8_90_1" />
+    <limit effort="6" velocity="5" lower="-4.97738438" upper="5.3058009" />
+    <axis xyz="0 0 1" />
+    </joint>
+  <joint name="joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4" type="revolute">
+    <origin xyz="-0.189799999116668 -1.9653886296211454e-09 -0.022750007803846672" rpy="4.641020723283873e-08 -1.5707962732050302 0.0" />
+    <parent link="fused_component_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_inner_rmd_x8_90_1" />
+    <child link="fused_component_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_1_outer_rmd_x4_24_1" />
+    <limit effort="6" velocity="5" lower="-3.1415927" upper="3.1415927" />
+    <axis xyz="0 0 1" />
+    </joint>
+  <joint name="joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4" type="fixed">
+    <origin xyz="-0.18979999911666812 -1.965388574109994e-09 -0.0227500078038467" rpy="4.641020723283873e-08 -1.5707962732050302 0.0" />
+    <parent link="fused_component_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_inner_rmd_x8_90_1" />
+    <child link="fused_component_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_outer_rmd_x4_24_1" />
+    <limit effort="6" velocity="5" lower="-3.1415927" upper="3.1415927" />
+    <axis xyz="0 0 1" />
+    </joint>
+  <joint name="joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4" type="revolute">
+    <origin xyz="-2.947438682010528e-10 0.00899999910323851 0.13400000146410204" rpy="-1.5707963071795863 0.0 3.1415926" />
+    <parent link="fused_component_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_1_outer_rmd_x4_24_1" />
+    <child link="fused_component_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_inner_rmd_x4_24_1" />
+    <limit effort="6" velocity="5" lower="-1.4486233" upper="5.4454273" />
+    <axis xyz="0 0 1" />
+    </joint>
+  <joint name="joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4" type="fixed">
+    <origin xyz="-2.9474395146777965e-10 0.008999999103238454 0.13400000146410207" rpy="-1.5707963071795863 0.0 3.1415926" />
+    <parent link="fused_component_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_outer_rmd_x4_24_1" />
+    <child link="fused_component_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_inner_rmd_x4_24_1" />
+    <limit effort="6" velocity="5" lower="1.4486233" upper="5.4454273" />
+    <axis xyz="0 0 1" />
+    </joint>
+  <joint name="joint_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4" type="revolute">
+    <origin xyz="0.04993608340191161 0.15600310803306197 0.00894414875571331" rpy="-1.5707961515083824 1.3613567732051028 -0.30979589355526016" />
+    <parent link="fused_component_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_inner_rmd_x4_24_1" />
+    <child link="fused_component_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_outer_rmd_x4_24_1" />
+    <limit effort="6" velocity="5" lower="-3.1415927" upper="3.1415927" />
+    <axis xyz="0 0 1" />
+    </joint>
+  <joint name="joint_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4" type="fixed">
+    <origin xyz="0.04993608340191158 0.15600310803306194 0.008944148755713255" rpy="-1.5707961515083815 1.3613567732051028 -0.3097958935552595" />
+    <parent link="fused_component_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_inner_rmd_x4_24_1" />
+    <child link="fused_component_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_outer_rmd_x4_24_1" />
+    <limit effort="6" velocity="5" lower="-3.1415927" upper="3.1415927" />
+    <axis xyz="0 0 1" />
+    </joint>
+  <link name="link_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_rmd_x4_24_mock_1_inner_rmd_x4_24_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_rmd_x4_24_mock_1_inner_rmd_x4_24_1_simple.stl" />
+        </geometry>
+      <material name="link_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_rmd_x4_24_mock_1_inner_rmd_x4_24_1_material">
+        <color rgba="0.76862745 0.88627451 0.95294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_rmd_x4_24_mock_1_inner_rmd_x4_24_1_simple.stl" />
+        </geometry>
+      </collision>
+    </link>
+  <joint name="joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_rmd_x4_24_mock_1_dof_x4" type="fixed">
+    <origin xyz="0.0 -4.176918561027421e-09 0.08999999901528571" rpy="-3.141592514359173 0.0 0.0" />
+    <parent link="fused_component_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_outer_rmd_x4_24_1" />
+    <child link="link_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_rmd_x4_24_mock_1_inner_rmd_x4_24_1" />
+    <limit effort="6" velocity="5" lower="-1.3264502" upper="1.3264502" />
+    <axis xyz="0 0 -1" />
+    </joint>
+  <link name="link_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_rmd_x4_24_mock_1_inner_rmd_x4_24_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_rmd_x4_24_mock_1_inner_rmd_x4_24_1_simple.stl" />
+        </geometry>
+      <material name="link_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_rmd_x4_24_mock_1_inner_rmd_x4_24_1_material">
+        <color rgba="0.76862745 0.88627451 0.95294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_rmd_x4_24_mock_1_inner_rmd_x4_24_1_simple.stl" />
+        </geometry>
+      </collision>
+    </link>
+  <joint name="joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_rmd_x4_24_mock_1_dof_x4" type="fixed">
+    <origin xyz="-8.326672684688674e-17 -4.176918588782996e-09 0.08999999901528571" rpy="-3.141592514359173 0.0 0.0" />
+    <parent link="fused_component_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_outer_rmd_x4_24_1" />
+    <child link="link_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_rmd_x4_24_mock_1_inner_rmd_x4_24_1" />
+    <limit effort="6" velocity="5" lower="-1.3264502" upper="1.3264502" />
+    <axis xyz="0 0 -1" />
+    </joint>
+  <joint name="joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1" type="fixed">
+    <origin xyz="-4.641020762141679e-09 0.09999999190141898 0.1669999949543925" rpy="-1.5707963999999996 1.5707963000000045 0.0" />
+    <parent link="fused_component_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_outer_rmd_x4_24_1" />
+    <child link="fused_component_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slide_1" />
+    <limit effort="6" velocity="5" lower="0.02" upper="0.03" />
+    <axis xyz="0 0 -1" />
+    </joint>
+  <joint name="joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2" type="fixed">
+    <origin xyz="4.641020623363801e-09 -0.10000000809858076 0.1669999949543925" rpy="1.5707963071795867 1.5707963000000045 0.0" />
+    <parent link="fused_component_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_outer_rmd_x4_24_1" />
+    <child link="fused_component_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slide_2" />
+    <limit effort="6" velocity="5" lower="0.01" upper=".03" />
+    <axis xyz="0 0 -1" />
+    <!-- <mimic joint="joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1" multiplier="1" offset="0" /> -->
+    </joint>
+  <joint name="joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_1" type="fixed">
+    <origin xyz="-4.641020873163981e-09 0.0999999919014189 0.16699999495439255" rpy="-1.5707963999999999 1.570796300000005 0.0" />
+    <parent link="fused_component_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_outer_rmd_x4_24_1" />
+    <child link="fused_component_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slide_1" />
+    <limit effort="6" velocity="5" lower="0" upper="0.051" />
+    <axis xyz="0 0 -1" />
+    </joint>
+  <joint name="joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_2" type="fixed">
+    <origin xyz="4.641020484585923e-09 -0.10000000809858081 0.16699999495439255" rpy="1.5707963071795863 1.570796300000005 0.0" />
+    <parent link="fused_component_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_outer_rmd_x4_24_1" />
+    <child link="fused_component_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slide_2" />
+    <limit effort="6" velocity="5" lower="-0.051" upper="0" />
+    <axis xyz="0 0 -1" />
+    <!-- <mimic joint="joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_1" multiplier="1" offset="0" /> -->
+    </joint>
+  </robot>
