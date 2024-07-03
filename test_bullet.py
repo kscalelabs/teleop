@@ -10,7 +10,7 @@ from numpy.typing import NDArray
 
 
 # local urdf is used for pybullet
-URDF_LOCAL: str = f"urdf/stompy_new/upper_limb_assembly_5_dof_merged_simplified.urdf"
+URDF_LOCAL: str = f"urdf/stompy_new/edited.urdf"
 
 # starting positions for robot trunk relative to world frames
 START_POS_TRUNK_PYBULLET: NDArray = np.array([0, 0, 1.])
@@ -39,7 +39,7 @@ START_Q: Dict[str, float] = {
 }   
 
 # link names are based on the URDF
-EEL_LINK: str = "fused_component_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slide_1"
+EEL_LINK: str = "fused_component_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_outer_rmd_x4_24_1"#"end_effector_link" #"fused_component_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slide_1"
 
 # kinematic chains for each arm and hand
 EEL_CHAIN_ARM: List[str] = [
@@ -51,7 +51,8 @@ EEL_CHAIN_ARM: List[str] = [
 ]
 EEL_CHAIN_HAND: List[str] = [
     'joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1', 
-    'joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2'
+    'joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2',
+    #"end_effector_link"
 ]
 
 # PyBullet IK will output a 37dof list in this exact order
@@ -64,7 +65,8 @@ IK_Q_LIST: List[str] = [
     'joint_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4',
     # slider
     'joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1', 
-    'joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2'
+    'joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2',
+    #"end_effector_link"
 ]
 
 # PyBullet inverse kinematics (IK) params
@@ -86,6 +88,7 @@ else:
 p.setAdditionalSearchPath(pybullet_data.getDataPath())
 pb_robot_id = p.loadURDF(URDF_LOCAL, [0, 0, 0], useFixedBase=True)
 p.setGravity(0, 0, -9.81)
+
 
 pb_num_joints: int = p.getNumJoints(pb_robot_id)
 
@@ -175,55 +178,76 @@ point_size = 20
 p.addUserDebugPoints(point_coords, point_color, pointSize=point_size)
 
 def ik() -> None:
-    global goal_pos_eel, goal_orn_eel
+    global goal_pos_eel, goal_orn_eel, q
     ee_id = pb_eel_id
     ee_chain = EEL_CHAIN_ARM
     pos = goal_pos_eel
     orn = goal_orn_eel
 
-    pb_q = p.calculateInverseKinematics(
-        pb_robot_id,
-        ee_id,
-        pos,
-        orn,
-        pb_joint_lower_limit,
-        pb_joint_upper_limit,
-        pb_joint_ranges,
-        rest_pose,
-    )
+    best_error = float('inf')
+    best_solution = None
 
-    for i, val in enumerate(pb_q):
-        joint_name = IK_Q_LIST[i]
-        if joint_name in ee_chain:
-            p.resetJointState(pb_robot_id, pb_q_map[joint_name], val)
+    for attempt in range(10):  # Try 10 times
+        # Perturb the initial guess slightly
+        initial_guess = [p.getJointState(pb_robot_id, i)[0] + np.random.uniform(-0.1, 0.1) for i in range(p.getNumJoints(pb_robot_id))]
 
-    global q
+        pb_q = p.calculateInverseKinematics(
+            pb_robot_id,
+            ee_id,
+            pos,
+            orn,
+            lowerLimits=pb_joint_lower_limit,
+            upperLimits=pb_joint_upper_limit,
+            jointRanges=pb_joint_ranges,
+            restPoses=initial_guess,
+            maxNumIterations=100,
+            residualThreshold=1e-5
+        )
+
+        # Apply the IK solution temporarily
+        for i, joint_name in enumerate(IK_Q_LIST):
+            if joint_name in ee_chain:
+                p.resetJointState(pb_robot_id, pb_q_map[joint_name], pb_q[i])
+
+        # Check the error
+        actual_pos, _ = p.getLinkState(pb_robot_id, ee_id)[:2]
+        error = np.linalg.norm(np.array(pos) - np.array(actual_pos))
+
+        if error < best_error:
+            best_error = error
+            best_solution = pb_q
+
+        print(f"Attempt {attempt + 1}: Error = {error}")
+
+    # Apply the best solution found
     new_changes = []
-    for i, val in enumerate(pb_q):
-        joint_name = IK_Q_LIST[i]
+    for i, joint_name in enumerate(IK_Q_LIST):
         if joint_name in ee_chain:
-            q[joint_name] = val
-            new_changes.append((joint_name[-20:], val))
-            p.resetJointState(pb_robot_id, pb_q_map[joint_name], val)
+            q[joint_name] = best_solution[i]
+            new_changes.append((joint_name[-20:], best_solution[i]))
+            p.resetJointState(pb_robot_id, pb_q_map[joint_name], best_solution[i])
 
-            # # take into account dynamics
-            # p.setJointMotorControl2(bodyIndex=pb_robot_id,
-            #                         jointIndex=pb_q_map[joint_name],
-            #                         controlMode=p.POSITION_CONTROL,
-            #                         targetPosition=val,
-            #                         targetVelocity=0,
-            #                         force=500,
-            #                         positionGain=0.03,
-            #                         velocityGain=1)
-        # p.stepSimulation()
+    print(f"Best solution found with error: {best_error}")
+    print(new_changes)
+    print(f"Final position: {p.getLinkState(pb_robot_id, ee_id)[0]}")
+    print(f"Goal position: {goal_pos_eel}")
+
+    # Visualize the error
+    actual_pos, _ = p.getLinkState(pb_robot_id, ee_id)[:2]
+    p.addUserDebugLine(actual_pos, goal_pos_eel, [1, 0, 0], 2, 0)
+
+    p.stepSimulation()
+
 
 
 counter = 0
 while True:
     counter += 1
-    time.sleep(0.0005)
+    time.sleep(1)
     p.stepSimulation()
     ik()
-    if counter == 1000:
-        goal_pos_eel = np.array([0., 0.2 , 0.2])
-        p.addUserDebugPoints([goal_pos_eel], point_color, pointSize=point_size)
+    actual_pos, _ = p.getLinkState(pb_robot_id, pb_eel_id)[:2]
+    p.addUserDebugLine(actual_pos, goal_pos_eel, [1, 0, 0], 2, 0)
+    # if counter == 1000:
+    #     goal_pos_eel = np.array([0., 0.2 , 0.2])
+        #p.addUserDebugPoints([goal_pos_eel], point_color, pointSize=point_size)
