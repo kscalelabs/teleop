@@ -10,13 +10,14 @@ import pybullet as p
 import pybullet_data
 from vuer import Vuer, VuerSession
 from vuer.schemas import Hands, PointLight, Urdf
+import random
 
 # web urdf is used for vuer
 URDF_WEB: str = (
     "https://raw.githubusercontent.com/kscalelabs/webstompy/pawel/new_stomp/urdf/stompy_new/upper_limb_assembly_5_dof_merged_simplified.urdf"
 )
 # local urdf is used for pybullet
-URDF_LOCAL: str = f"urdf/stompy_new/Edited2.urdf"
+URDF_LOCAL: str = f"urdf/stompy_new/multiarm.urdf"
 
 # starting positions for robot trunk relative to world frames
 START_POS_TRUNK_VUER: NDArray = np.array([0, 1., 0])
@@ -27,7 +28,7 @@ VIEWER_TO_PYBULLET_SCALE = 1.0  # Adjust this value if needed
 
 # starting positions for robot end effectors are defined relative to robot trunk frame
 START_POS_EER_VUER: NDArray = np.array([-.2, .3, .2]) + START_POS_TRUNK_PYBULLET
-START_POS_EEL_VUER: NDArray = np.array([0.3, -0.1, .3]) + START_POS_TRUNK_PYBULLET
+START_POS_EEL_VUER: NDArray = np.array([0.0, 0.2, -.3]) + START_POS_TRUNK_PYBULLET
 
 # conversion between PyBullet and Vuer axes
 VUER_TO_PB_AXES: NDArray = np.array([2, 0, 1], dtype=np.uint8)
@@ -36,11 +37,11 @@ VUER_TO_PB_AXES_SIGN: NDArray = np.array([1, 1, 1], dtype=np.int8)
 # starting joint positions (Q means "joint angles")
 START_Q: Dict[str, float] = {
     # torso
-    "joint_torso_1_rmd_x8_90_mock_1_dof_x8": 0,
+    #"joint_torso_1_rmd_x8_90_mock_1_dof_x8": 0,
 
     # left arm (5dof)
-    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8": 2.61,
-    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8": -1.38,
+    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8": 0,
+    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8": 4.2,
     "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4": 0,
     "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4": 2.83,
     "joint_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4": 1.32,
@@ -51,8 +52,8 @@ START_Q: Dict[str, float] = {
 }   
 
 # link names are based on the URDF
-EEL_LINK: str = "end_effector_link" #need to make left and right version
-EER_LINK: str = "end_effector_link" 
+EEL_LINK: str = "left_end_effector_link" #need to make left and right version
+EER_LINK: str = "left_end_effector_link" 
 
 # kinematic chains for each arm and hand
 EEL_CHAIN_ARM: List[str] = [
@@ -186,6 +187,43 @@ goal_orn_eel: NDArray = p.getQuaternionFromEuler([0, 0, 0])
 # Add a red point at the goal position
 p.addUserDebugPoints([goal_pos_eel], [[1, 0, 0]], pointSize=20)
 
+
+
+def is_state_valid(robot_id, joint_indices, joint_values):
+    # Save current state of all joints
+    original_states = [p.getJointState(robot_id, idx)[0] for idx in range(p.getNumJoints(robot_id))]
+    
+    # Set to test state for specified joints
+    for idx, value in zip(joint_indices, joint_values):
+        p.resetJointState(robot_id, idx, value)
+    
+    # Check for collisions
+    p.performCollisionDetection()
+    collision = False
+    for i in range(p.getNumJoints(robot_id)):
+        for j in range(i+1, p.getNumJoints(robot_id)):
+            contact_points = p.getContactPoints(robot_id, robot_id, linkIndexA=i, linkIndexB=j)
+            if len(contact_points) > 0:
+                collision = True
+                break
+        if collision:
+            break
+    
+    # Restore original state
+    for idx, state in enumerate(original_states):
+        p.resetJointState(robot_id, idx, state)
+    
+    return not collision
+
+
+def setup_collision_filter():
+    # Disable collisions between adjacent links
+    for i in range(p.getNumJoints(pb_robot_id)):
+        p.setCollisionFilterPair(pb_robot_id, pb_robot_id, i, i-1, 0)
+    p.setCollisionFilterGroupMask(pb_robot_id, -1, 1, 1)
+
+
+
 async def ik(arm: str, max_attempts=20, max_iterations=100) -> float:
     global goal_pos_eer, goal_orn_eer, goal_pos_eel, goal_orn_eel, q
 
@@ -198,29 +236,30 @@ async def ik(arm: str, max_attempts=20, max_iterations=100) -> float:
         ee_chain = EEL_CHAIN_ARM
         target_pos = goal_pos_eel
 
+    joint_indices = [pb_q_map[joint] for joint in ee_chain]
+
     best_error = float('inf')
     best_solution = None
 
     for attempt in range(max_attempts):
-        initial_guess = [np.random.uniform(pb_joint_lower_limit[pb_q_map[joint]], 
-                                           pb_joint_upper_limit[pb_q_map[joint]]) 
-                         for joint in ee_chain]
-
         solution = p.calculateInverseKinematics(
             pb_robot_id,
             ee_id,
             target_pos,
-            lowerLimits=[pb_joint_lower_limit[pb_q_map[joint]] for joint in ee_chain],
-            upperLimits=[pb_joint_upper_limit[pb_q_map[joint]] for joint in ee_chain],
-            jointRanges=[pb_joint_ranges[pb_q_map[joint]] for joint in ee_chain],
-            restPoses=initial_guess,
             maxNumIterations=max_iterations,
             residualThreshold=1e-5
         )
-
+        
         # Apply the solution
-        for i, joint in enumerate(ee_chain):
-            p.resetJointState(pb_robot_id, pb_q_map[joint], solution[i])
+        for idx, value in zip(joint_indices, solution[:len(joint_indices)]):
+            p.resetJointState(pb_robot_id, idx, value)
+        
+        # Check for collisions
+        p.performCollisionDetection()
+        if len(p.getContactPoints(pb_robot_id, pb_robot_id)) > 0:
+            print(f"Attempt {attempt + 1}: Collision detected, retrying...")
+            continue
+
         p.stepSimulation()
 
         # Check the error
@@ -229,18 +268,18 @@ async def ik(arm: str, max_attempts=20, max_iterations=100) -> float:
 
         if error < best_error:
             best_error = error
-            best_solution = solution
+            best_solution = solution[:len(joint_indices)]
 
         print(f"Attempt {attempt + 1}: Error = {error}")
 
         if error < 0.01:  # 1cm tolerance
             break
 
-    if best_solution:
+    if best_solution is not None:
         async with q_lock:
-            for i, joint in enumerate(ee_chain):
-                q[joint] = best_solution[i]
-                p.resetJointState(pb_robot_id, pb_q_map[joint], best_solution[i])
+            for joint, value in zip(ee_chain, best_solution):
+                q[joint] = value
+                p.resetJointState(pb_robot_id, pb_q_map[joint], value)
 
     print(f"Best solution found with error: {best_error}")
     print(f"Final position: {p.getLinkState(pb_robot_id, ee_id)[0]}")
@@ -253,8 +292,52 @@ async def ik(arm: str, max_attempts=20, max_iterations=100) -> float:
     p.stepSimulation()
 
     return best_error
-
 app = Vuer()
+def update_viewer_goal(session: VuerSession, goal_pos: NDArray):
+    # Adjust the conversion to account for the new rotation
+    viewer_pos = np.array([
+        goal_pos[1] - VIEWER_POS_TRUNK[0],
+        (goal_pos[2] - VIEWER_POS_TRUNK[1]),
+        -(goal_pos[0] - VIEWER_POS_TRUNK[2])
+    ])
+
+    
+    # Create a small sphere URDF to represent the goal
+    sphere_urdf = f"""
+    <?xml version="1.0"?>
+    <robot name="sphere">
+      <link name="sphere_link">
+        <visual>
+          <geometry>
+            <sphere radius="0.05"/>
+          </geometry>
+          <material>
+            <color rgba="1 0 0 1"/>
+          </material>
+        </visual>
+      </link>
+    </robot>
+    """
+    
+    session.upsert @ Urdf(
+        urdf=sphere_urdf,
+        position=viewer_pos,
+        key="goal_marker"
+    )
+
+# Convert PyBullet position to viewer coordinates
+VIEWER_POS_TRUNK = np.array([
+    START_POS_TRUNK_PYBULLET[1],
+    START_POS_TRUNK_PYBULLET[2],
+    -START_POS_TRUNK_PYBULLET[0]
+])
+
+# Convert PyBullet orientation to viewer coordinates
+VIEWER_ROT_TRUNK = np.array([
+    START_EUL_TRUNK_PYBULLET[1] + math.pi,
+    -START_EUL_TRUNK_PYBULLET[2],
+    START_EUL_TRUNK_PYBULLET[0] + math.pi/2
+])
 
 @app.add_handler("HAND_MOVE")
 async def hand_handler(event, _):
@@ -266,11 +349,12 @@ async def hand_handler(event, _):
     if rpinch_dist < PINCH_DIST_CLOSED:
         global goal_pos_eel
         # Convert from viewer coordinates to PyBullet coordinates
+        # Convert from viewer coordinates to PyBullet coordinates
         pybullet_pos = np.array([
-            -rthumb_pos[2],
-            rthumb_pos[0],
-            rthumb_pos[1]
-        ]) * VIEWER_TO_PYBULLET_SCALE + START_POS_TRUNK_PYBULLET
+            -(rthumb_pos[2] - VIEWER_POS_TRUNK[2]),
+            rthumb_pos[0] + VIEWER_POS_TRUNK[0],
+            -(rthumb_pos[1] - VIEWER_POS_TRUNK[1])
+        ]) * VIEWER_TO_PYBULLET_SCALE
         goal_pos_eel = pybullet_pos
         print(f"New goal_pos_eel: {goal_pos_eel}")
         
@@ -284,12 +368,15 @@ async def hand_handler(event, _):
     lpinch_dist: NDArray = np.linalg.norm(lindex_pos - lthumb_pos)
     # You can add left hand control logic here if needed
 
-# Convert PyBullet position and orientation to viewer coordinates
-VIEWER_POS_TRUNK = np.array([START_POS_TRUNK_PYBULLET[1], START_POS_TRUNK_PYBULLET[2], -START_POS_TRUNK_PYBULLET[0]])
-VIEWER_ROT_TRUNK = np.array([START_EUL_TRUNK_PYBULLET[1], START_EUL_TRUNK_PYBULLET[2], -START_EUL_TRUNK_PYBULLET[0]])
+
+
 
 @app.spawn(start=True)
 async def main(session: VuerSession):
+    global q
+    
+    setup_collision_filter()
+    
     session.upsert @ PointLight(intensity=VUER_LIGHT_INTENSITY, position=VUER_LIGHT_POS)
     session.upsert @ Hands(fps=HAND_FPS, stream=True, key="hands")
     await asyncio.sleep(0.1)
@@ -300,14 +387,20 @@ async def main(session: VuerSession):
         rotation=VIEWER_ROT_TRUNK,
         key="robot",
     )
-    global q
+    
     counter = 0
     while True:
         counter += 1
         error = await ik("left")
         await asyncio.sleep(1 / MAX_FPS)
         
+        # Update joint values from PyBullet
         async with q_lock:
+            for idx in range(p.getNumJoints(pb_robot_id)):
+                joint_name = pb_joint_names[idx]
+                joint_state = p.getJointState(pb_robot_id, idx)
+                q[joint_name] = joint_state[0]
+            print(q)
             session.upsert @ Urdf(
                 src=URDF_WEB,
                 jointValues=q,
@@ -322,5 +415,8 @@ async def main(session: VuerSession):
         # Visualize the current position and the target
         actual_pos, _ = p.getLinkState(pb_robot_id, pb_eel_id)[:2]
         p.addUserDebugLine(actual_pos, goal_pos_eel, [1, 0, 0], 2, 0)
+        update_viewer_goal(session, goal_pos_eel)
+
+
 if __name__ == "__main__":
     app.run()
