@@ -16,27 +16,22 @@ URDF_LOCAL: str = "urdf/stompy_new/multiarm.urdf"
 # Robot configuration
 START_POS_TRUNK_PYBULLET: NDArray = np.array([0, 0, 1.])
 START_EUL_TRUNK_PYBULLET: NDArray = np.array([-math.pi/2, 0, -1.])
+START_POS_TRUNK_VUER: NDArray = np.array([0, 1., 0])
+START_EUL_TRUNK_VUER: NDArray = np.array([-math.pi, -3.8, 0])
+
+# Starting positions for robot end effectors
 START_POS_EEL: NDArray = np.array([0.3, -0.1, .3]) + START_POS_TRUNK_PYBULLET
 START_POS_EER: NDArray = np.array([-0.3, -0.1, .3]) + START_POS_TRUNK_PYBULLET
 
-# Vuer-specific configurations
-START_POS_TRUNK_VUER: NDArray = np.array([0, 1., 0])
-START_EUL_TRUNK_VUER: NDArray = np.array([-math.pi, -3.8, 0])
-VUER_TO_PB_AXES: NDArray = np.array([2, 0, 1], dtype=np.uint8)
-VUER_TO_PB_AXES_SIGN: NDArray = np.array([1, 1, 1], dtype=np.int8)
-
-# Update the START_Q dictionary
+# Starting joint positions
 START_Q: Dict[str, float] = {
-    #"joint_torso_1_rmd_x8_90_mock_1_dof_x8": 0,
-    # Left arm
-    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8": -2.61,
-    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8": 1.38,
+    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8": 0,
+    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8": 4.2,
     "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4": 0,
-    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4": -2.83,
-    "joint_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4": -1.32,
-    # Right arm (mirrored)
-    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8": -2.61,
-    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8": 1.38,
+    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4": 2.83,
+    "joint_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4": 1.32,
+    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8": 0,
+    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8": -4.2,
     "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4": 0,
     "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4": -2.83,
     "joint_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4": -1.32,
@@ -46,7 +41,7 @@ START_Q: Dict[str, float] = {
 EEL_LINK: str = "left_end_effector_link"
 EER_LINK: str = "right_end_effector_link"
 
-# Kinematic chains
+# Kinematic chains for each arm
 EEL_CHAIN_ARM: List[str] = [
     'joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8',
     'joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8',
@@ -113,32 +108,31 @@ p.resetDebugVisualizerCamera(
     cameraTargetPosition=START_POS_TRUNK_PYBULLET
 )
 
-# Initialize global variables
-q_lock = asyncio.Lock()
-q = deepcopy(START_Q)
-goal_pos_eel: NDArray = START_POS_EEL
-goal_pos_eer: NDArray = START_POS_EER
-goal_orn_eel: NDArray = p.getQuaternionFromEuler([0, 0, 0])
-goal_orn_eer: NDArray = p.getQuaternionFromEuler([0, 0, 0])
-
-# Add goal position markers
-p.addUserDebugPoints([goal_pos_eel], [[1, 0, 0]], pointSize=20)
-p.addUserDebugPoints([goal_pos_eer], [[0, 0, 1]], pointSize=20)
-
 # Vuer rendering params
 MAX_FPS: int = 60
 VUER_LIGHT_POS: NDArray = np.array([0, 2, 2])
 VUER_LIGHT_INTENSITY: float = 10.0
 
-# Vuer hand tracking and pinch detection params
+# Vuer hand tracking params
 HAND_FPS: int = 30
-INDEX_FINGER_TIP_ID: int = 9
+INDEX_FINGER_TIP_ID: int = 8
 THUMB_FINGER_TIP_ID: int = 4
-MIDDLE_FINGER_TIP_ID: int = 14
-PINCH_DIST_OPENED: float = 0.10  # 10cm
-PINCH_DIST_CLOSED: float = 0.01  # 1cm
+PINCH_DIST_CLOSED: float = 0.05
 
+# Global variables
+q_lock = asyncio.Lock()
+q = deepcopy(START_Q)
+goal_pos_eel: NDArray = START_POS_EEL
+goal_pos_eer: NDArray = START_POS_EER
 
+# Add goal position markers
+p.addUserDebugPoints([goal_pos_eel], [[1, 0, 0]], pointSize=20)
+p.addUserDebugPoints([goal_pos_eer], [[0, 0, 1]], pointSize=20)
+
+def visualize_target_and_actual(target_pos, actual_pos, color):
+    p.addUserDebugPoints([target_pos], [color], pointSize=6)
+    p.addUserDebugPoints([actual_pos], [[1, 1, 1]], pointSize=4)  # White for actual position
+    p.addUserDebugLine(target_pos, actual_pos, color, lineWidth=2)
 
 async def ik(arm: str, max_attempts=20, max_iterations=100) -> float:
     global goal_pos_eel, goal_pos_eer, q
@@ -147,40 +141,39 @@ async def ik(arm: str, max_attempts=20, max_iterations=100) -> float:
         ee_id = pb_eer_id
         ee_chain = EER_CHAIN_ARM
         target_pos = goal_pos_eer
-        q_subset = {joint: q[joint] for joint in EER_CHAIN_ARM}
+        color = [0, 0, 1]  # Blue for right arm
     else:
         ee_id = pb_eel_id
         ee_chain = EEL_CHAIN_ARM
         target_pos = goal_pos_eel
-        q_subset = {joint: q[joint] for joint in EEL_CHAIN_ARM}
+        color = [1, 0, 0]  # Red for left arm
 
     joint_indices = [pb_q_map[joint] for joint in ee_chain]
     
     best_error = float('inf')
     best_solution = None
 
-    # Store initial state
-    initial_states = [p.getJointState(pb_robot_id, idx)[0] for idx in range(p.getNumJoints(pb_robot_id))]
+    # Prepare joint limit arrays for IK calculation
+    lower_limits = [pb_joint_lower_limit[idx] for idx in joint_indices]
+    upper_limits = [pb_joint_upper_limit[idx] for idx in joint_indices]
+    joint_ranges = [upper - lower for upper, lower in zip(upper_limits, lower_limits)]
 
     for attempt in range(max_attempts):
-        # Reset to initial state before each attempt
-        for idx, state in enumerate(initial_states):
-            p.resetJointState(pb_robot_id, idx, state)
-
         solution = p.calculateInverseKinematics(
             pb_robot_id,
             ee_id,
             target_pos,
+            lowerLimits=lower_limits,
+            upperLimits=upper_limits,
+            jointRanges=joint_ranges,
+            restPoses=[q[joint_name] for joint_name in ee_chain],
             maxNumIterations=max_iterations,
             residualThreshold=1e-5
         )
 
-        # Apply the solution only to the current arm's joints
+        # Apply the solution
         for i, idx in enumerate(joint_indices):
-            joint_value = solution[i]
-            joint_value = max(pb_joint_lower_limit[idx], min(pb_joint_upper_limit[idx], joint_value))
-            p.resetJointState(pb_robot_id, idx, joint_value)
-        
+            p.resetJointState(pb_robot_id, idx, solution[i])
         p.stepSimulation()
 
         actual_pos, _ = p.getLinkState(pb_robot_id, ee_id)[:2]
@@ -188,45 +181,85 @@ async def ik(arm: str, max_attempts=20, max_iterations=100) -> float:
 
         if error < best_error:
             best_error = error
-            best_solution = [solution[i] for i in range(len(joint_indices))]
+            best_solution = solution[:len(joint_indices)]
 
         if error < 0.01:  # 1cm tolerance
             break
 
-    # Apply the best solution
     if best_solution:
         for i, joint in enumerate(ee_chain):
-            q_subset[joint] = best_solution[i]
+            q[joint] = best_solution[i]
             p.resetJointState(pb_robot_id, pb_q_map[joint], best_solution[i])
 
-    # Update global q only for the current arm
-    q.update(q_subset)
-
-    print(f"\n{arm.capitalize()} arm results:")
-    print(f"  Best error: {best_error}")
-    print(f"  Final position: {p.getLinkState(pb_robot_id, ee_id)[0]}")
-    print(f"  Goal position: {target_pos}")
+    final_pos, _ = p.getLinkState(pb_robot_id, ee_id)[:2]
     
-    print(f"  Joint values:")
-    for joint, value in q_subset.items():
-        print(f"    {joint}: {value}")
+    # Visualize target and actual positions
+    visualize_target_and_actual(target_pos, final_pos, color)
 
-    # Visualize the error
-    actual_pos, _ = p.getLinkState(pb_robot_id, ee_id)[:2]
-    color = [0, 0, 1] if arm == "right" else [1, 0, 0]
-    p.addUserDebugLine(actual_pos, target_pos, color, 2, 0)
+    p.stepSimulation()
 
     return best_error
 
+def visualize_target_and_actual(target_pos, actual_pos, color):
+    p.addUserDebugPoints([target_pos], [color], pointSize=6)
+    p.addUserDebugPoints([actual_pos], [[1, 1, 1]], pointSize=4)  # White for actual position
+    p.addUserDebugLine(target_pos, actual_pos, color, lineWidth=2)
+
+def verify_arm_config(arm: str):
+    if arm == "right":
+        ee_id = pb_eer_id
+        ee_chain = EER_CHAIN_ARM
+        ee_link = EER_LINK
+    else:
+        ee_id = pb_eel_id
+        ee_chain = EEL_CHAIN_ARM
+        ee_link = EEL_LINK
+
+    print(f"\nVerifying {arm} arm configuration:")
+    for joint in ee_chain:
+        idx = pb_q_map[joint]
+        print(f"Joint: {joint}")
+        print(f"  Index: {idx}")
+        print(f"  Lower limit: {pb_joint_lower_limit[idx]}")
+        print(f"  Upper limit: {pb_joint_upper_limit[idx]}")
+        print(f"  Current value: {p.getJointState(pb_robot_id, idx)[0]}")
+    
+    print(f"\n{arm.capitalize()} arm end effector:")
+    print(f"  Link name: {ee_link}")
+    print(f"  Link index: {ee_id}")
+    ee_state = p.getLinkState(pb_robot_id, ee_id)
+    print(f"  Current position: {ee_state[0]}")
+    print(f"  Current orientation: {ee_state[1]}")
+
+app = Vuer()
+
+@app.add_handler("HAND_MOVE")
+async def hand_handler(event, _):
+    global goal_pos_eer, goal_pos_eel
+    
+    # right hand
+    rthumb_pos = np.array(event.value["rightLandmarks"][THUMB_FINGER_TIP_ID])
+    rpinch_dist = np.linalg.norm(np.array(event.value["rightLandmarks"][INDEX_FINGER_TIP_ID]) - rthumb_pos)
+    if rpinch_dist < PINCH_DIST_CLOSED:
+        goal_pos_eer = np.array([rthumb_pos[2], -rthumb_pos[0], rthumb_pos[1]]) + START_POS_TRUNK_PYBULLET
+        print(f"New goal_pos_eer: {goal_pos_eer}")
+        p.addUserDebugPoints([goal_pos_eer], [[0, 0, 1]], pointSize=20)
+
+    # left hand
+    lthumb_pos = np.array(event.value["leftLandmarks"][THUMB_FINGER_TIP_ID])
+    lpinch_dist = np.linalg.norm(np.array(event.value["leftLandmarks"][INDEX_FINGER_TIP_ID]) - lthumb_pos)
+    if lpinch_dist < PINCH_DIST_CLOSED:
+        goal_pos_eel = np.array([lthumb_pos[2], -lthumb_pos[0], lthumb_pos[1]]) + START_POS_TRUNK_PYBULLET
+        print(f"New goal_pos_eel: {goal_pos_eel}")
+        p.addUserDebugPoints([goal_pos_eel], [[1, 0, 0]], pointSize=20)
+
 def update_viewer_goal(session: VuerSession, goal_pos: NDArray, key: str):
-    # Convert PyBullet coordinates to Vuer coordinates
     viewer_pos = np.array([
         goal_pos[1] - START_POS_TRUNK_VUER[0],
         (goal_pos[2] - START_POS_TRUNK_VUER[1]),
         -(goal_pos[0] - START_POS_TRUNK_VUER[2])
     ])
     
-    # Create a small sphere URDF to represent the goal
     sphere_urdf = f"""
     <?xml version="1.0"?>
     <robot name="sphere">
@@ -243,38 +276,19 @@ def update_viewer_goal(session: VuerSession, goal_pos: NDArray, key: str):
     </robot>
     """
     
-    # Update or create the goal marker in the Vuer scene
     session.upsert @ Urdf(
         urdf=sphere_urdf,
         position=viewer_pos,
         key=key
     )
 
-app = Vuer()
-
-@app.add_handler("HAND_MOVE")
-async def hand_handler(event, _):
-    global goal_pos_eer, goal_pos_eel
-    
-    base_pos, _ = p.getBasePositionAndOrientation(pb_robot_id)
-    
-    # right hand
-    rthumb_pos = np.array(event.value["rightLandmarks"][THUMB_FINGER_TIP_ID])
-    rpinch_dist = np.linalg.norm(np.array(event.value["rightLandmarks"][INDEX_FINGER_TIP_ID]) - rthumb_pos)
-    if rpinch_dist < PINCH_DIST_CLOSED:
-        goal_pos_eer = np.array([rthumb_pos[2], -rthumb_pos[0], rthumb_pos[1]]) + base_pos
-        p.addUserDebugPoints([goal_pos_eer], [[0, 0, 1]], pointSize=20)
-
-    # left hand
-    lthumb_pos = np.array(event.value["leftLandmarks"][THUMB_FINGER_TIP_ID])
-    lpinch_dist = np.linalg.norm(np.array(event.value["leftLandmarks"][INDEX_FINGER_TIP_ID]) - lthumb_pos)
-    if lpinch_dist < PINCH_DIST_CLOSED:
-        goal_pos_eel = np.array([lthumb_pos[2], -lthumb_pos[0], lthumb_pos[1]]) + base_pos
-        p.addUserDebugPoints([goal_pos_eel], [[1, 0, 0]], pointSize=20)
-
 @app.spawn(start=True)
 async def main(session: VuerSession):
     global q
+    
+    # Verify arm configurations before starting
+    verify_arm_config("left")
+    verify_arm_config("right")
     
     session.upsert @ PointLight(intensity=VUER_LIGHT_INTENSITY, position=VUER_LIGHT_POS)
     session.upsert @ Hands(fps=HAND_FPS, stream=True, key="hands")
@@ -290,22 +304,17 @@ async def main(session: VuerSession):
     counter = 0
     while True:
         counter += 1
-        
-        # Perform IK for both arms
         error_left = await ik("left")
         error_right = await ik("right")
-        
-        # Short delay to maintain desired frame rate
         await asyncio.sleep(1 / MAX_FPS)
         
-        # Update joint values from PyBullet to Vuer
+        # Update joint values from PyBullet
         async with q_lock:
             for idx in range(pb_num_joints):
                 joint_name = pb_joint_names[idx]
                 joint_state = p.getJointState(pb_robot_id, idx)
                 q[joint_name] = joint_state[0]
             
-            # Update the robot's joint values in the Vuer scene
             session.upsert @ Urdf(
                 src=URDF_WEB,
                 jointValues=q,
@@ -314,48 +323,17 @@ async def main(session: VuerSession):
                 key="robot",
             )
         
-        # Print status every 100 iterations
-        if counter % 100 == 0:
+        if counter % 1 == 0:
             print(f"Iteration {counter}, Left arm error: {error_left}, Right arm error: {error_right}")
 
-        # Visualize current positions and targets for both arms
+
+        # Visualize the current positions and the targets for both arms
         left_actual_pos, _ = p.getLinkState(pb_robot_id, pb_eel_id)[:2]
         right_actual_pos, _ = p.getLinkState(pb_robot_id, pb_eer_id)[:2]
         p.addUserDebugLine(left_actual_pos, goal_pos_eel, [1, 0, 0], 2, 0)
         p.addUserDebugLine(right_actual_pos, goal_pos_eer, [0, 0, 1], 2, 0)
-
-        # Update goal markers in the Vuer scene
         update_viewer_goal(session, goal_pos_eel, "left_goal_marker")
         update_viewer_goal(session, goal_pos_eer, "right_goal_marker")
-
-def update_viewer_goal(session: VuerSession, goal_pos: NDArray, key: str):
-    viewer_pos = np.array([
-        goal_pos[1] - START_POS_TRUNK_VUER[0],
-        (goal_pos[2] - START_POS_TRUNK_VUER[1]),
-        -(goal_pos[0] - START_POS_TRUNK_VUER[2])
-    ])
-    
-    sphere_urdf = f"""
-    <?xml version="1.0"?>
-    <robot name="sphere">
-      <link name="sphere_link">
-        <visual>
-          <geometry>
-            <sphere radius="0.05"/>
-          </geometry>
-          <material>
-            <color rgba="1 0 0 1"/>
-          </material>
-        </visual>
-      </link>
-    </robot>
-    """
-    
-    session.upsert @ Urdf(
-        urdf=sphere_urdf,
-        position=viewer_pos,
-        key=key
-    )
 
 if __name__ == "__main__":
     app.run()
