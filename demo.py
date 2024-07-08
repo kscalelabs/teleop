@@ -8,24 +8,28 @@ from numpy.typing import NDArray
 import pybullet as p
 import pybullet_data
 from vuer import Vuer, VuerSession
-from vuer.schemas import Hands, PointLight, Urdf
+from vuer.schemas import Hands, PointLight, Urdf, Sphere, Arrow
 import time
 from collections import OrderedDict
+
 # URDF paths
-URDF_WEB: str = "https://raw.githubusercontent.com/kscalelabs/webstompy/pawel/new_stomp/urdf/stompy_new/upper_limb_assembly_5_dof_merged_simplified.urdf"
+URDF_WEB: str = "https://raw.githubusercontent.com/kscalelabs/webstompy/pawel/new_stomp/urdf/stompy_new/multiarm.urdf"
 URDF_LOCAL: str = "urdf/stompy_new/multiarm.urdf"
 
 # Robot configuration
 START_POS_TRUNK_PYBULLET: NDArray = np.array([0, 0, 1.])
-START_EUL_TRUNK_PYBULLET: NDArray = np.array([-math.pi/2, 0, -1.])
+START_EUL_TRUNK_PYBULLET: NDArray = np.array([-math.pi/2, 0, 2.15])
 START_POS_TRUNK_VUER: NDArray = np.array([0, 1., 0])
-START_EUL_TRUNK_VUER: NDArray = np.array([-math.pi, -3.8, 0])
+START_EUL_TRUNK_VUER: NDArray = np.array([-math.pi, -.68, 0])
 
 # Starting positions for robot end effectors
-START_POS_EEL: NDArray = np.array([0.0, 0.3, -.3]) + START_POS_TRUNK_PYBULLET
-START_POS_EER: NDArray = np.array([0.0, -0.3, -.3]) + START_POS_TRUNK_PYBULLET
+START_POS_EEL: NDArray = np.array([-0.35, -0.25, 0.]) + START_POS_TRUNK_PYBULLET
+START_POS_EER: NDArray = np.array([-0.35, +0.25, .0]) + START_POS_TRUNK_PYBULLET
+START_POS_EEL: NDArray = np.array([-0.35, -0.25, 0.]) + START_POS_TRUNK_PYBULLET
+START_POS_EER: NDArray = np.array([-0.35, +0.25, .0]) + START_POS_TRUNK_PYBULLET
 
-PB_TO_VUER_AXES: NDArray = np.array([0, 2, 1], dtype=np.uint8)
+
+PB_TO_VUER_AXES: NDArray = np.array([2, 0, 1], dtype=np.uint8)
 PB_TO_VUER_AXES_SIGN: NDArray = np.array([1, 1, 1], dtype=np.int8)
 
 # Starting joint positions
@@ -34,13 +38,14 @@ START_Q: Dict[str, float] = OrderedDict([
     ("joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8", 0.503),
     ("joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8", -1.33),
     ("joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4", 0),
-    ("joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4", 3.45),
+    ("joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4", 5.03),
     ("joint_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4", 1.76),
     ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8", 0),
     ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8", -4.2),
     ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4", 0),
     ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4", -2.83),
     ("joint_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4", -1.32)
+
 ])
  
 OFFSET = [val for val in START_Q.values()]
@@ -101,6 +106,9 @@ pb_eel_id = pb_child_link_names.index(EEL_LINK)
 pb_eer_id = pb_child_link_names.index(EER_LINK)
 
 
+for i in range(pb_num_joints):
+    p.resetJointState(pb_robot_id, i, pb_start_q[i])
+
 p.resetBasePositionAndOrientation(
     pb_robot_id,
     START_POS_TRUNK_PYBULLET,
@@ -144,7 +152,7 @@ p.addUserDebugPoints([goal_pos_eer], [[0, 0, 1]], pointSize=20)
 
 async def ik(arm: str, max_attempts=20, max_iterations=100) -> float:
     global goal_pos_eel, goal_pos_eer, q
-    
+    print(goal_pos_eel, goal_pos_eer)
     # Get the current torso position and orientation
     torso_pos, torso_orn = p.getBasePositionAndOrientation(pb_robot_id)
     
@@ -184,23 +192,21 @@ async def ik(arm: str, max_attempts=20, max_iterations=100) -> float:
         lowerLimits=lower_limits,
         upperLimits=upper_limits,
         jointRanges=joint_ranges,
-        # restPoses=current_positions,
+        restPoses=OFFSET,
     )
 
     actual_pos, _ = p.getLinkState(pb_robot_id, ee_id)[:2]
     error = np.linalg.norm(np.array(target_pos) - np.array(actual_pos))
 
-    # print("position",[p.getJointState(pb_robot_id, j)[0] for j in joint_indices])
-    # print([s - o for s, o in zip(solution, OFFSET)])
-
     async with q_lock:
         global q
+        print("solution", solution)
         for i, val in enumerate(solution):
             joint_name = IK_Q_LIST[i]
             if joint_name in ee_chain:
                 q[joint_name] = val
                 p.resetJointState(pb_robot_id, pb_q_map[joint_name], val)
-    # print(f"ik {arm} took {time.time() - start_time} seconds")
+
     return error
 
 def verify_arm_config(arm: str):
@@ -241,7 +247,6 @@ async def hand_handler(event, _):
     rpinch_dist = np.linalg.norm(np.array(event.value["rightLandmarks"][INDEX_FINGER_TIP_ID]) - rthumb_pos)
     if rpinch_dist < PINCH_DIST_CLOSED:
         goal_pos_eer = np.multiply(rthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN)
-        # p.addUserDebugPoints([goal_pos_eer], [[0, 0, 1]], pointSize=20)
         print("OLD", goal_pos_eer)
         goal_pos_eer += TUNING
         print(f"New goal_pos_eer: {goal_pos_eer}")
@@ -250,7 +255,6 @@ async def hand_handler(event, _):
     lpinch_dist = np.linalg.norm(np.array(event.value["leftLandmarks"][INDEX_FINGER_TIP_ID]) - lthumb_pos)
     if lpinch_dist < PINCH_DIST_CLOSED:
         goal_pos_eel = np.multiply(lthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN)
-        # p.addUserDebugPoints([goal_pos_eel], [[1, 0, 0]], pointSize=20)
         goal_pos_eer += TUNING
         print(f"New goal_pos_eel: {goal_pos_eel}")
 
@@ -273,15 +277,33 @@ async def main(session: VuerSession):
         rotation=START_EUL_TRUNK_VUER,
         key="robot",
     )
-    
-    # default values:
-    # New goal_pos_eer: [-0.00269513 -0.18189202  1.46302509]
-    # New goal_pos_eel: [ 0.21767785 -0.34274298  1.38409591]
+
+    # Add a sphere (ball) to the session
+    arrow = Arrow(
+        position=[-1, 1, -1],
+        rotation=[0, 0, 0],
+        scale=1.,
+    )
+    session.upsert @ arrow
+
     while True:
         await asyncio.gather(
             ik("left"),  # ~1ms
-            # ik("right"),  # ~1ms
-            # asyncio.sleep(1 / MAX_FPS),  # ~16ms @ 60fps
+            ik("right"),  # ~1ms
+            asyncio.sleep(1 / MAX_FPS),  # ~16ms @ 60fps
         )
+
+        async with q_lock:
+            global q
+            print("here full q", q)
+            session.upsert @ Urdf(
+                src=URDF_WEB,
+                jointValues=q,
+                position=START_POS_TRUNK_VUER,
+                rotation=START_EUL_TRUNK_VUER,
+                key="robot",
+            )
+
+
 if __name__ == "__main__":
     app.run()
