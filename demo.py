@@ -25,6 +25,8 @@ START_EUL_TRUNK_VUER: NDArray = np.array([-math.pi, -3.8, 0])
 START_POS_EEL: NDArray = np.array([0.0, 0.3, -.3]) + START_POS_TRUNK_PYBULLET
 START_POS_EER: NDArray = np.array([0.0, -0.3, -.3]) + START_POS_TRUNK_PYBULLET
 
+PB_TO_VUER_AXES: NDArray = np.array([0, 2, 1], dtype=np.uint8)
+PB_TO_VUER_AXES_SIGN: NDArray = np.array([1, 1, 1], dtype=np.int8)
 
 # Starting joint positions
 START_Q: Dict[str, float] = OrderedDict([
@@ -173,7 +175,6 @@ async def ik(arm: str, max_attempts=20, max_iterations=100) -> float:
     
     # Prepare current positions for all movable joints
     current_positions = [p.getJointState(pb_robot_id, j)[0] for j in movable_joints]
-    print("position",[p.getJointState(pb_robot_id, j)[0] for j in joint_indices])
 
     solution = p.calculateInverseKinematics(
         pb_robot_id,
@@ -183,18 +184,17 @@ async def ik(arm: str, max_attempts=20, max_iterations=100) -> float:
         lowerLimits=lower_limits,
         upperLimits=upper_limits,
         jointRanges=joint_ranges,
-        restPoses=current_positions,
+        # restPoses=current_positions,
     )
 
     actual_pos, _ = p.getLinkState(pb_robot_id, ee_id)[:2]
     error = np.linalg.norm(np.array(target_pos) - np.array(actual_pos))
-    # move the offset setup 
-    print([s - o for s, o in zip(solution, OFFSET)])
-    # p.stepSimulation()
+
+    # print("position",[p.getJointState(pb_robot_id, j)[0] for j in joint_indices])
+    # print([s - o for s, o in zip(solution, OFFSET)])
 
     async with q_lock:
         global q
-
         for i, val in enumerate(solution):
             joint_name = IK_Q_LIST[i]
             if joint_name in ee_chain:
@@ -229,27 +229,30 @@ def verify_arm_config(arm: str):
     print(f"  Current position: {ee_state[0]}")
     print(f"  Current orientation: {ee_state[1]}")
 
+
 app = Vuer()
 
 @app.add_handler("HAND_MOVE")
 async def hand_handler(event, _):
     global goal_pos_eer, goal_pos_eel
-    
+    TUNING = np.asarray([0, 0, -1])
     # right hand
     rthumb_pos = np.array(event.value["rightLandmarks"][THUMB_FINGER_TIP_ID])
     rpinch_dist = np.linalg.norm(np.array(event.value["rightLandmarks"][INDEX_FINGER_TIP_ID]) - rthumb_pos)
     if rpinch_dist < PINCH_DIST_CLOSED:
-        goal_pos_eer = np.array([rthumb_pos[2], -rthumb_pos[0], rthumb_pos[1]]) + START_POS_TRUNK_PYBULLET
+        goal_pos_eer = np.multiply(rthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN)
+        # p.addUserDebugPoints([goal_pos_eer], [[0, 0, 1]], pointSize=20)
+        print("OLD", goal_pos_eer)
+        goal_pos_eer += TUNING
         print(f"New goal_pos_eer: {goal_pos_eer}")
-        p.addUserDebugPoints([goal_pos_eer], [[0, 0, 1]], pointSize=20)
-
     # left hand
     lthumb_pos = np.array(event.value["leftLandmarks"][THUMB_FINGER_TIP_ID])
     lpinch_dist = np.linalg.norm(np.array(event.value["leftLandmarks"][INDEX_FINGER_TIP_ID]) - lthumb_pos)
     if lpinch_dist < PINCH_DIST_CLOSED:
-        goal_pos_eel = np.array([lthumb_pos[2], -lthumb_pos[0], lthumb_pos[1]]) + START_POS_TRUNK_PYBULLET
+        goal_pos_eel = np.multiply(lthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN)
+        # p.addUserDebugPoints([goal_pos_eel], [[1, 0, 0]], pointSize=20)
+        goal_pos_eer += TUNING
         print(f"New goal_pos_eel: {goal_pos_eel}")
-        p.addUserDebugPoints([goal_pos_eel], [[1, 0, 0]], pointSize=20)
 
 
 @app.spawn(start=True)
@@ -271,10 +274,13 @@ async def main(session: VuerSession):
         key="robot",
     )
     
+    # default values:
+    # New goal_pos_eer: [-0.00269513 -0.18189202  1.46302509]
+    # New goal_pos_eel: [ 0.21767785 -0.34274298  1.38409591]
     while True:
         await asyncio.gather(
             ik("left"),  # ~1ms
-            ik("right"),  # ~1ms
+            # ik("right"),  # ~1ms
             # asyncio.sleep(1 / MAX_FPS),  # ~16ms @ 60fps
         )
 if __name__ == "__main__":
