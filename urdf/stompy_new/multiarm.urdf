@@ -397,18 +397,18 @@
     <limit effort="6" velocity="5" lower="-1.3264502" upper="1.3264502" />
     <axis xyz="0 0 -1" />
     </joint>
-  <joint name="joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1" type="fixed">
+  <joint name="joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1" type="prismatic">
     <origin xyz="-4.641020762141679e-09 0.09999999190141898 0.1669999949543925" rpy="-1.5707963999999996 1.5707963000000045 0.0" />
     <parent link="fused_component_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_outer_rmd_x4_24_1" />
     <child link="fused_component_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slide_1" />
-    <limit effort="6" velocity="5" lower="0.02" upper="0.03" />
-    <axis xyz="0 0 -1" />
+    <limit effort="6" velocity="5" lower="-0.05" upper="0.0" />
+    <axis xyz="0 0 1" />
     </joint>
-  <joint name="joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2" type="fixed">
+  <joint name="joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2" type="prismatic">
     <origin xyz="4.641020623363801e-09 -0.10000000809858076 0.1669999949543925" rpy="1.5707963071795867 1.5707963000000045 0.0" />
     <parent link="fused_component_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_outer_rmd_x4_24_1" />
     <child link="fused_component_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slide_2" />
-    <limit effort="6" velocity="5" lower="0.01" upper=".03" />
+    <limit effort="80" velocity="5" lower="0.0" upper=".05" />
     <axis xyz="0 0 -1" />
     <!-- <mimic joint="joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1" multiplier="1" offset="0" /> -->
     </joint>
@@ -416,14 +416,14 @@
     <origin xyz="-4.641020873163981e-09 0.0999999919014189 0.16699999495439255" rpy="-1.5707963999999999 1.570796300000005 0.0" />
     <parent link="fused_component_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_outer_rmd_x4_24_1" />
     <child link="fused_component_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slide_1" />
-    <limit effort="6" velocity="5" lower="0" upper="0.051" />
+    <limit effort="80" velocity="5" lower="-0.05" upper="0." />
     <axis xyz="0 0 -1" />
     </joint>
   <joint name="joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_2" type="fixed">
     <origin xyz="4.641020484585923e-09 -0.10000000809858081 0.16699999495439255" rpy="1.5707963071795863 1.570796300000005 0.0" />
     <parent link="fused_component_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_outer_rmd_x4_24_1" />
     <child link="fused_component_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slide_2" />
-    <limit effort="6" velocity="5" lower="-0.051" upper="0" />
+    <limit effort="6" velocity="5" lower="-0.05" upper="0" />
     <axis xyz="0 0 -1" />
     <!-- <mimic joint="joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_1" multiplier="1" offset="0" /> -->
     </joint>

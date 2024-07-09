@@ -13,7 +13,7 @@ import time
 from collections import OrderedDict
 
 # URDF paths
-URDF_WEB: str = "https://raw.githubusercontent.com/kscalelabs/webstompy/pawel/new_stomp/urdf/stompy_new/multiarm.urdf"
+URDF_WEB: str = "https://raw.githubusercontent.com/kscalelabs/webstompy/f669565d449a6441ca250f11990d5b955a1a286d/urdf/stompy_new/multiarm.urdf"
 URDF_LOCAL: str = "urdf/stompy_new/multiarm.urdf"
 
 # Robot configuration
@@ -40,12 +40,15 @@ START_Q: Dict[str, float] = OrderedDict([
     ("joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4", 0),
     ("joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4", 5.03),
     ("joint_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4", 1.76),
+    # left gripper
+    ("joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1", 0.0),
+    ("joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2", 0.0),
+
     ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8", 0),
     ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8", -4.2),
     ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4", 0),
     ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4", -2.83),
     ("joint_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4", -1.32)
-
 ])
  
 OFFSET = [val for val in START_Q.values()]
@@ -69,6 +72,10 @@ EER_CHAIN_ARM: List[str] = [
     'joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4',
     'joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4',
     'joint_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4',
+]
+EEL_CHAIN_HAND: List[str] = [
+    'joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1',
+    'joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2',
 ]
 
 # PyBullet setup
@@ -99,7 +106,7 @@ for i in range(pb_num_joints):
     if name in START_Q:
         pb_start_q[i] = START_Q[name]
 
-    if name in EEL_CHAIN_ARM or name in EER_CHAIN_ARM:
+    if name in EEL_CHAIN_ARM + EER_CHAIN_ARM + EEL_CHAIN_HAND:
         pb_q_map[name] = i
 
 pb_eel_id = pb_child_link_names.index(EEL_LINK)
@@ -135,9 +142,19 @@ VUER_LIGHT_INTENSITY: float = 10.0
 
 # Vuer hand tracking params
 HAND_FPS: int = 30
+# TODO check that
 INDEX_FINGER_TIP_ID: int = 8
 THUMB_FINGER_TIP_ID: int = 4
-PINCH_DIST_CLOSED: float = 0.05
+PINCH_DIST_CLOSED: float = 0.1
+
+
+# pre-compute gripper "slider" ranges for faster callback
+MIDDLE_FINGER_TIP_ID: int = 14
+PINCH_DIST_OPENED: float = 0.03  # 10cm
+EE_S_MIN: float = 0.0
+EE_S_MAX: float = 0.05
+ee_s_range: float = EE_S_MAX - EE_S_MIN
+
 
 # Global variables
 q_lock = asyncio.Lock()
@@ -150,9 +167,47 @@ p.addUserDebugPoints([goal_pos_eel], [[1, 0, 0]], pointSize=20)
 p.addUserDebugPoints([goal_pos_eer], [[0, 0, 1]], pointSize=20)
 
 
-async def ik(arm: str, max_attempts=20, max_iterations=100) -> float:
+FIRMWARE_ON = False
+
+if FIRMWARE_ON:
+    import sys
+    import can
+    sys.path.append('./firmware/')
+
+    rad_to_deg = lambda rad: rad / (math.pi) * 180
+    deg_to_rad = lambda deg: deg / 180 * math.pi
+
+    from firmware.bionic_motors.model import Arm, Body
+    from firmware.bionic_motors.motors import BionicMotor, CANInterface
+    from firmware.bionic_motors.utils import NORMAL_STRENGTH
+
+    print('no issues with imports')
+    # TODO clean up
+    write_bus = can.interface.Bus(channel="can0", bustype="socketcan")
+    buffer_reader = can.BufferedReader()
+    notifier = can.Notifier(write_bus, [buffer_reader])
+    CAN_BUS = CANInterface(write_bus, buffer_reader, notifier)
+    TestModel = Body(
+        left_arm=Arm(
+            rotator_cuff=BionicMotor(1, NORMAL_STRENGTH.ARM_PARAMS, CAN_BUS),
+            shoulder=BionicMotor(2, NORMAL_STRENGTH.ARM_PARAMS, CAN_BUS),
+            bicep=BionicMotor(3, NORMAL_STRENGTH.ARM_PARAMS, CAN_BUS),
+            elbow=BionicMotor(4, NORMAL_STRENGTH.ARM_PARAMS, CAN_BUS),
+            wrist=BionicMotor(5, NORMAL_STRENGTH.ARM_PARAMS, CAN_BUS),
+            gripper=BionicMotor(6, NORMAL_STRENGTH.GRIPPERS_PARAMS, CAN_BUS),
+        )
+    )
+
+    def filter_motor_values(values: List[float], pos: List[float], increments: List[float], max_val: List[float]):
+
+        # make it so that we are limited to 0 +- max_val
+        for idx, (val, maxes) in enumerate(zip(values, max_val)):
+            if abs(val) > abs(maxes):
+                values[idx] = val // abs(val) * maxes
+
+
+async def ik(arm: str, max_attempts=20, max_iterations=100, current_state = None) -> float:
     global goal_pos_eel, goal_pos_eer, q
-    print(goal_pos_eel, goal_pos_eer)
     # Get the current torso position and orientation
     torso_pos, torso_orn = p.getBasePositionAndOrientation(pb_robot_id)
     
@@ -160,9 +215,11 @@ async def ik(arm: str, max_attempts=20, max_iterations=100) -> float:
         ee_id = pb_eer_id
         ee_chain = EER_CHAIN_ARM
         target_pos = goal_pos_eer
+        joint_damping = [0.1, 100, 100, 100, 100, 100, 100, 100, 0.1, 0.1, 0.1, 0.1, 0.1]
     else:
         ee_id = pb_eel_id
         ee_chain = EEL_CHAIN_ARM
+        joint_damping = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 100, 100, 100, 100, 100]
         target_pos = goal_pos_eel
 
     joint_indices = [pb_q_map[joint] for joint in ee_chain]
@@ -182,8 +239,14 @@ async def ik(arm: str, max_attempts=20, max_iterations=100) -> float:
     movable_joints = [j for j in all_joints if p.getJointInfo(pb_robot_id, j)[2] != p.JOINT_FIXED]
     
     # Prepare current positions for all movable joints
-    current_positions = [p.getJointState(pb_robot_id, j)[0] for j in movable_joints]
 
+    if current_state == None:
+        # print("This is the length that I should be gettings")
+        current_positions = [p.getJointState(pb_robot_id, j)[0] for j in movable_joints]
+        # print(len(current_positions))
+    else:
+        # print("This is the length that I am getting", len(current_state))
+        current_positions = current_state
     solution = p.calculateInverseKinematics(
         pb_robot_id,
         ee_id,
@@ -193,6 +256,7 @@ async def ik(arm: str, max_attempts=20, max_iterations=100) -> float:
         upperLimits=upper_limits,
         jointRanges=joint_ranges,
         restPoses=OFFSET,
+        jointDamping=joint_damping,
     )
 
     actual_pos, _ = p.getLinkState(pb_robot_id, ee_id)[:2]
@@ -200,7 +264,6 @@ async def ik(arm: str, max_attempts=20, max_iterations=100) -> float:
 
     async with q_lock:
         global q
-        print("solution", solution)
         for i, val in enumerate(solution):
             joint_name = IK_Q_LIST[i]
             if joint_name in ee_chain:
@@ -241,22 +304,33 @@ app = Vuer()
 @app.add_handler("HAND_MOVE")
 async def hand_handler(event, _):
     global goal_pos_eer, goal_pos_eel
-    TUNING = np.asarray([0, 0, -1])
+
     # right hand
     rthumb_pos = np.array(event.value["rightLandmarks"][THUMB_FINGER_TIP_ID])
     rpinch_dist = np.linalg.norm(np.array(event.value["rightLandmarks"][INDEX_FINGER_TIP_ID]) - rthumb_pos)
     if rpinch_dist < PINCH_DIST_CLOSED:
         goal_pos_eer = np.multiply(rthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN)
-        print("OLD", goal_pos_eer)
-        goal_pos_eer += TUNING
-        print(f"New goal_pos_eer: {goal_pos_eer}")
+
     # left hand
     lthumb_pos = np.array(event.value["leftLandmarks"][THUMB_FINGER_TIP_ID])
-    lpinch_dist = np.linalg.norm(np.array(event.value["leftLandmarks"][INDEX_FINGER_TIP_ID]) - lthumb_pos)
+    lindex_pos = np.array(event.value["leftLandmarks"][INDEX_FINGER_TIP_ID])
+    lpinch_dist = np.linalg.norm(lindex_pos - lthumb_pos)
+        
+    # index finger to thumb pinch turns on tracking
     if lpinch_dist < PINCH_DIST_CLOSED:
         goal_pos_eel = np.multiply(lthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN)
-        goal_pos_eer += TUNING
-        print(f"New goal_pos_eel: {goal_pos_eel}")
+        # pinching with middle finger controls gripper
+        lmiddl_pos: NDArray = np.array(event.value["leftLandmarks"][MIDDLE_FINGER_TIP_ID])
+        lgrip_dist: float = np.linalg.norm(lthumb_pos - lmiddl_pos) / PINCH_DIST_OPENED
+        _s: float = EE_S_MIN + lgrip_dist * ee_s_range
+
+        async with q_lock:
+            print(f"left gripper at {lgrip_dist}, updating to {_s}")
+            q["joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1"] = _s
+            q["joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2"] = -_s
+            
+            p.resetJointState(pb_robot_id, pb_q_map["joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1"], _s)
+            p.resetJointState(pb_robot_id, pb_q_map["joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2"], -_s)
 
 
 @app.spawn(start=True)
@@ -286,16 +360,41 @@ async def main(session: VuerSession):
     )
     session.upsert @ arrow
 
+    if FIRMWARE_ON:
+        for part in TestModel.left_arm.motors:
+            part.set_zero_position()
+            time.sleep(0.001)
+        
+        for part in TestModel.left_arm.motors:
+            part.update_position(0.25)
+
+        for part in TestModel.left_arm.motors:
+            print(f"Part {part.motor_id} at {part.position}")
+
+        time.sleep(0.25)
+        print("No issues with the other commands here")
+        position_list = [part.position for part in TestModel.left_arm.motors]
+        increments = [4 for i in range(6)]
+        # maximum_values = [20, 10, 5, 5, 5, 0]
+        # maximum_values = [10, 10, 30, 30, 30, 0]
+        maximum_values = [60, 60, 60, 60, 0, 0]
+        signs = [1, -1, 1, -1, 1, 1]
+        TEST_OFFSETS = [0, 0, 0, 0, 0, 0]
+        Angle_Offsets = [0, -90, 0, -90, 0, 0]
+
+        prev_q = []
+
+    
     while True:
         await asyncio.gather(
             ik("left"),  # ~1ms
-            ik("right"),  # ~1ms
+            # ik("left", current_state = current_state),  # ~1ms
+            # ik("right"),  # ~1ms
             asyncio.sleep(1 / MAX_FPS),  # ~16ms @ 60fps
         )
 
         async with q_lock:
             global q
-            print("here full q", q)
             session.upsert @ Urdf(
                 src=URDF_WEB,
                 jointValues=q,
@@ -304,6 +403,35 @@ async def main(session: VuerSession):
                 key="robot",
             )
 
+        if FIRMWARE_ON:
+            [print(signs[idx] * part.position) for idx, part in enumerate(TestModel.left_arm.motors)]
+            current_state = [deg_to_rad(signs[idx] * part.position + Angle_Offsets[idx]) for idx, part in enumerate(TestModel.left_arm.motors)]
+            for i in range(len(current_state) - 1):
+                p.resetJointState(pb_robot_id, pb_q_map[EEL_CHAIN_ARM[i]], current_state[i] - math.pi / 2)
+
+            for idx, (key, val) in enumerate(q.items()):
+                q[key] = val - OFFSET[idx]
+            q_list = [rad_to_deg(q[i]) for i in EEL_CHAIN_ARM] + [0]
+            if q_list != [0, 0, 0, 0, 0, 0]:
+                q_list = [val - off for val, off in zip(q_list, TEST_OFFSETS)]
+
+            filter_motor_values(q_list, position_list, increments, maximum_values)
+            
+            delta = 10
+            for idx, (old, val) in enumerate(zip(prev_q, q_list)):
+                if abs(val - old) > delta:
+                    q_list[idx] = old
+            print("From filter, ", q_list[3])
+
+            # TestModel.left_arm.rotator_cuff.set_position(signs[0] * int(q_list[0]), 0, 0)
+            # TestModel.left_arm.shoulder.set_position(signs[1] * int(q_list[1]), 0, 0)
+            # TestModel.left_arm.bicep.set_position(signs[2] * int(q_list[2]), 0, 0)
+            # TestModel.left_arm.elbow.set_position(signs[3] * int(q_list[3]), 0, 0)
+            # TestModel.left_arm.wrist.set_position(signs[4] * int(q_list[4]), 0, 0)
+
+            for part in TestModel.left_arm.motors:
+                part.update_position(0.005)
+            prev_q = q_list
 
 if __name__ == "__main__":
     app.run()
