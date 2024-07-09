@@ -44,11 +44,9 @@ A minimal implementation of a bi-manual remote robotic teleoperation system usin
 
 ✅ 3dof end effector control
 
+✅ tested on real world robot
+
 ⬜️ debug 6dof end effector control
-
-⬜️ resets to various default pose 
-
-⬜️ tested on real world robot
 
 ⬜️ record & playback trajectories
 
@@ -66,7 +64,7 @@ pip install -r requirements.txt
 Start the server on the robot computer.
 
 ```bash
-python demo_hands_stereo_ik3dof.py
+python demo.py
 ```
 
 Start ngrok on the robot computer.
@@ -89,7 +87,7 @@ Open the browser app on the HMD and go to the ngrok URL.
 ```
 @misc{teleop-2024,
   title={Bi-Manual Remote Robotic Teleoperation},
-  author={Hugo Ponte},
+  author={KScale Labs},
   year={2024},
   url={https://github.com/kscalelabs/teleop}
 }
