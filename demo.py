@@ -1,22 +1,24 @@
 """POC for integrating PyBullet with Vuer for real-time robot control."""
 import asyncio
-from copy import deepcopy
+import logging
 import math
-from typing import List, Dict
-import numpy as np
-from numpy.typing import NDArray
-import pybullet as p
-import pybullet_data
-from vuer import Vuer, VuerSession
-from vuer.schemas import Hands, PointLight, Urdf, Sphere, Arrow
 import time
 from collections import OrderedDict
+from copy import deepcopy
+from typing import Dict, List
+
+import numpy as np
+import pybullet as p
+import pybullet_data
+from numpy.typing import NDArray
+from vuer import Vuer, VuerSession
+from vuer.schemas import Hands, PointLight, Urdf
 
 FIRMWARE_ON = False
 DELTA = 10
 
 # URDF paths
-URDF_WEB: str = "https://raw.githubusercontent.com/kscalelabs/webstompy/pawel/new_stomp/urdf/stompy_new/multiarm.urdf"
+URDF_WEB: str = "https://raw.githubusercontent.com/kscalelabs/teleop/9260d7b46de14cf93214142bf0172967b2e7de2a/urdf/stompy/upper_limb_assembly_5_dof_merged_simplified.urdf"
 URDF_LOCAL: str = "urdf/stompy/upper_limb_assembly_5_dof_merged_simplified.urdf"
 
 # Robot configuration
@@ -177,6 +179,7 @@ p.addUserDebugPoints([goal_pos_eer], [[0, 0, 1]], pointSize=20)
 
 if FIRMWARE_ON:
     import sys
+
     import can
     sys.path.append('./firmware/')
 
@@ -349,14 +352,6 @@ async def main(session: VuerSession):
         key="robot",
     )
 
-    # Add a sphere (ball) to the session
-    arrow = Arrow(
-        position=[-1, 1, -1],
-        rotation=[0, 0, 0],
-        scale=1.,
-    )
-    session.upsert @ arrow
-
     if FIRMWARE_ON:
         for part in TestModel.left_arm.motors:
             part.set_zero_position()
@@ -369,11 +364,8 @@ async def main(session: VuerSession):
             print(f"Part {part.motor_id} at {part.position}")
 
         time.sleep(0.25)
-        print("No issues with the other commands here")
         position_list = [part.position for part in TestModel.left_arm.motors]
         increments = [4 for i in range(6)]
-        # maximum_values = [20, 10, 5, 5, 5, 0]
-        # maximum_values = [10, 10, 30, 30, 30, 0]
         maximum_values = [60, 60, 60, 60, 0, 10]
         signs = [1, -1, 1, -1, 1, 1]
         TEST_OFFSETS = [0, 0, 0, 0, 0, 0]
