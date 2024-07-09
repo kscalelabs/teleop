@@ -401,14 +401,14 @@
     <origin xyz="-4.641020762141679e-09 0.09999999190141898 0.1669999949543925" rpy="-1.5707963999999996 1.5707963000000045 0.0" />
     <parent link="fused_component_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_outer_rmd_x4_24_1" />
     <child link="fused_component_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slide_1" />
-    <limit effort="6" velocity="5" lower="-0.05" upper="0.0" />
-    <axis xyz="0 0 1" />
+    <limit effort="6" velocity="5" lower="0" upper="0.05" />
+    <axis xyz="0 0 -1" />
     </joint>
   <joint name="joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2" type="prismatic">
     <origin xyz="4.641020623363801e-09 -0.10000000809858076 0.1669999949543925" rpy="1.5707963071795867 1.5707963000000045 0.0" />
     <parent link="fused_component_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_outer_rmd_x4_24_1" />
     <child link="fused_component_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slide_2" />
-    <limit effort="80" velocity="5" lower="0.0" upper=".05" />
+    <limit effort="80" velocity="5" lower="0" upper=".05" />
     <axis xyz="0 0 -1" />
     <!-- <mimic joint="joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1" multiplier="1" offset="0" /> -->
     </joint>
