@@ -17,8 +17,8 @@ Options:
 
 import argparse
 import asyncio
-import logging
 import math
+import logging
 from collections import OrderedDict
 from copy import deepcopy
 from typing import Dict, List, Tuple
@@ -29,6 +29,8 @@ import pybullet_data
 from numpy.typing import NDArray
 from vuer import Vuer, VuerSession
 from vuer.schemas import Hands, PointLight, Urdf
+
+import logging
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -67,11 +69,11 @@ START_Q: Dict[str, float] = OrderedDict(
         ("joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1", 0.0),
         ("joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2", 0.0),
         # right arm
-        ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8", 0.68),
-        ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8", 1.24),
+        ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8", 0),
+        ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8", -4.2),
         ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4", 0),
-        ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4", 3.45),
-        ("joint_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4", 0),
+        ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4", -2.83),
+        ("joint_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4", -1.32),
     ]
 )
 
@@ -276,60 +278,16 @@ async def main_loop(session: VuerSession, robot_id: int, joint_info: Dict, max_f
     )
 
     if use_firmware:
-        import time
+        from firmware.scripts.robot_controller import Robot
 
-        import can
-
-        from firmware.bionic_motors.model import Arm, Body
-        from firmware.bionic_motors.motors import BionicMotor, CANInterface
-        from firmware.bionic_motors.utils import NORMAL_STRENGTH
-
-        rad_to_deg = lambda rad: rad / (math.pi) * 180
-        val_to_grip = lambda val: val * -90 / 0.04
-        write_bus = can.interface.Bus(channel="can0", bustype="socketcan")
-        buffer_reader = can.BufferedReader()
-        notifier = can.Notifier(write_bus, [buffer_reader])
-        can_bus = CANInterface(write_bus, buffer_reader, notifier)
-        TestModel = Body(
-            left_arm=Arm(
-                rotator_cuff=BionicMotor(1, NORMAL_STRENGTH.ARM_PARAMS, can_bus),
-                shoulder=BionicMotor(2, NORMAL_STRENGTH.ARM_PARAMS, can_bus),
-                bicep=BionicMotor(3, NORMAL_STRENGTH.ARM_PARAMS, can_bus),
-                elbow=BionicMotor(4, NORMAL_STRENGTH.ARM_PARAMS, can_bus),
-                wrist=BionicMotor(5, NORMAL_STRENGTH.ARM_PARAMS, can_bus),
-                gripper=BionicMotor(6, NORMAL_STRENGTH.GRIPPERS_PARAMS, can_bus),
-            )
-        )
-
-        def filter_motor_values(values: List[float], pos: List[float], increments: List[float], max_val: List[float]):
-            # make it so that we are limited to 0 +- max_val
-            for idx, (val, maxes) in enumerate(zip(values, max_val)):
-                if abs(val) > abs(maxes):
-                    values[idx] = val // abs(val) * maxes
-
-        for part in TestModel.left_arm.motors:
-            part.set_zero_position()
-            time.sleep(0.001)
-
-        for part in TestModel.left_arm.motors:
-            part.update_position(0.25)
-
-        for part in TestModel.left_arm.motors:
-            print(f"Part {part.motor_id} at {part.position}")
-
-        time.sleep(0.25)
-        position_list = [part.position for part in TestModel.left_arm.motors]
-        increments = [4 for i in range(6)]
-        maximum_values = [60, 60, 60, 60, 0, 10]
-        signs = [1, -1, 1, -1, 1, 1]
-        TEST_OFFSETS = [0, 0, 0, 0, 0, 0]
-
-        prev_q = []
+        # todo
+        robot = Robot("left_arm")
+        robot.zero_out()
 
     while True:
         await asyncio.gather(
-            # inverse_kinematics(robot_id, joint_info, movable_joints, "left"),
-            inverse_kinematics(robot_id, joint_info, movable_joints, "right"),
+            inverse_kinematics(robot_id, joint_info, movable_joints, "left"),
+            # inverse_kinematics(robot_id, joint_info, movable_joints, "right"),
             asyncio.sleep(1 / max_fps),
         )
 
@@ -343,32 +301,8 @@ async def main_loop(session: VuerSession, robot_id: int, joint_info: Dict, max_f
             )
 
         if use_firmware:
-            for idx, (key, val) in enumerate(q.items()):
-                q[key] = val - OFFSET[idx]
-            q_list = [rad_to_deg(q[i]) for i in EEL_CHAIN_ARM] + [0]
-            if q_list != [0, 0, 0, 0, 0, 0]:
-                q_list = [val - off for val, off in zip(q_list, TEST_OFFSETS)]
-
-            filter_motor_values(q_list, position_list, increments, maximum_values)
-
-            for idx, (old, val) in enumerate(zip(prev_q, q_list)):
-                if abs(val - old) > DELTA:
-                    q_list[idx] = old
-
-            TestModel.left_arm.rotator_cuff.set_position(signs[0] * int(q_list[0]), 0, 0)
-            TestModel.left_arm.shoulder.set_position(signs[1] * int(q_list[1]), 0, 0)
-            TestModel.left_arm.bicep.set_position(signs[2] * int(q_list[2]), 0, 0)
-            TestModel.left_arm.elbow.set_position(signs[3] * int(q_list[3]), 0, 0)
-            TestModel.left_arm.wrist.set_position(signs[4] * int(q_list[4]), 0, 0)
-
-            gripper_q = val_to_grip(q["joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1"])
-            if gripper_q > 0:
-                gripper_q = 0
-            if gripper_q < -90:
-                gripper_q = -90
-            TestModel.left_arm.gripper.set_position(gripper_q, 0, 0)
-
-            prev_q = q_list
+            # TODO update q
+            robot.set_position(q)
 
 
 def main():
