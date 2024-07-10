@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 
 # Constants
 DELTA = 10
-URDF_WEB = "https://raw.githubusercontent.com/kscalelabs/teleop/9260d7b46de14cf93214142bf0172967b2e7de2a/urdf/stompy/upper_limb_assembly_5_dof_merged_simplified.urdf"
+URDF_WEB = "https://raw.githubusercontent.com/kscalelabs/teleop/master/urdf/stompy/upper_limb_assembly_5_dof_merged_simplified.urdf"
 URDF_LOCAL = "urdf/stompy/upper_limb_assembly_5_dof_merged_simplified.urdf"
 
 # Robot configuration
@@ -291,7 +291,7 @@ async def main_loop(session: VuerSession, robot_id: int, joint_info: Dict, max_f
 
     if use_firmware:
         from firmware.scripts.robot_controller import Robot
-        # TODO update it to the actual setup
+        # TODO update it to the actual setup depending on the robot
         robot = Robot("left_arm")
         robot.zero_out()
         new_positions = {"left_arm": [q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]}
