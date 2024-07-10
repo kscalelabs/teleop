@@ -40,9 +40,9 @@ URDF_WEB = "https://raw.githubusercontent.com/kscalelabs/teleop/9260d7b46de14cf9
 URDF_LOCAL = "urdf/stompy/upper_limb_assembly_5_dof_merged_simplified.urdf"
 
 # Robot configuration
-START_POS_TRUNK_PYBULLET: NDArray = np.array([0, 0, 1.0])
+START_POS_TRUNK_PYBULLET: NDArray = np.array([0, 0, 1])
 START_EUL_TRUNK_PYBULLET: NDArray = np.array([-math.pi / 2, 0, 2.15])
-START_POS_TRUNK_VUER: NDArray = np.array([0, 1.0, 0])
+START_POS_TRUNK_VUER: NDArray = np.array([0, 1, 0])
 START_EUL_TRUNK_VUER: NDArray = np.array([-math.pi, -0.68, 0])
 
 # Starting positions for robot end effectors
@@ -67,11 +67,11 @@ START_Q: Dict[str, float] = OrderedDict(
         ("joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1", 0.0),
         ("joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2", 0.0),
         # right arm
-        ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8", 0),
-        ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8", -4.2),
+        ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8", 0.68),
+        ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8", 1.24),
         ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4", 0),
-        ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4", -2.83),
-        ("joint_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4", -1.32),
+        ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4", 3.45),
+        ("joint_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4", 0),
     ]
 )
 
@@ -99,6 +99,10 @@ EER_CHAIN_ARM = [
 EEL_CHAIN_HAND = [
     "joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1",
     "joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2",
+]
+EER_CHAIN_HAND = [
+    "joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_1",
+    "joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_2",
 ]
 
 # Hand tracking parameters
@@ -157,7 +161,7 @@ def setup_pybullet(use_gui: bool, urdf_path: str) -> Tuple[int, Dict]:
     return robot_id, joint_info
 
 
-async def inverse_kinematics(robot_id: int, joint_info: Dict, arm: str, max_attempts: int = 20) -> float:
+async def inverse_kinematics(robot_id: int, joint_info: Dict, movable_joints: Dict, arm: str, max_attempts: int = 20) -> float:
     """
     Perform inverse kinematics calculation for the specified arm.
 
@@ -174,11 +178,10 @@ async def inverse_kinematics(robot_id: int, joint_info: Dict, arm: str, max_atte
 
     ee_id = joint_info[EEL_JOINT if arm == "left" else EER_JOINT]["index"]
     # TODO: add right arm support
-    ee_chain = EEL_CHAIN_ARM + EEL_CHAIN_HAND if arm == "left" else EER_CHAIN_ARM
+    ee_chain = EEL_CHAIN_ARM + EEL_CHAIN_HAND if arm == "left" else EER_CHAIN_ARM + EER_CHAIN_HAND
     target_pos = goal_pos_eel if arm == "left" else goal_pos_eer
     joint_damping = [0.1 if i not in ee_chain else 100 for i in range(len(joint_info))]
 
-    joint_indices = [joint_info[joint]["index"] for joint in ee_chain]
     lower_limits = [joint_info[joint]["lower_limit"] for joint in ee_chain]
     upper_limits = [joint_info[joint]["upper_limit"] for joint in ee_chain]
     joint_ranges = [upper - lower for upper, lower in zip(upper_limits, lower_limits)]
@@ -187,7 +190,6 @@ async def inverse_kinematics(robot_id: int, joint_info: Dict, arm: str, max_atte
     inv_torso_pos, inv_torso_orn = p.invertTransform(torso_pos, torso_orn)
     target_pos_local = p.multiplyTransforms(inv_torso_pos, inv_torso_orn, target_pos, [0, 0, 0, 1])[0]
 
-    movable_joints = [j for j in range(p.getNumJoints(robot_id)) if p.getJointInfo(robot_id, j)[2] != p.JOINT_FIXED]
     current_positions = [p.getJointState(robot_id, j)[0] for j in movable_joints]
 
     solution = p.calculateInverseKinematics(
@@ -260,6 +262,7 @@ async def main_loop(session: VuerSession, robot_id: int, joint_info: Dict, max_f
         use_firmware (bool): Whether to use firmware control.
     """
     global q
+    movable_joints = [j for j in range(p.getNumJoints(robot_id)) if p.getJointInfo(robot_id, j)[2] != p.JOINT_FIXED]
 
     session.upsert @ PointLight(intensity=10.0, position=[0, 2, 2])
     session.upsert @ Hands(fps=30, stream=True, key="hands")
@@ -325,8 +328,8 @@ async def main_loop(session: VuerSession, robot_id: int, joint_info: Dict, max_f
 
     while True:
         await asyncio.gather(
-            inverse_kinematics(robot_id, joint_info, "left"),
-            inverse_kinematics(robot_id, joint_info, "right"),
+            # inverse_kinematics(robot_id, joint_info, movable_joints, "left"),
+            inverse_kinematics(robot_id, joint_info, movable_joints, "right"),
             asyncio.sleep(1 / max_fps),
         )
 
@@ -363,7 +366,6 @@ async def main_loop(session: VuerSession, robot_id: int, joint_info: Dict, max_f
                 gripper_q = 0
             if gripper_q < -90:
                 gripper_q = -90
-
             TestModel.left_arm.gripper.set_position(gripper_q, 0, 0)
 
             prev_q = q_list
