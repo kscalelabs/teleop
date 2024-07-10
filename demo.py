@@ -69,11 +69,14 @@ START_Q: Dict[str, float] = OrderedDict(
         ("joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1", 0.0),
         ("joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2", 0.0),
         # right arm
-        ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8", 0),
-        ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8", -4.2),
+        ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8", 0.68),
+        ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8", 1.24),
         ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4", 0),
-        ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4", -2.83),
-        ("joint_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4", -1.32),
+        ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4", 3.45),
+        ("joint_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4", 0),
+        # right gripper
+        ("joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_1", 0.0),
+        ("joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_2", 0.0),
     ]
 )
 
@@ -236,6 +239,15 @@ def hand_move_handler(event, robot_id: int, joint_info: Dict):
     if rpinch_dist < PINCH_DIST_CLOSED:
         goal_pos_eer = np.multiply(rthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN)
 
+        # Gripper control
+        rmiddl_pos = np.array(event.value["rightLandmarks"][MIDDLE_FINGER_TIP_ID])
+        rgrip_dist = np.linalg.norm(rthumb_pos - rmiddl_pos) / PINCH_DIST_OPENED
+        _s = EE_S_MIN + rgrip_dist * (EE_S_MAX - EE_S_MIN)
+
+        for slider in EER_CHAIN_HAND:
+            q[slider] = 0.05 - _s
+            p.resetJointState(robot_id, joint_info[slider]["index"], 0.05 - _s)
+
     # Left hand
     lthumb_pos = np.array(event.value["leftLandmarks"][THUMB_FINGER_TIP_ID])
     lpinch_dist = np.linalg.norm(np.array(event.value["leftLandmarks"][INDEX_FINGER_TIP_ID]) - lthumb_pos)
@@ -279,15 +291,15 @@ async def main_loop(session: VuerSession, robot_id: int, joint_info: Dict, max_f
 
     if use_firmware:
         from firmware.scripts.robot_controller import Robot
-
-        # todo
+        # TODO update it to the actual setup
         robot = Robot("left_arm")
         robot.zero_out()
+        new_positions = {"left_arm": [q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]}
 
     while True:
         await asyncio.gather(
             inverse_kinematics(robot_id, joint_info, movable_joints, "left"),
-            # inverse_kinematics(robot_id, joint_info, movable_joints, "right"),
+            inverse_kinematics(robot_id, joint_info, movable_joints, "right"),
             asyncio.sleep(1 / max_fps),
         )
 
@@ -302,7 +314,8 @@ async def main_loop(session: VuerSession, robot_id: int, joint_info: Dict, max_f
 
         if use_firmware:
             # TODO update q
-            robot.set_position(q)
+            new_positions["left_arm"] = [q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]
+            robot.set_position(new_positions)
 
 
 def main():
