@@ -1,12 +1,27 @@
-"""POC for integrating PyBullet with Vuer for real-time robot control."""
+"""
+POC for integrating PyBullet with Vuer for real-time robot control.
 
+This script demonstrates the integration of PyBullet physics simulation with Vuer
+for real-time robot control and visualization. It includes inverse kinematics (IK)
+calculations, hand tracking, and optional firmware control.
+
+Usage:
+    python script_name.py [--firmware] [--gui] [--fps FPS] [--urdf PATH]
+
+Options:
+    --firmware  Enable firmware control (default: False)
+    --gui       Use PyBullet GUI mode (default: False)
+    --fps FPS   Set the maximum frames per second (default: 60)
+    --urdf PATH Path to the URDF file (default: local path)
+"""
+
+import argparse
 import asyncio
 import logging
 import math
-import time
 from collections import OrderedDict
 from copy import deepcopy
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 import numpy as np
 import pybullet as p
@@ -15,12 +30,14 @@ from numpy.typing import NDArray
 from vuer import Vuer, VuerSession
 from vuer.schemas import Hands, PointLight, Urdf
 
-FIRMWARE_ON = False
-DELTA = 10
+# Configure logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
 
-# URDF paths
-URDF_WEB: str = "https://raw.githubusercontent.com/kscalelabs/teleop/9260d7b46de14cf93214142bf0172967b2e7de2a/urdf/stompy/upper_limb_assembly_5_dof_merged_simplified.urdf"
-URDF_LOCAL: str = "urdf/stompy/upper_limb_assembly_5_dof_merged_simplified.urdf"
+# Constants
+DELTA = 10
+URDF_WEB = "https://raw.githubusercontent.com/kscalelabs/teleop/9260d7b46de14cf93214142bf0172967b2e7de2a/urdf/stompy/upper_limb_assembly_5_dof_merged_simplified.urdf"
+URDF_LOCAL = "urdf/stompy/upper_limb_assembly_5_dof_merged_simplified.urdf"
 
 # Robot configuration
 START_POS_TRUNK_PYBULLET: NDArray = np.array([0, 0, 1.0])
@@ -30,10 +47,7 @@ START_EUL_TRUNK_VUER: NDArray = np.array([-math.pi, -0.68, 0])
 
 # Starting positions for robot end effectors
 START_POS_EEL: NDArray = np.array([-0.35, -0.25, 0.0]) + START_POS_TRUNK_PYBULLET
-START_POS_EER: NDArray = np.array([-0.35, +0.25, 0.0]) + START_POS_TRUNK_PYBULLET
-START_POS_EEL: NDArray = np.array([-0.35, -0.25, 0.0]) + START_POS_TRUNK_PYBULLET
-START_POS_EER: NDArray = np.array([-0.35, +0.25, 0.0]) + START_POS_TRUNK_PYBULLET
-
+START_POS_EER: NDArray = np.array([-0.35, 0.25, 0.0]) + START_POS_TRUNK_PYBULLET
 
 PB_TO_VUER_AXES: NDArray = np.array([2, 0, 1], dtype=np.uint8)
 PB_TO_VUER_AXES_SIGN: NDArray = np.array([1, 1, 1], dtype=np.int8)
@@ -41,7 +55,9 @@ PB_TO_VUER_AXES_SIGN: NDArray = np.array([1, 1, 1], dtype=np.int8)
 # Starting joint positions
 START_Q: Dict[str, float] = OrderedDict(
     [
+        # trunk
         ("joint_torso_1_rmd_x8_90_mock_1_dof_x8", 0),
+        # left arm
         ("joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8", 0.503),
         ("joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8", -1.33),
         ("joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4", 0),
@@ -59,194 +75,123 @@ START_Q: Dict[str, float] = OrderedDict(
     ]
 )
 
-OFFSET = [val for val in START_Q.values()]
-IK_Q_LIST = list(START_Q.keys())
+OFFSET = list(START_Q.values())
 
 # End effector links
-EEL_LINK: str = "left_end_effector_link"
-EER_LINK: str = "right_end_effector_link"
+EEL_JOINT: str = "left_end_effector_joint"
+EER_JOINT: str = "right_end_effector_joint"
 
 # Kinematic chains for each arm
-EEL_CHAIN_ARM: List[str] = [
+EEL_CHAIN_ARM = [
     "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8",
     "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8",
     "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4",
     "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4",
     "joint_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4",
 ]
-EER_CHAIN_ARM: List[str] = [
+EER_CHAIN_ARM = [
     "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8",
     "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8",
     "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4",
     "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4",
     "joint_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4",
 ]
-
-EEL_CHAIN_HAND: List[str] = [
+EEL_CHAIN_HAND = [
     "joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1",
     "joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2",
 ]
 
-# PyBullet setup
-print("Starting PyBullet in GUI mode.")
-p.connect(p.GUI)
-p.setAdditionalSearchPath(pybullet_data.getDataPath())
-pb_robot_id = p.loadURDF(URDF_LOCAL, [0, 0, 0], useFixedBase=True)
-p.setGravity(0, 0, -9.81)
-
-# Initialize joint information
-pb_num_joints: int = p.getNumJoints(pb_robot_id)
-pb_joint_names: List[str] = [""] * pb_num_joints
-pb_child_link_names: List[str] = [""] * pb_num_joints
-pb_joint_upper_limit: List[float] = [0.0] * pb_num_joints
-pb_joint_lower_limit: List[float] = [0.0] * pb_num_joints
-pb_joint_ranges: List[float] = [0.0] * pb_num_joints
-pb_start_q: List[float] = [0.0] * pb_num_joints
-pb_q_map: Dict[str, int] = {}
-
-for i in range(pb_num_joints):
-    info = p.getJointInfo(pb_robot_id, i)
-    name = info[1].decode("utf-8")
-    pb_joint_names[i] = name
-    pb_child_link_names[i] = info[12].decode("utf-8")
-    pb_joint_lower_limit[i] = info[8]
-    pb_joint_upper_limit[i] = info[9]
-    pb_joint_ranges[i] = abs(info[9] - info[8])
-    if name in START_Q:
-        pb_start_q[i] = START_Q[name]
-
-    if name in EEL_CHAIN_ARM + EER_CHAIN_ARM + EEL_CHAIN_HAND:
-        pb_q_map[name] = i
-
-pb_eel_id = pb_child_link_names.index(EEL_LINK)
-pb_eer_id = pb_child_link_names.index(EER_LINK)
-
-
-for i in range(pb_num_joints):
-    p.resetJointState(pb_robot_id, i, pb_start_q[i])
-
-p.resetBasePositionAndOrientation(
-    pb_robot_id,
-    START_POS_TRUNK_PYBULLET,
-    p.getQuaternionFromEuler(START_EUL_TRUNK_PYBULLET),
-)
-
-# Verify: Get joint positions (should all be zeros now)
-for joint in range(pb_num_joints):
-    position = p.getJointState(pb_robot_id, joint)[0]
-    print(f"Joint {joint} position: {position}")
-
-# Set camera view
-p.resetDebugVisualizerCamera(
-    cameraDistance=2.0, cameraYaw=50, cameraPitch=-35, cameraTargetPosition=START_POS_TRUNK_PYBULLET
-)
-
-# Vuer rendering params
-MAX_FPS: int = 60
-VUER_LIGHT_POS: NDArray = np.array([0, 2, 2])
-VUER_LIGHT_INTENSITY: float = 10.0
-
-# Vuer hand tracking params
-HAND_FPS: int = 30
-# TODO check that
-INDEX_FINGER_TIP_ID: int = 8
-THUMB_FINGER_TIP_ID: int = 4
-PINCH_DIST_CLOSED: float = 0.1
-
-
-# pre-compute gripper "slider" ranges for faster callback
-MIDDLE_FINGER_TIP_ID: int = 14
-PINCH_DIST_OPENED: float = 0.1  # 10cm
-EE_S_MIN: float = 0.0
-EE_S_MAX: float = 0.05
-ee_s_range: float = EE_S_MAX - EE_S_MIN
-
+# Hand tracking parameters
+INDEX_FINGER_TIP_ID, THUMB_FINGER_TIP_ID, MIDDLE_FINGER_TIP_ID = 8, 4, 14
+PINCH_DIST_CLOSED, PINCH_DIST_OPENED = 0.1, 0.1  # 10 cm
+EE_S_MIN, EE_S_MAX = 0.0, 0.05
 
 # Global variables
 q_lock = asyncio.Lock()
 q = deepcopy(START_Q)
-goal_pos_eel: NDArray = START_POS_EEL
-goal_pos_eer: NDArray = START_POS_EER
-
-# Add goal position markers
-p.addUserDebugPoints([goal_pos_eel], [[1, 0, 0]], pointSize=20)
-p.addUserDebugPoints([goal_pos_eer], [[0, 0, 1]], pointSize=20)
+goal_pos_eel, goal_pos_eer = START_POS_EEL, START_POS_EER
 
 
-if FIRMWARE_ON:
-    import sys
+def setup_pybullet(use_gui: bool, urdf_path: str) -> Tuple[int, Dict]:
+    """
+    Set up PyBullet simulation environment.
 
-    import can
+    Args:
+        use_gui (bool): Whether to use GUI mode.
+        urdf_path (str): Path to the URDF file.
 
-    sys.path.append("./firmware/")
+    Returns:
+        Tuple containing robot ID and joint information dictionary.
+    """
+    p.connect(p.GUI if use_gui else p.DIRECT)
+    p.setAdditionalSearchPath(pybullet_data.getDataPath())
+    robot_id = p.loadURDF(urdf_path, [0, 0, 0], useFixedBase=True)
+    p.setGravity(0, 0, -9.81)
 
-    rad_to_deg = lambda rad: rad / (math.pi) * 180
-    val_to_grip = lambda val: val * -90 / 0.04
+    joint_info = {}
+    for i in range(p.getNumJoints(robot_id)):
+        info = p.getJointInfo(robot_id, i)
+        name = info[1].decode("utf-8")
+        joint_info[name] = {
+            "index": i,
+            "lower_limit": info[8],
+            "upper_limit": info[9],
+            "child_link_name": info[12].decode("utf-8"),
+        }
+        if name in START_Q:
+            p.resetJointState(robot_id, i, START_Q[name])
 
-    from firmware.bionic_motors.model import Arm, Body
-    from firmware.bionic_motors.motors import BionicMotor, CANInterface
-    from firmware.bionic_motors.utils import NORMAL_STRENGTH
-
-    write_bus = can.interface.Bus(channel="can0", bustype="socketcan")
-    buffer_reader = can.BufferedReader()
-    notifier = can.Notifier(write_bus, [buffer_reader])
-    CAN_BUS = CANInterface(write_bus, buffer_reader, notifier)
-    TestModel = Body(
-        left_arm=Arm(
-            rotator_cuff=BionicMotor(1, NORMAL_STRENGTH.ARM_PARAMS, CAN_BUS),
-            shoulder=BionicMotor(2, NORMAL_STRENGTH.ARM_PARAMS, CAN_BUS),
-            bicep=BionicMotor(3, NORMAL_STRENGTH.ARM_PARAMS, CAN_BUS),
-            elbow=BionicMotor(4, NORMAL_STRENGTH.ARM_PARAMS, CAN_BUS),
-            wrist=BionicMotor(5, NORMAL_STRENGTH.ARM_PARAMS, CAN_BUS),
-            gripper=BionicMotor(6, NORMAL_STRENGTH.GRIPPERS_PARAMS, CAN_BUS),
-        )
+    p.resetBasePositionAndOrientation(
+        robot_id,
+        START_POS_TRUNK_PYBULLET,
+        p.getQuaternionFromEuler(START_EUL_TRUNK_PYBULLET),
+    )
+    p.resetDebugVisualizerCamera(
+        cameraDistance=2.0, cameraYaw=50, cameraPitch=-35, cameraTargetPosition=START_POS_TRUNK_PYBULLET
     )
 
-    def filter_motor_values(values: List[float], pos: List[float], increments: List[float], max_val: List[float]):
-        # make it so that we are limited to 0 +- max_val
-        for idx, (val, maxes) in enumerate(zip(values, max_val)):
-            if abs(val) > abs(maxes):
-                values[idx] = val // abs(val) * maxes
+    # Add goal position markers
+    p.addUserDebugPoints([goal_pos_eel], [[1, 0, 0]], pointSize=20)
+    p.addUserDebugPoints([goal_pos_eer], [[0, 0, 1]], pointSize=20)
+
+    return robot_id, joint_info
 
 
-async def ik(arm: str, max_attempts=20, max_iterations=100) -> float:
+async def inverse_kinematics(robot_id: int, joint_info: Dict, arm: str, max_attempts: int = 20) -> float:
+    """
+    Perform inverse kinematics calculation for the specified arm.
+
+    Args:
+        robot_id (int): PyBullet robot ID.
+        joint_info (Dict): Joint information dictionary.
+        arm (str): Arm to calculate IK for ('left' or 'right').
+        max_attempts (int): Maximum number of IK calculation attempts.
+
+    Returns:
+        float: Error between target and actual position.
+    """
     global goal_pos_eel, goal_pos_eer, q
-    # print(goal_pos_eel, goal_pos_eer)
-    # Get the current torso position and orientation
-    torso_pos, torso_orn = p.getBasePositionAndOrientation(pb_robot_id)
 
-    if arm == "right":
-        ee_id = pb_eer_id
-        ee_chain = EER_CHAIN_ARM
-        target_pos = goal_pos_eer
-        joint_damping = [0.1, 100, 100, 100, 100, 100, 100, 100, 0.1, 0.1, 0.1, 0.1, 0.1]
-    else:
-        ee_id = pb_eel_id
-        ee_chain = EEL_CHAIN_ARM
-        joint_damping = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 100, 100, 100, 100, 100]
-        target_pos = goal_pos_eel
+    ee_id = joint_info[EEL_JOINT if arm == "left" else EER_JOINT]["index"]
+    # TODO: add right arm support
+    ee_chain = EEL_CHAIN_ARM + EEL_CHAIN_HAND if arm == "left" else EER_CHAIN_ARM
+    target_pos = goal_pos_eel if arm == "left" else goal_pos_eer
+    joint_damping = [0.1 if i not in ee_chain else 100 for i in range(len(joint_info))]
 
-    joint_indices = [pb_q_map[joint] for joint in ee_chain]
-
-    # Prepare joint limit arrays for IK calculation
-    lower_limits = [pb_joint_lower_limit[idx] for idx in joint_indices]
-    upper_limits = [pb_joint_upper_limit[idx] for idx in joint_indices]
+    joint_indices = [joint_info[joint]["index"] for joint in ee_chain]
+    lower_limits = [joint_info[joint]["lower_limit"] for joint in ee_chain]
+    upper_limits = [joint_info[joint]["upper_limit"] for joint in ee_chain]
     joint_ranges = [upper - lower for upper, lower in zip(upper_limits, lower_limits)]
 
-    # Transform target position to torso's local frame
+    torso_pos, torso_orn = p.getBasePositionAndOrientation(robot_id)
     inv_torso_pos, inv_torso_orn = p.invertTransform(torso_pos, torso_orn)
     target_pos_local = p.multiplyTransforms(inv_torso_pos, inv_torso_orn, target_pos, [0, 0, 0, 1])[0]
 
-    # Get all movable joints
-    num_joints = p.getNumJoints(pb_robot_id)
-    all_joints = range(num_joints)
-    movable_joints = [j for j in all_joints if p.getJointInfo(pb_robot_id, j)[2] != p.JOINT_FIXED]
-
-    # Prepare current positions for all movable joints
-    current_positions = [p.getJointState(pb_robot_id, j)[0] for j in movable_joints]
+    movable_joints = [j for j in range(p.getNumJoints(robot_id)) if p.getJointInfo(robot_id, j)[2] != p.JOINT_FIXED]
+    current_positions = [p.getJointState(robot_id, j)[0] for j in movable_joints]
 
     solution = p.calculateInverseKinematics(
-        pb_robot_id,
+        robot_id,
         ee_id,
         target_pos_local,
         currentPositions=current_positions,
@@ -257,89 +202,67 @@ async def ik(arm: str, max_attempts=20, max_iterations=100) -> float:
         jointDamping=joint_damping,
     )
 
-    actual_pos, _ = p.getLinkState(pb_robot_id, ee_id)[:2]
+    actual_pos, _ = p.getLinkState(robot_id, ee_id)[:2]
     error = np.linalg.norm(np.array(target_pos) - np.array(actual_pos))
 
     async with q_lock:
-        global q
-        # print("solution", solution)
         for i, val in enumerate(solution):
-            joint_name = IK_Q_LIST[i]
+            joint_name = list(START_Q.keys())[i]
             if joint_name in ee_chain:
                 q[joint_name] = val
-                p.resetJointState(pb_robot_id, pb_q_map[joint_name], val)
+                p.resetJointState(robot_id, joint_info[joint_name]["index"], val)
 
     return error
 
 
-def verify_arm_config(arm: str):
-    if arm == "right":
-        ee_id = pb_eer_id
-        ee_chain = EER_CHAIN_ARM
-        ee_link = EER_LINK
-    else:
-        ee_id = pb_eel_id
-        ee_chain = EEL_CHAIN_ARM
-        ee_link = EEL_LINK
+def hand_move_handler(event, robot_id: int, joint_info: Dict):
+    """
+    Handle hand movement events from Vuer.
 
-    print(f"\nVerifying {arm} arm configuration:")
-    for joint in ee_chain:
-        idx = pb_q_map[joint]
-        print(f"Joint: {joint}")
-        print(f"  Index: {idx}")
-        print(f"  Lower limit: {pb_joint_lower_limit[idx]}")
-        print(f"  Upper limit: {pb_joint_upper_limit[idx]}")
-        print(f"  Current value: {p.getJointState(pb_robot_id, idx)[0]}")
+    Args:
+        event: Vuer hand movement event.
+        robot_id (int): PyBullet robot ID.
+        joint_info (Dict): Joint information dictionary.
+    """
+    global goal_pos_eer, goal_pos_eel, q
 
-    print(f"\n{arm.capitalize()} arm end effector:")
-    print(f"  Link name: {ee_link}")
-    print(f"  Link index: {ee_id}")
-    ee_state = p.getLinkState(pb_robot_id, ee_id)
-    print(f"  Current position: {ee_state[0]}")
-    print(f"  Current orientation: {ee_state[1]}")
-
-
-app = Vuer()
-
-
-@app.add_handler("HAND_MOVE")
-async def hand_handler(event, _):
-    global goal_pos_eer, goal_pos_eel
-
-    # right hand
+    # Right hand
     rthumb_pos = np.array(event.value["rightLandmarks"][THUMB_FINGER_TIP_ID])
     rpinch_dist = np.linalg.norm(np.array(event.value["rightLandmarks"][INDEX_FINGER_TIP_ID]) - rthumb_pos)
     if rpinch_dist < PINCH_DIST_CLOSED:
         goal_pos_eer = np.multiply(rthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN)
 
-    # left hand
+    # Left hand
     lthumb_pos = np.array(event.value["leftLandmarks"][THUMB_FINGER_TIP_ID])
     lpinch_dist = np.linalg.norm(np.array(event.value["leftLandmarks"][INDEX_FINGER_TIP_ID]) - lthumb_pos)
-
     if lpinch_dist < PINCH_DIST_CLOSED:
         goal_pos_eel = np.multiply(lthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN)
-        # pinching with middle finger controls gripper
-        lmiddl_pos: NDArray = np.array(event.value["leftLandmarks"][MIDDLE_FINGER_TIP_ID])
-        lgrip_dist: float = np.linalg.norm(lthumb_pos - lmiddl_pos) / PINCH_DIST_OPENED
-        _s: float = EE_S_MIN + lgrip_dist * ee_s_range
 
-        q["joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1"] = 0.05 - _s
-        q["joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2"] = 0.05 - _s
+        # Gripper control
+        lmiddl_pos = np.array(event.value["leftLandmarks"][MIDDLE_FINGER_TIP_ID])
+        lgrip_dist = np.linalg.norm(lthumb_pos - lmiddl_pos) / PINCH_DIST_OPENED
+        _s = EE_S_MIN + lgrip_dist * (EE_S_MAX - EE_S_MIN)
 
-        p.resetJointState(pb_robot_id, pb_q_map["joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1"], 0.05 - _s)
-        p.resetJointState(pb_robot_id, pb_q_map["joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2"], 0.05 - _s)
+        for slider in EEL_CHAIN_HAND:
+            q[slider] = 0.05 - _s
+            p.resetJointState(robot_id, joint_info[slider]["index"], 0.05 - _s)
 
 
-@app.spawn(start=True)
-async def main(session: VuerSession):
+async def main_loop(session: VuerSession, robot_id: int, joint_info: Dict, max_fps: int, use_firmware: bool):
+    """
+    Main application loop.
+
+    Args:
+        session (VuerSession): Vuer session object.
+        robot_id (int): PyBullet robot ID.
+        joint_info (Dict): Joint information dictionary.
+        max_fps (int): Maximum frames per second.
+        use_firmware (bool): Whether to use firmware control.
+    """
     global q
 
-    # Verify arm configurations before starting
-    verify_arm_config("left")
-    verify_arm_config("right")
-
-    session.upsert @ PointLight(intensity=VUER_LIGHT_INTENSITY, position=VUER_LIGHT_POS)
-    session.upsert @ Hands(fps=HAND_FPS, stream=True, key="hands")
+    session.upsert @ PointLight(intensity=10.0, position=[0, 2, 2])
+    session.upsert @ Hands(fps=30, stream=True, key="hands")
     await asyncio.sleep(0.1)
     session.upsert @ Urdf(
         src=URDF_WEB,
@@ -349,7 +272,38 @@ async def main(session: VuerSession):
         key="robot",
     )
 
-    if FIRMWARE_ON:
+    if use_firmware:
+        import time
+
+        import can
+
+        from firmware.bionic_motors.model import Arm, Body
+        from firmware.bionic_motors.motors import BionicMotor, CANInterface
+        from firmware.bionic_motors.utils import NORMAL_STRENGTH
+
+        rad_to_deg = lambda rad: rad / (math.pi) * 180
+        val_to_grip = lambda val: val * -90 / 0.04
+        write_bus = can.interface.Bus(channel="can0", bustype="socketcan")
+        buffer_reader = can.BufferedReader()
+        notifier = can.Notifier(write_bus, [buffer_reader])
+        can_bus = CANInterface(write_bus, buffer_reader, notifier)
+        TestModel = Body(
+            left_arm=Arm(
+                rotator_cuff=BionicMotor(1, NORMAL_STRENGTH.ARM_PARAMS, can_bus),
+                shoulder=BionicMotor(2, NORMAL_STRENGTH.ARM_PARAMS, can_bus),
+                bicep=BionicMotor(3, NORMAL_STRENGTH.ARM_PARAMS, can_bus),
+                elbow=BionicMotor(4, NORMAL_STRENGTH.ARM_PARAMS, can_bus),
+                wrist=BionicMotor(5, NORMAL_STRENGTH.ARM_PARAMS, can_bus),
+                gripper=BionicMotor(6, NORMAL_STRENGTH.GRIPPERS_PARAMS, can_bus),
+            )
+        )
+
+        def filter_motor_values(values: List[float], pos: List[float], increments: List[float], max_val: List[float]):
+            # make it so that we are limited to 0 +- max_val
+            for idx, (val, maxes) in enumerate(zip(values, max_val)):
+                if abs(val) > abs(maxes):
+                    values[idx] = val // abs(val) * maxes
+
         for part in TestModel.left_arm.motors:
             part.set_zero_position()
             time.sleep(0.001)
@@ -371,13 +325,12 @@ async def main(session: VuerSession):
 
     while True:
         await asyncio.gather(
-            ik("left"),  # ~1ms
-            # ik("right"),  # ~1ms
-            asyncio.sleep(1 / MAX_FPS),  # ~16ms @ 60fps
+            inverse_kinematics(robot_id, joint_info, "left"),
+            inverse_kinematics(robot_id, joint_info, "right"),
+            asyncio.sleep(1 / max_fps),
         )
 
         async with q_lock:
-            global q
             session.upsert @ Urdf(
                 src=URDF_WEB,
                 jointValues=q,
@@ -386,7 +339,7 @@ async def main(session: VuerSession):
                 key="robot",
             )
 
-        if FIRMWARE_ON:
+        if use_firmware:
             for idx, (key, val) in enumerate(q.items()):
                 q[key] = val - OFFSET[idx]
             q_list = [rad_to_deg(q[i]) for i in EEL_CHAIN_ARM] + [0]
@@ -416,5 +369,29 @@ async def main(session: VuerSession):
             prev_q = q_list
 
 
-if __name__ == "__main__":
+def main():
+    """Main entry point of the application."""
+    parser = argparse.ArgumentParser(description="PyBullet and Vuer integration for robot control")
+    parser.add_argument("--firmware", action="store_true", help="Enable firmware control")
+    parser.add_argument("--gui", action="store_true", help="Use PyBullet GUI mode")
+    parser.add_argument("--fps", type=int, default=60, help="Maximum frames per second")
+    parser.add_argument("--urdf", type=str, default=URDF_LOCAL, help="Path to URDF file")
+    args = parser.parse_args()
+
+    robot_id, joint_info = setup_pybullet(args.gui, args.urdf)
+
+    app = Vuer()
+
+    @app.add_handler("HAND_MOVE")
+    async def hand_move_wrapper(event, _):
+        hand_move_handler(event, robot_id, joint_info)
+
+    @app.spawn(start=True)
+    async def app_main(session: VuerSession):
+        await main_loop(session, robot_id, joint_info, args.fps, args.firmware)
+
     app.run()
+
+
+if __name__ == "__main__":
+    main()
