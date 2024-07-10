@@ -55,7 +55,8 @@ A minimal implementation of a bi-manual remote robotic teleoperation system usin
 
 ```bash
 git clone https://github.com/kscalelabs/teleop.git && cd teleop
-conda create -y -n teleop python=3.8 && conda activate teleop
+conda create -y -n teleop python=3.11 && conda activate teleop
+make install-dependencies
 pip install -r requirements.txt
 ```
 

@@ -1,4 +1,5 @@
 """POC for integrating PyBullet with Vuer for real-time robot control."""
+
 import asyncio
 import logging
 import math
@@ -22,42 +23,42 @@ URDF_WEB: str = "https://raw.githubusercontent.com/kscalelabs/teleop/9260d7b46de
 URDF_LOCAL: str = "urdf/stompy/upper_limb_assembly_5_dof_merged_simplified.urdf"
 
 # Robot configuration
-START_POS_TRUNK_PYBULLET: NDArray = np.array([0, 0, 1.])
-START_EUL_TRUNK_PYBULLET: NDArray = np.array([-math.pi/2, 0, 2.15])
-START_POS_TRUNK_VUER: NDArray = np.array([0, 1., 0])
-START_EUL_TRUNK_VUER: NDArray = np.array([-math.pi, -.68, 0])
+START_POS_TRUNK_PYBULLET: NDArray = np.array([0, 0, 1.0])
+START_EUL_TRUNK_PYBULLET: NDArray = np.array([-math.pi / 2, 0, 2.15])
+START_POS_TRUNK_VUER: NDArray = np.array([0, 1.0, 0])
+START_EUL_TRUNK_VUER: NDArray = np.array([-math.pi, -0.68, 0])
 
 # Starting positions for robot end effectors
-START_POS_EEL: NDArray = np.array([-0.35, -0.25, 0.]) + START_POS_TRUNK_PYBULLET
-START_POS_EER: NDArray = np.array([-0.35, +0.25, .0]) + START_POS_TRUNK_PYBULLET
-START_POS_EEL: NDArray = np.array([-0.35, -0.25, 0.]) + START_POS_TRUNK_PYBULLET
-START_POS_EER: NDArray = np.array([-0.35, +0.25, .0]) + START_POS_TRUNK_PYBULLET
+START_POS_EEL: NDArray = np.array([-0.35, -0.25, 0.0]) + START_POS_TRUNK_PYBULLET
+START_POS_EER: NDArray = np.array([-0.35, +0.25, 0.0]) + START_POS_TRUNK_PYBULLET
+START_POS_EEL: NDArray = np.array([-0.35, -0.25, 0.0]) + START_POS_TRUNK_PYBULLET
+START_POS_EER: NDArray = np.array([-0.35, +0.25, 0.0]) + START_POS_TRUNK_PYBULLET
 
 
 PB_TO_VUER_AXES: NDArray = np.array([2, 0, 1], dtype=np.uint8)
 PB_TO_VUER_AXES_SIGN: NDArray = np.array([1, 1, 1], dtype=np.int8)
 
 # Starting joint positions
-START_Q: Dict[str, float] = OrderedDict([
-    ("joint_torso_1_rmd_x8_90_mock_1_dof_x8", 0),
-    
-    ("joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8", 0.503),
-    ("joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8", -1.33),
-    ("joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4", 0),
-    ("joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4", 5.03),
-    ("joint_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4", 1.76),
-    # left gripper
-    ("joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1", 0.0),
-    ("joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2", 0.0),
-    # right arm
-    ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8", 0),
-    ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8", -4.2),
-    ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4", 0),
-    ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4", -2.83),
-    ("joint_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4", -1.32)
+START_Q: Dict[str, float] = OrderedDict(
+    [
+        ("joint_torso_1_rmd_x8_90_mock_1_dof_x8", 0),
+        ("joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8", 0.503),
+        ("joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8", -1.33),
+        ("joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4", 0),
+        ("joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4", 5.03),
+        ("joint_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4", 1.76),
+        # left gripper
+        ("joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1", 0.0),
+        ("joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2", 0.0),
+        # right arm
+        ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8", 0),
+        ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8", -4.2),
+        ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4", 0),
+        ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4", -2.83),
+        ("joint_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4", -1.32),
+    ]
+)
 
-])
- 
 OFFSET = [val for val in START_Q.values()]
 IK_Q_LIST = list(START_Q.keys())
 
@@ -67,23 +68,23 @@ EER_LINK: str = "right_end_effector_link"
 
 # Kinematic chains for each arm
 EEL_CHAIN_ARM: List[str] = [
-    'joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8',
-    'joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8',
-    'joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4',
-    'joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4',
-    'joint_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4',
+    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8",
+    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8",
+    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4",
+    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4",
+    "joint_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4",
 ]
 EER_CHAIN_ARM: List[str] = [
-    'joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8',
-    'joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8',
-    'joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4',
-    'joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4',
-    'joint_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4',
+    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8",
+    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8",
+    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4",
+    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4",
+    "joint_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4",
 ]
 
 EEL_CHAIN_HAND: List[str] = [
-    'joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1',
-    'joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2',
+    "joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1",
+    "joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2",
 ]
 
 # PyBullet setup
@@ -137,10 +138,7 @@ for joint in range(pb_num_joints):
 
 # Set camera view
 p.resetDebugVisualizerCamera(
-    cameraDistance=2.0,
-    cameraYaw=50,
-    cameraPitch=-35,
-    cameraTargetPosition=START_POS_TRUNK_PYBULLET
+    cameraDistance=2.0, cameraYaw=50, cameraPitch=-35, cameraTargetPosition=START_POS_TRUNK_PYBULLET
 )
 
 # Vuer rendering params
@@ -175,23 +173,20 @@ p.addUserDebugPoints([goal_pos_eel], [[1, 0, 0]], pointSize=20)
 p.addUserDebugPoints([goal_pos_eer], [[0, 0, 1]], pointSize=20)
 
 
-
-
 if FIRMWARE_ON:
     import sys
 
     import can
-    sys.path.append('./firmware/')
+
+    sys.path.append("./firmware/")
 
     rad_to_deg = lambda rad: rad / (math.pi) * 180
-    val_to_grip = lambda val: val * -90/ 0.04
+    val_to_grip = lambda val: val * -90 / 0.04
 
     from firmware.bionic_motors.model import Arm, Body
     from firmware.bionic_motors.motors import BionicMotor, CANInterface
     from firmware.bionic_motors.utils import NORMAL_STRENGTH
 
-    print('no issues with imports')
-    # TODO clean up
     write_bus = can.interface.Bus(channel="can0", bustype="socketcan")
     buffer_reader = can.BufferedReader()
     notifier = can.Notifier(write_bus, [buffer_reader])
@@ -208,7 +203,6 @@ if FIRMWARE_ON:
     )
 
     def filter_motor_values(values: List[float], pos: List[float], increments: List[float], max_val: List[float]):
-
         # make it so that we are limited to 0 +- max_val
         for idx, (val, maxes) in enumerate(zip(values, max_val)):
             if abs(val) > abs(maxes):
@@ -220,7 +214,7 @@ async def ik(arm: str, max_attempts=20, max_iterations=100) -> float:
     # print(goal_pos_eel, goal_pos_eer)
     # Get the current torso position and orientation
     torso_pos, torso_orn = p.getBasePositionAndOrientation(pb_robot_id)
-    
+
     if arm == "right":
         ee_id = pb_eer_id
         ee_chain = EER_CHAIN_ARM
@@ -229,7 +223,7 @@ async def ik(arm: str, max_attempts=20, max_iterations=100) -> float:
     else:
         ee_id = pb_eel_id
         ee_chain = EEL_CHAIN_ARM
-        joint_damping = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1,0.1,0.1, 100, 100, 100, 100, 100]
+        joint_damping = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 100, 100, 100, 100, 100]
         target_pos = goal_pos_eel
 
     joint_indices = [pb_q_map[joint] for joint in ee_chain]
@@ -247,7 +241,7 @@ async def ik(arm: str, max_attempts=20, max_iterations=100) -> float:
     num_joints = p.getNumJoints(pb_robot_id)
     all_joints = range(num_joints)
     movable_joints = [j for j in all_joints if p.getJointInfo(pb_robot_id, j)[2] != p.JOINT_FIXED]
-    
+
     # Prepare current positions for all movable joints
     current_positions = [p.getJointState(pb_robot_id, j)[0] for j in movable_joints]
 
@@ -277,6 +271,7 @@ async def ik(arm: str, max_attempts=20, max_iterations=100) -> float:
 
     return error
 
+
 def verify_arm_config(arm: str):
     if arm == "right":
         ee_id = pb_eer_id
@@ -295,7 +290,7 @@ def verify_arm_config(arm: str):
         print(f"  Lower limit: {pb_joint_lower_limit[idx]}")
         print(f"  Upper limit: {pb_joint_upper_limit[idx]}")
         print(f"  Current value: {p.getJointState(pb_robot_id, idx)[0]}")
-    
+
     print(f"\n{arm.capitalize()} arm end effector:")
     print(f"  Link name: {ee_link}")
     print(f"  Link index: {ee_id}")
@@ -303,7 +298,9 @@ def verify_arm_config(arm: str):
     print(f"  Current position: {ee_state[0]}")
     print(f"  Current orientation: {ee_state[1]}")
 
+
 app = Vuer()
+
 
 @app.add_handler("HAND_MOVE")
 async def hand_handler(event, _):
@@ -314,11 +311,11 @@ async def hand_handler(event, _):
     rpinch_dist = np.linalg.norm(np.array(event.value["rightLandmarks"][INDEX_FINGER_TIP_ID]) - rthumb_pos)
     if rpinch_dist < PINCH_DIST_CLOSED:
         goal_pos_eer = np.multiply(rthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN)
-    
+
     # left hand
     lthumb_pos = np.array(event.value["leftLandmarks"][THUMB_FINGER_TIP_ID])
     lpinch_dist = np.linalg.norm(np.array(event.value["leftLandmarks"][INDEX_FINGER_TIP_ID]) - lthumb_pos)
-    
+
     if lpinch_dist < PINCH_DIST_CLOSED:
         goal_pos_eel = np.multiply(lthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN)
         # pinching with middle finger controls gripper
@@ -328,7 +325,7 @@ async def hand_handler(event, _):
 
         q["joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1"] = 0.05 - _s
         q["joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2"] = 0.05 - _s
-        
+
         p.resetJointState(pb_robot_id, pb_q_map["joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1"], 0.05 - _s)
         p.resetJointState(pb_robot_id, pb_q_map["joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2"], 0.05 - _s)
 
@@ -336,11 +333,11 @@ async def hand_handler(event, _):
 @app.spawn(start=True)
 async def main(session: VuerSession):
     global q
-    
+
     # Verify arm configurations before starting
     verify_arm_config("left")
     verify_arm_config("right")
-    
+
     session.upsert @ PointLight(intensity=VUER_LIGHT_INTENSITY, position=VUER_LIGHT_POS)
     session.upsert @ Hands(fps=HAND_FPS, stream=True, key="hands")
     await asyncio.sleep(0.1)
@@ -356,7 +353,7 @@ async def main(session: VuerSession):
         for part in TestModel.left_arm.motors:
             part.set_zero_position()
             time.sleep(0.001)
-        
+
         for part in TestModel.left_arm.motors:
             part.update_position(0.25)
 
@@ -372,7 +369,6 @@ async def main(session: VuerSession):
 
         prev_q = []
 
-    
     while True:
         await asyncio.gather(
             ik("left"),  # ~1ms
@@ -409,15 +405,16 @@ async def main(session: VuerSession):
             TestModel.left_arm.elbow.set_position(signs[3] * int(q_list[3]), 0, 0)
             TestModel.left_arm.wrist.set_position(signs[4] * int(q_list[4]), 0, 0)
 
-            gripper_q = val_to_grip(q['joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1'])
+            gripper_q = val_to_grip(q["joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1"])
             if gripper_q > 0:
                 gripper_q = 0
             if gripper_q < -90:
                 gripper_q = -90
 
             TestModel.left_arm.gripper.set_position(gripper_q, 0, 0)
-    
+
             prev_q = q_list
+
 
 if __name__ == "__main__":
     app.run()
