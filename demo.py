@@ -49,6 +49,9 @@ START_EUL_TRUNK_VUER: NDArray = np.array([-math.pi, -0.68, 0])
 START_POS_EEL: NDArray = np.array([-0.35, -0.25, 0.0]) + START_POS_TRUNK_PYBULLET
 START_POS_EER: NDArray = np.array([-0.35, 0.25, 0.0]) + START_POS_TRUNK_PYBULLET
 
+START_ORN_EEL: NDArray = p.getQuaternionFromEuler([0, 0, math.pi/2])
+START_ORN_EER: NDArray = p.getQuaternionFromEuler([0, 0, -math.pi/2])
+
 PB_TO_VUER_AXES: NDArray = np.array([2, 0, 1], dtype=np.uint8)
 PB_TO_VUER_AXES_SIGN: NDArray = np.array([1, 1, 1], dtype=np.int8)
 
@@ -96,6 +99,11 @@ EER_CHAIN_ARM = [
     "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4",
     "joint_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4",
 ]
+
+# Add torso joint to left arm kinematic chain for full 6dof control
+TORSO_JOINT = "joint_torso_1_rmd_x8_90_mock_1_dof_x8"
+EEL_CHAIN_ARM = [TORSO_JOINT] + EEL_CHAIN_ARM
+
 EEL_CHAIN_HAND = [
     "joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1",
     "joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2",
@@ -110,6 +118,7 @@ EE_S_MIN, EE_S_MAX = 0.0, 0.05
 q_lock = asyncio.Lock()
 q = deepcopy(START_Q)
 goal_pos_eel, goal_pos_eer = START_POS_EEL, START_POS_EER
+goal_orn_eel, goal_orn_eer = START_ORN_EEL, START_ORN_EER
 
 
 def setup_pybullet(use_gui: bool, urdf_path: str) -> Tuple[int, Dict]:
@@ -170,12 +179,13 @@ async def inverse_kinematics(robot_id: int, joint_info: Dict, arm: str, max_atte
     Returns:
         float: Error between target and actual position.
     """
-    global goal_pos_eel, goal_pos_eer, q
+    global goal_pos_eel, goal_pos_eer, goal_orn_eel, goal_orn_eer, q
 
     ee_id = joint_info[EEL_JOINT if arm == "left" else EER_JOINT]["index"]
     # TODO: add right arm support
     ee_chain = EEL_CHAIN_ARM + EEL_CHAIN_HAND if arm == "left" else EER_CHAIN_ARM
     target_pos = goal_pos_eel if arm == "left" else goal_pos_eer
+    target_orn = goal_orn_eel if arm == "left" else goal_orn_eer
     joint_damping = [0.1 if i not in ee_chain else 100 for i in range(len(joint_info))]
 
     joint_indices = [joint_info[joint]["index"] for joint in ee_chain]
@@ -185,7 +195,7 @@ async def inverse_kinematics(robot_id: int, joint_info: Dict, arm: str, max_atte
 
     torso_pos, torso_orn = p.getBasePositionAndOrientation(robot_id)
     inv_torso_pos, inv_torso_orn = p.invertTransform(torso_pos, torso_orn)
-    target_pos_local = p.multiplyTransforms(inv_torso_pos, inv_torso_orn, target_pos, [0, 0, 0, 1])[0]
+    target_pos_local, target_orn_local = p.multiplyTransforms(inv_torso_pos, inv_torso_orn, target_pos, target_orn)
 
     movable_joints = [j for j in range(p.getNumJoints(robot_id)) if p.getJointInfo(robot_id, j)[2] != p.JOINT_FIXED]
     current_positions = [p.getJointState(robot_id, j)[0] for j in movable_joints]
@@ -194,6 +204,7 @@ async def inverse_kinematics(robot_id: int, joint_info: Dict, arm: str, max_atte
         robot_id,
         ee_id,
         target_pos_local,
+        target_orn_local,
         currentPositions=current_positions,
         lowerLimits=lower_limits,
         upperLimits=upper_limits,
