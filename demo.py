@@ -166,7 +166,7 @@ def setup_pybullet(use_gui: bool, urdf_path: str) -> Tuple[int, Dict]:
     return robot_id, joint_info
 
 
-async def inverse_kinematics(robot_id: int, joint_info: Dict, arm: str, max_attempts: int = 20) -> float:
+async def inverse_kinematics(robot_id: int, joint_info: Dict, arm: str, max_attempts: int = 20, fix_orientation: bool = True) -> float:
     """
     Perform inverse kinematics calculation for the specified arm.
 
@@ -175,6 +175,7 @@ async def inverse_kinematics(robot_id: int, joint_info: Dict, arm: str, max_atte
         joint_info (Dict): Joint information dictionary.
         arm (str): Arm to calculate IK for ('left' or 'right').
         max_attempts (int): Maximum number of IK calculation attempts.
+        fix_orientation (bool): Whether to fix the orientation of the end effector.
 
     Returns:
         float: Error between target and actual position.
@@ -183,7 +184,7 @@ async def inverse_kinematics(robot_id: int, joint_info: Dict, arm: str, max_atte
 
     ee_id = joint_info[EEL_JOINT if arm == "left" else EER_JOINT]["index"]
     # TODO: add right arm support
-    ee_chain = EEL_CHAIN_ARM + EEL_CHAIN_HAND if arm == "left" else EER_CHAIN_ARM
+    ee_chain = (EEL_CHAIN_ARM + EEL_CHAIN_HAND)[arm == "left" and not fix_orientation:] if arm == "left" else EER_CHAIN_ARM
     target_pos = goal_pos_eel if arm == "left" else goal_pos_eer
     target_orn = goal_orn_eel if arm == "left" else goal_orn_eer
     joint_damping = [0.1 if i not in ee_chain else 100 for i in range(len(joint_info))]
@@ -204,7 +205,7 @@ async def inverse_kinematics(robot_id: int, joint_info: Dict, arm: str, max_atte
         robot_id,
         ee_id,
         target_pos_local,
-        target_orn_local,
+        **({"targetOrientation": target_orn_local} if fix_orientation else {}),
         currentPositions=current_positions,
         lowerLimits=lower_limits,
         upperLimits=upper_limits,
