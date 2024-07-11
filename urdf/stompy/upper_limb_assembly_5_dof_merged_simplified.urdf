@@ -423,7 +423,7 @@
     <origin xyz="4.641020484585923e-09 -0.10000000809858081 0.16699999495439255" rpy="1.5707963071795863 1.570796300000005 0.0" />
     <parent link="fused_component_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_outer_rmd_x4_24_1" />
     <child link="fused_component_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slide_2" />
-    <limit effort="6" velocity="5" lower="5" upper="0.05" />
+    <limit effort="6" velocity="5" lower="0" upper="0.05" />
     <axis xyz="0 0 -1" />
     <!-- <mimic joint="joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_1" multiplier="1" offset="0" /> -->
     </joint>

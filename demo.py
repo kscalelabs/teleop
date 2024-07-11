@@ -6,7 +6,7 @@ for real-time robot control and visualization. It includes inverse kinematics (I
 calculations, hand tracking, and optional firmware control.
 
 Usage:
-    python script_name.py [--firmware] [--gui] [--fps FPS] [--urdf PATH]
+    python demo.py [--firmware] [--gui] [--fps FPS] [--urdf PATH]
 
 Options:
     --firmware  Enable firmware control (default: False)
