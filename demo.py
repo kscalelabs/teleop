@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 
 # Constants
 DELTA = 10
-URDF_WEB = "https://raw.githubusercontent.com/kscalelabs/teleop/a057fcd8d3477a4ab8818bcce1a04edc376c37fb/urdf/stompy/upper_limb_assembly_5_dof_merged_simplified.urdf"
+URDF_WEB = "https://raw.githubusercontent.com/kscalelabs/teleop/f4616b5f117842e5f7eb138b87af31258e1f7484/urdf/stompy/upper_limb_assembly_5_dof_merged_simplified.urdf"
 URDF_LOCAL = "urdf/stompy/upper_limb_assembly_5_dof_merged_simplified.urdf"
 
 # Robot configuration
@@ -164,7 +164,6 @@ def setup_pybullet(use_gui: bool, urdf_path: str) -> Tuple[int, Dict]:
     p.addUserDebugPoints([goal_pos_eer], [[0, 0, 1]], pointSize=20)
 
     return robot_id, joint_info
-
 
 async def inverse_kinematics(robot_id: int, joint_info: Dict, movable_joints: Dict, arm: str, max_attempts: int = 20) -> float:
     """
@@ -313,9 +312,9 @@ async def main_loop(session: VuerSession, robot_id: int, joint_info: Dict, max_f
             )
 
         if use_firmware:
-            # TODO update q
             new_positions["left_arm"] = [q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]
-            robot.set_position(new_positions)
+            offset = {"left_arm": [START_Q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]}
+            robot.set_position(new_positions, offset=offset)
 
 
 def main():
