@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 
 # Constants
 DELTA = 10
-URDF_WEB = "https://raw.githubusercontent.com/kscalelabs/teleop/master/urdf/stompy/upper_limb_assembly_5_dof_merged_simplified.urdf"
+URDF_WEB = "https://raw.githubusercontent.com/kscalelabs/teleop/a057fcd8d3477a4ab8818bcce1a04edc376c37fb/urdf/stompy/upper_limb_assembly_5_dof_merged_simplified.urdf"
 URDF_LOCAL = "urdf/stompy/upper_limb_assembly_5_dof_merged_simplified.urdf"
 
 # Robot configuration
