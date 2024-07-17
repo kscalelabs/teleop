@@ -11,7 +11,7 @@ from vuer.schemas import Hands, PointLight, Urdf
 
 # URDF paths
 URDF_WEB: str = "https://raw.githubusercontent.com/kscalelabs/webstompy/pawel/new_stomp/urdf/stompy_new/upper_limb_assembly_5_dof_merged_simplified.urdf"
-URDF_LOCAL: str = "urdf/stompy_7dof/multiarm.urdf"
+# URDF_LOCAL: str = "urdf/stompy_7dof/multiarm.urdf"
 URDF_LOCAL: str = "urdf/stompy_7dof/meshes/complete.urdf"
 
 
@@ -149,86 +149,36 @@ def visualize_target_and_actual(target_pos, actual_pos, color):
     p.addUserDebugLine(target_pos, actual_pos, color, lineWidth=2)
 
 
-async def ik(arm: str, max_attempts=20, max_iterations=100) -> float:
-    global goal_pos_eel, goal_pos_eer, q, goal_orn_eel, goal_orn_eer
-    
-    torso_pos, torso_orn = p.getBasePositionAndOrientation(pb_robot_id)
-    
+async def ik(arm: str, max_attempts: int =20, max_iterations: int = 100) -> float:
+
     if arm == "right":
         ee_id = pb_eer_id
         ee_chain = EER_CHAIN_ARM
         target_pos = goal_pos_eer
         target_orn = goal_orn_eer
-        joint_damping = [0.1] * 20
         color = [0, 0, 1]
     else:
         ee_id = pb_eel_id
         ee_chain = EEL_CHAIN_ARM
         target_pos = goal_pos_eel
         target_orn = goal_orn_eel
-        joint_damping = [0.1] * 20
         color = [1, 0, 0]
 
     joint_indices = [pb_q_map[joint] for joint in ee_chain]
-    #print(f"Joint indices for {arm} ", joint_indices)
-    
+
     best_error = float('inf')
     best_solution = None
 
-    lower_limits = [pb_joint_lower_limit[idx] for idx in joint_indices]
-    upper_limits = [pb_joint_upper_limit[idx] for idx in joint_indices]
-    joint_ranges = [upper - lower for upper, lower in zip(upper_limits, lower_limits)]
-
-    inv_torso_pos, inv_torso_orn = p.invertTransform(torso_pos, torso_orn)
-    target_pos_local, target_orn_local = p.multiplyTransforms(inv_torso_pos, inv_torso_orn, target_pos, target_orn)
-
-    #current_positions = [p.getJointState(pb_robot_id, idx)[0] for idx in joint_indices]
-
-    # Get all movable joints
-    num_joints = p.getNumJoints(pb_robot_id)
-    all_joints = range(num_joints)
-    movable_joints = [j for j in all_joints if p.getJointInfo(pb_robot_id, j)[2] != p.JOINT_FIXED]
-    
-    # Prepare current positions for all movable joints
-    current_positions = [p.getJointState(pb_robot_id, j)[0] for j in movable_joints]
-
-    for attempt in range(max_attempts):
-            
+    for _ in range(max_attempts):
         solution = p.calculateInverseKinematics(
             pb_robot_id,
             ee_id,
             target_pos,
             target_orn,
-            #lowerLimits=lower_limits,
-            #upperLimits=upper_limits,
-            #jointRanges=joint_ranges,
-            #restPoses=pb_start_q,#current_positions,
             maxNumIterations=max_iterations,
             residualThreshold=1e-5
         )
 
-
-        """
-            solution = p.calculateInverseKinematics(
-            pb_robot_id,
-            ee_id,
-            target_pos_local,
-            #target_orn_local,
-            lowerLimits=lower_limits,
-            upperLimits=upper_limits,
-            jointRanges=joint_ranges,
-            restPoses=pb_start_q,#current_positions,
-            #currentPositions=current_positions,
-            #jointDamping=joint_damping,
-            #solver=p.IK_DLS,
-            maxNumIterations=max_iterations,
-            residualThreshold=1e-4
-        )
-        """
-    
-        #for i, idx in enumerate(joint_indices):
-        #    p.resetJointState(pb_robot_id, idx, solution[i])
-        
         for idx, value in zip(joint_indices, solution[:len(joint_indices)]):
             p.resetJointState(pb_robot_id, idx, value)
 
@@ -237,9 +187,6 @@ async def ik(arm: str, max_attempts=20, max_iterations=100) -> float:
         actual_pos, actual_orn = p.getLinkState(pb_robot_id, ee_id)[:2]
         error = np.linalg.norm(np.array(target_pos) - np.array(actual_pos))
         total_error = error
-        #pos_error = np.linalg.norm(np.array(target_pos_local) - np.array(actual_pos))
-        #orn_error = np.linalg.norm(np.array(target_orn_local) - np.array(actual_orn))
-        #total_error = 0.9*pos_error + 0.1 * orn_error  # Weighted sum of position and orientation errors
 
         if total_error < best_error:
             best_error = total_error
@@ -258,207 +205,6 @@ async def ik(arm: str, max_attempts=20, max_iterations=100) -> float:
     p.stepSimulation()
 
     return best_error
-
-'''
-async def ik(arm: str, max_attempts=20, max_iterations=100) -> float:
-    global goal_pos_eel, goal_pos_eer, q, goal_orn_eel, goal_orn_eer
-    
-    # Get the current torso position and orientation
-    torso_pos, torso_orn = p.getBasePositionAndOrientation(pb_robot_id)
-    
-    if arm == "right":
-        ee_id = pb_eer_id
-        ee_chain = EER_CHAIN_ARM
-        target_pos = goal_pos_eer
-        target_orn = goal_orn_eer
-        #joint_damping = [0.05]*11
-        joint_damping = [0.00001, 100, 100, 100, 100, 100, 0.00001, 0.00001, 0.0000001, 0.00001, 0.00001, 0.1, 0.1, 0.1, 0.1]
-        #joint_damping = [3.5, 100, 100, 100, 100, 100, 3.5, 3.5, 3.5, 3.5, 3.5]
-        #joint_damping = [0.01] * pb_num_joints
-        color = [0, 0, 1]  # Blue for right arm
-    else:
-        ee_id = pb_eel_id
-        ee_chain = EEL_CHAIN_ARM
-        target_pos = goal_pos_eel
-        target_orn = goal_orn_eel
-        #joint_damping = [0.05]*11
-        joint_damping = [0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 100, 100, 100, 100, 100, 0.1, 0.1, 0.1, 0.1]
-        #joint_damping = [100, 3.5, 3.5, 3.5, 3.5, 3.5, 100, 100, 100, 100, 100]
-        #joint_damping = [0] * pb_num_joints
-        color = [1, 0, 0]  # Red for left arm
-
-    joint_indices = [pb_q_map[joint] for joint in ee_chain]
-    
-    best_error = float('inf')
-    best_solution = None
-
-    # Prepare joint limit arrays for IK calculation
-    lower_limits = [pb_joint_lower_limit[idx] for idx in joint_indices]
-    upper_limits = [pb_joint_upper_limit[idx] for idx in joint_indices]
-    joint_ranges = [upper - lower for upper, lower in zip(upper_limits, lower_limits)]
-
-    # Transform target position to torso's local frame
-    inv_torso_pos, inv_torso_orn = p.invertTransform(torso_pos, torso_orn)
-    target_pos_local, target_orn_local = p.multiplyTransforms(inv_torso_pos, inv_torso_orn, target_pos, target_orn)
-    # Get all movable joints
-    num_joints = p.getNumJoints(pb_robot_id)
-    all_joints = range(num_joints)
-    movable_joints = [j for j in all_joints if p.getJointInfo(pb_robot_id, j)[2] != p.JOINT_FIXED]
-
-    # Prepare current positions for all movable joints
-    current_positions = [p.getJointState(pb_robot_id, j)[0] for j in movable_joints]
-
-    for attempt in range(max_attempts):
-        
-        solution = p.calculateInverseKinematics(
-            pb_robot_id,
-            ee_id,
-            target_pos_local,
-            target_orn_local,  
-            #targetOrientation=[0, 0, 0, 1],  # Ignore orientation for now
-            lowerLimits=lower_limits,
-            upperLimits=upper_limits,
-            jointRanges=joint_ranges,
-            restPoses=pb_start_q,
-            #jointDamping=joint_damping,
-            solver=0,
-            maxNumIterations=max_iterations,
-            residualThreshold=1e-5
-        )
-        # breakpoint()
-        # Apply the solution only to the arm joints
-        for i, idx in enumerate(joint_indices):
-            p.resetJointState(pb_robot_id, idx, solution[movable_joints.index(idx)])
-        p.stepSimulation()
-
-        actual_pos, _ = p.getLinkState(pb_robot_id, ee_id)[:2]
-        error = np.linalg.norm(np.array(target_pos) - np.array(actual_pos))
-
-        if error < best_error:
-            best_error = error
-            best_solution = [solution[movable_joints.index(idx)] for idx in joint_indices]
-
-        if error < 0.01:  # 1cm tolerance
-            break
-
-    if best_solution:
-        for i, joint in enumerate(ee_chain):
-            q[joint] = best_solution[i]
-            p.resetJointState(pb_robot_id, pb_q_map[joint], best_solution[i])
-
-    final_pos, _ = p.getLinkState(pb_robot_id, ee_id)[:2]
-    
-    # Visualize target and actual positions
-    visualize_target_and_actual(target_pos, final_pos, color)
-
-    p.stepSimulation()
-
-    return best_error
-'''
-
-'''
-async def ik(arm: str, max_attempts=20, max_iterations=100) -> float:
-    global goal_pos_eel, goal_pos_eer, q, goal_orn_eel, goal_orn_eer
-    
-    # Get the current torso position and orientation
-    torso_pos, torso_orn = p.getBasePositionAndOrientation(pb_robot_id)
-    
-    if arm == "right":
-        ee_id = pb_eer_id
-        ee_chain = EER_CHAIN_ARM
-        target_pos = goal_pos_eer
-        target_orn = goal_orn_eer
-        #joint_damping = [0.05]*11
-        joint_damping = [0.1, 100, 100, 100, 100, 100, 0.1, 0.1, 0.1, 0.1, 0.1]#, 0.1, 0.1]
-        #joint_damping = [3.5, 100, 100, 100, 100, 100, 3.5, 3.5, 3.5, 3.5, 3.5]
-        #joint_damping = [0.01] * pb_num_joints
-        color = [0, 0, 1]  # Blue for right arm
-    else:
-        ee_id = pb_eel_id
-        ee_chain = EEL_CHAIN_ARM
-        target_pos = goal_pos_eel
-        target_orn = goal_orn_eel
-        #joint_damping = [0.05]*11
-        joint_damping = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 100, 100, 100, 100, 100]#, 0.1, 0.1]
-        #joint_damping = [100, 3.5, 3.5, 3.5, 3.5, 3.5, 100, 100, 100, 100, 100]
-        #joint_damping = [0] * pb_num_joints
-        color = [1, 0, 0]  # Red for left arm
-
-    #Joint damping for orientation
-    joint_damping = [0.001, 0.001, 0.001, 0.1, 0.001, 0.1, 0.001, 0.001, 0.1, 0.001, 0.001]
-
-    joint_indices = [pb_q_map[joint] for joint in ee_chain]
-    
-    best_error = float('inf')
-    best_solution = None
-
-    # Prepare joint limit arrays for IK calculation
-    lower_limits = [pb_joint_lower_limit[idx] for idx in joint_indices]
-    upper_limits = [pb_joint_upper_limit[idx] for idx in joint_indices]
-    joint_ranges = [upper - lower for upper, lower in zip(upper_limits, lower_limits)]
-
-    # Transform target position to torso's local frame
-    inv_torso_pos, inv_torso_orn = p.invertTransform(torso_pos, torso_orn)
-    target_pos_local, target_orn_local = p.multiplyTransforms(inv_torso_pos, inv_torso_orn, target_pos, target_orn)
-    # Get all movable joints
-    num_joints = p.getNumJoints(pb_robot_id)
-    all_joints = range(num_joints)
-    movable_joints = [j for j in all_joints if p.getJointInfo(pb_robot_id, j)[2] != p.JOINT_FIXED]
-    
-    # Prepare current positions for all movable joints
-    current_positions = [p.getJointState(pb_robot_id, j)[0] for j in movable_joints]
-
-    for attempt in range(max_attempts):
-        
-        solution = p.calculateInverseKinematics(
-            pb_robot_id,
-            ee_id,
-            target_pos_local,
-            target_orn_local,  
-            #targetOrientation=target_orn_local,
-            #targetOrientation=[0, 0, 0, 1],  # Ignore orientation for now
-            currentPositions=current_positions,
-            lowerLimits=lower_limits,
-            upperLimits=upper_limits,
-            jointRanges=joint_ranges,
-            #restPoses=pb_start_q,
-            restPoses=current_positions,
-            jointDamping=joint_damping,
-            solver=0,
-            maxNumIterations=max_iterations,
-            residualThreshold=1e-5
-        )
-        # breakpoint()
-        # Apply the solution only to the arm joints
-        for i, idx in enumerate(joint_indices):
-            p.resetJointState(pb_robot_id, idx, solution[movable_joints.index(idx)])
-        p.stepSimulation()
-
-        actual_pos, _ = p.getLinkState(pb_robot_id, ee_id)[:2]
-        error = np.linalg.norm(np.array(target_pos) - np.array(actual_pos))
-
-        if error < best_error:
-            best_error = error
-            best_solution = [solution[movable_joints.index(idx)] for idx in joint_indices]
-
-        if error < 0.01:  # 1cm tolerance
-            break
-
-    if best_solution:
-        for i, joint in enumerate(ee_chain):
-            q[joint] = best_solution[i]
-            p.resetJointState(pb_robot_id, pb_q_map[joint], best_solution[i])
-
-    final_pos, _ = p.getLinkState(pb_robot_id, ee_id)[:2]
-    
-    # Visualize target and actual positions
-    visualize_target_and_actual(target_pos, final_pos, color)
-
-    p.stepSimulation()
-
-    return best_error
-
-    '''
 
 def visualize_target_and_actual(target_pos, actual_pos, color):
     p.addUserDebugPoints([target_pos], [color], pointSize=6)
