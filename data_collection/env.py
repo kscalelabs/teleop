@@ -9,17 +9,10 @@ import numpy as np
 from constants import (
     DT,
 )
-
-# MASTER_GRIPPER_JOINT_NORMALIZE_FN,
-# PUPPET_GRIPPER_JOINT_CLOSE,
-# PUPPET_GRIPPER_JOINT_OPEN,
-# PUPPET_GRIPPER_JOINT_UNNORMALIZE_FN,
-# PUPPET_GRIPPER_POSITION_NORMALIZE_FN,
-# PUPPET_GRIPPER_VELOCITY_NORMALIZE_FN,
-# START_ARM_POSE,
-# from interbotix_xs_modules.arm import InterbotixManipulatorXS
-# from interbotix_xs_msgs.msg import JointSingleCommand
 from util import ImageRecorder
+
+from data_demo import TeleopRobot
+
 # from util import Recorder, move_arms, move_grippers, setup_master_bot, setup_puppet_bot
 
 
@@ -44,40 +37,19 @@ class RealEnv:
                                    "cam_right_wrist": (480x640x3)} # h, w, c, dtype='uint8'
                                    """  # noqa: D205
     def __init__(self, init_node, setup_robots=True):
-        # self.puppet_bot_left = InterbotixManipulatorXS(robot_model="vx300s", group_name="arm", gripper_name="gripper",
-        #                                                robot_name=f'puppet_left', init_node=init_node)
-        # self.puppet_bot_right = InterbotixManipulatorXS(robot_model="vx300s", group_name="arm", gripper_name="gripper",
-        #                                                 robot_name=f'puppet_right', init_node=False)
-        # if setup_robots:
-        #     self.setup_robots()
 
-        # self.recorder_left = Recorder('left', init_node=False)
-        # self.recorder_right = Recorder('right', init_node=False)
-        self.image_recorder = ImageRecorder([0])#init_node=False)
-        # self.gripper_command = JointSingleCommand(name="gripper")
+        self.image_recorder = ImageRecorder([0])
+        self.robot = TeleopRobot()
+        self.robot.run(use_gui=True, max_fps=60, use_firmware=True, urdf_path=TeleopRobot.URDF_LOCAL)
 
-    # def setup_robots(self):
-    #     setup_puppet_bot(self.puppet_bot_left)
-    #     setup_puppet_bot(self.puppet_bot_right)
 
-    def get_qpos(self):
-    #     left_qpos_raw = self.recorder_left.qpos
-    #     right_qpos_raw = self.recorder_right.qpos
-    #     left_arm_qpos = left_qpos_raw[:6]
-    #     right_arm_qpos = right_qpos_raw[:6]
-    #     left_gripper_qpos = [PUPPET_GRIPPER_POSITION_NORMALIZE_FN(left_qpos_raw[7])] # this is position not joint
-    #     right_gripper_qpos = [PUPPET_GRIPPER_POSITION_NORMALIZE_FN(right_qpos_raw[7])] # this is position not joint
-    #     return np.concatenate([left_arm_qpos, left_gripper_qpos, right_arm_qpos, right_gripper_qpos])
-        return np.zeros(14)
+    def get_qpos(self) -> np.ndarray:
+        positions = self.robot.get_positions()
+        return positions["actual"]["left"]
 
-    # def get_qvel(self):
-    #     left_qvel_raw = self.recorder_left.qvel
-    #     right_qvel_raw = self.recorder_right.qvel
-    #     left_arm_qvel = left_qvel_raw[:6]
-    #     right_arm_qvel = right_qvel_raw[:6]
-    #     left_gripper_qvel = [PUPPET_GRIPPER_VELOCITY_NORMALIZE_FN(left_qvel_raw[7])]
-    #     right_gripper_qvel = [PUPPET_GRIPPER_VELOCITY_NORMALIZE_FN(right_qvel_raw[7])]
-    #     return np.concatenate([left_arm_qvel, left_gripper_qvel, right_arm_qvel, right_gripper_qvel])
+    def get_qvel(self):
+        velocities = self.robot.get_velocities()
+        return velocities["left"]
 
     # def get_effort(self):
     #     left_effort_raw = self.recorder_left.effort
@@ -86,7 +58,7 @@ class RealEnv:
     #     right_robot_effort = right_effort_raw[:7]
     #     return np.concatenate([left_robot_effort, right_robot_effort])
 
-    def get_images(self):
+    def get_images(self) -> dict:
         return self.image_recorder.get_images()
 
     # def set_gripper_pose(self, left_gripper_desired_pos_normalized, right_gripper_desired_pos_normalized):
@@ -110,7 +82,7 @@ class RealEnv:
     def get_observation(self):
         obs = collections.OrderedDict()
         obs['qpos'] = self.get_qpos()
-        #obs['qvel'] = self.get_qvel()
+        obs['qvel'] = self.get_qvel()
         #obs['effort'] = self.get_effort()
         obs['images'] = self.get_images()
         return obs
@@ -149,16 +121,12 @@ class RealEnv:
             observation=self.get_observation())
 
 
-def get_action(master_bot_left=None, master_bot_right=None):
-    action = np.zeros(14) # 6 joint + 1 gripper, for two arms
-    # Arm actions
-    action[:6] = 0#master_bot_left.dxl.joint_states.position[:6]
-    action[7:7+6] = 0#master_bot_right.dxl.joint_states.position[:6]
-    # Gripper actions
-    action[6] = 0#MASTER_GRIPPER_JOINT_NORMALIZE_FN(master_bot_left.dxl.joint_states.position[6])
-    action[7+6] = 0#MASTER_GRIPPER_JOINT_NORMALIZE_FN(master_bot_right.dxl.joint_states.position[6])
+    def get_action(self):
+        action = np.zeros(6) # 6 joint + 1 gripper, for two arms
+        # Arm actions
+        action[:6] = self.robot.get_positions()["expected"]["left"]
 
-    return action
+        return action
 
 
 def make_real_env(init_node, setup_robots=True):

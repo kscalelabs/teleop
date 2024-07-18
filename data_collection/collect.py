@@ -15,18 +15,7 @@ from constants import (
 )
 from tqdm import tqdm
 
-#from interbotix_xs_modules.arm import InterbotixManipulatorXS
-from env import make_real_env, get_action
-
-# from util import (
-#     ImageRecorder,
-#     Recorder,
-#     get_arm_gripper_positions,
-#     move_arms,
-#     move_grippers,
-#     torque_off,
-#     torque_on,
-# )
+from env import get_action, make_real_env
 
 
 def capture_one_episode(dt: float,
@@ -59,7 +48,7 @@ def capture_one_episode(dt: float,
     actual_dt_history = []
     for t in tqdm(range(max_timesteps)):
         t0 = time.time() #
-        action = get_action()#get_action(master_bot_left, master_bot_right)
+        action = env.get_action()#get_action(master_bot_left, master_bot_right)
         t1 = time.time() #
         #ts = env.step(action)
         ts = env.step(None)
@@ -67,12 +56,6 @@ def capture_one_episode(dt: float,
         timesteps.append(ts)
         actions.append(action)
         actual_dt_history.append([t0, t1, t2])
-
-    # Torque on both master bots
-    #torque_on(master_bot_left)
-    #torque_on(master_bot_right)
-    # Open puppet grippers
-    #move_grippers([env.puppet_bot_left, env.puppet_bot_right], [PUPPET_GRIPPER_JOINT_OPEN] * 2, move_time=0.5)
 
     freq_mean = print_dt_diagnosis(actual_dt_history)
     if freq_mean < 1: #41
@@ -156,6 +139,7 @@ def main(args: Any) -> None:
 
     dataset_name = f'episode_{episode_idx}'
     print(dataset_name + '\n')
+    
     while True:
         is_healthy = capture_one_episode(DT,
                                          max_timesteps,

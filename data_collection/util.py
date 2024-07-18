@@ -8,6 +8,8 @@ from collections import deque
 import numpy as np
 import threading
 
+
+
 class ImageRecorder:
     def signal_handler(self, sig, frame):
         print("You pressed Ctrl+C!")
@@ -77,23 +79,6 @@ class ImageRecorder:
                 image_dict[camera_id] = self.latest_frames[camera_id]
                 #print(image_dict[camera_id])
         return image_dict
-                    
-    # def get_images(self):
-    #     image_dict = {}
-    #     for camera_name in self.camera_ids:
-    #         frame = self.latest_frames[camera_name]
-    #         if frame is not None:
-    #             # Ensure the frame is in the correct format
-    #             if len(frame.shape) == 2:  # If grayscale
-    #                 frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
-    #             elif frame.shape[2] == 4:  # If RGBA
-    #                 frame = cv2.cvtColor(frame, cv2.COLOR_RGBA2BGR)
-                
-    #             # Ensure the dtype is uint8
-    #             frame = frame.astype(np.uint8)
-                    
-    #             image_dict[camera_name] = frame
-    #     return image_dict
 
     def print_diagnostics(self):
         def dt_helper(l):
@@ -140,3 +125,4 @@ if __name__ == "__main__":
     finally:
         recorder.print_diagnostics()
         cv2.destroyAllWindows()
+

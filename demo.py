@@ -15,6 +15,7 @@ Options:
     --urdf PATH Path to the URDF file (default: local path)
 """
 
+# mypy: ignore-errors
 import argparse
 import asyncio
 import math
