@@ -7,6 +7,7 @@ import sys
 import time
 from typing import Any
 
+import cv2
 import h5py
 import numpy as np
 from constants import (
@@ -15,7 +16,7 @@ from constants import (
 )
 from tqdm import tqdm
 
-from env import get_action, make_real_env
+from env import make_real_env
 
 
 def capture_one_episode(dt: float,
@@ -126,6 +127,22 @@ def capture_one_episode(dt: float,
 
 
 def main(args: Any) -> None:
+
+    if args['find_cameras']:
+        index = 0
+        arr = []
+        while True:
+            cap = cv2.VideoCapture(index)
+            if not cap.read()[0]:
+                break
+            else:
+                arr.append(index)
+            cap.release()
+            index += 1
+        print("Connected camera IDs:", arr)
+        return
+
+
     task_config = TASK_CONFIGS[args['task_name']]
     dataset_dir = task_config['dataset_dir']
     max_timesteps: int = task_config['episode_len'] # noqa: PGH003
@@ -177,6 +194,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--task_name', action='store', type=str, help='Task name.', required=True)
     parser.add_argument('--episode_idx', action='store', type=int, help='Episode index.', default=None, required=False)
+    parser.add_argument('--find_cameras', action='store_true', help='Find available cameras.', default=False)
     main(vars(parser.parse_args()))
     # debug()
 

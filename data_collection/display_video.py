@@ -1,8 +1,10 @@
 # mypy: ignore-errors
-import h5py
-import cv2
-import numpy as np
 import argparse
+
+import cv2
+import h5py
+import numpy as np
+
 
 def display_video(file_path, camera_name, playback_speed=1.0):
     with h5py.File(file_path, 'r') as f:
