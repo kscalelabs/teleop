@@ -4,7 +4,6 @@ import argparse
 
 import cv2
 import h5py
-import numpy as np
 
 
 def display_video(file_path: str, camera_name: str, playback_speed: float = 1.0) -> None:

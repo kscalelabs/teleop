@@ -1,3 +1,5 @@
+"""Constants for data collection."""
+
 DATA_DIR = "data"
 TASK_CONFIGS: dict[str, dict[str, int | str | list]] = {
     "left_arm": {

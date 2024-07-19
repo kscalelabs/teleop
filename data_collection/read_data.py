@@ -1,6 +1,9 @@
-# mypy: ignore-errors
+"""Script to read and visualize data from hdf5 files."""
+
 import argparse
 import os
+import sys
+from typing import Any
 
 import cv2
 import h5py
@@ -12,26 +15,25 @@ JOINT_NAMES = ["waist", "shoulder", "elbow", "forearm_roll", "wrist_angle", "wri
 STATE_NAMES = JOINT_NAMES + ["gripper"]
 
 
-def load_hdf5(dataset_dir, dataset_name):
+def load_hdf5(dataset_dir: str, dataset_name: str) -> tuple:
     dataset_path = os.path.join(dataset_dir, dataset_name + ".hdf5")
     if not os.path.isfile(dataset_path):
         print(f"Dataset does not exist at \n{dataset_path}\n")
-        exit()
+        sys.exit()
 
     with h5py.File(dataset_path, "r") as root:
-        is_sim = root.attrs["sim"]
         qpos = root["/observations/qpos"][()]
         # qvel = root['/observations/qvel'][()]
         # effort = root['/observations/effort'][()]
         action = root["/action"][()]
         image_dict = dict()
-        for cam_name in root[f"/observations/images/"].keys():
+        for cam_name in root["/observations/images/"].keys():
             image_dict[cam_name] = root[f"/observations/images/{cam_name}"][()]
 
     return qpos, action, image_dict  # qvel, effort, action, image_dict
 
 
-def main(args):
+def main(args: dict) -> None:
     dataset_dir = args["dataset_dir"]
     episode_idx = args["episode_idx"]
     dataset_name = f"episode_{episode_idx}"
@@ -40,11 +42,12 @@ def main(args):
     save_videos(image_dict, DT, video_path=os.path.join(dataset_dir, dataset_name + "_video.mp4"))
     visualize_joints(qpos, action, plot_path=os.path.join(dataset_dir, dataset_name + "_qpos.png"))
     # visualize_single(effort, 'effort', plot_path=os.path.join(dataset_dir, dataset_name + '_effort.png'))
-    # visualize_single(action - qpos, 'tracking_error', plot_path=os.path.join(dataset_dir, dataset_name + '_error.png'))
-    # visualize_timestamp(t_list, dataset_path) # TODO addn timestamp back
+    # visualize_single(action - qpos,
+    #                  'tracking_error',
+    #                   plot_path=os.path.join(dataset_dir, dataset_name + '_error.png'))
 
 
-def save_videos(video, dt, video_path=None):
+def save_videos(video: list | dict, dt: float, video_path: str | None = None) -> None:
     if isinstance(video, list):
         cam_names = list(video[0].keys())
         h, w, _ = video[0][cam_names[0]].shape
@@ -79,7 +82,9 @@ def save_videos(video, dt, video_path=None):
         print(f"Saved video to: {video_path}")
 
 
-def visualize_joints(qpos_list, command_list, plot_path=None, ylim=None, label_overwrite=None):
+def visualize_joints(
+    qpos_list: list, command_list: list, plot_path: Any = None, ylim: Any = None, label_overwrite: tuple = None
+) -> None:
     if label_overwrite:
         label1, label2 = label_overwrite
     else:
@@ -117,7 +122,9 @@ def visualize_joints(qpos_list, command_list, plot_path=None, ylim=None, label_o
     plt.close()
 
 
-def visualize_single(efforts_list, label, plot_path=None, ylim=None, label_overwrite=None):
+def visualize_single(
+    efforts_list: list, label: str, plot_path: Any = None, ylim: Any = None, label_overwrite: Any = None
+) -> None:
     efforts = np.array(efforts_list)  # ts, dim
     num_ts, num_dim = efforts.shape
     h, w = 2, num_dim
@@ -140,34 +147,6 @@ def visualize_single(efforts_list, label, plot_path=None, ylim=None, label_overw
     plt.tight_layout()
     plt.savefig(plot_path)
     print(f"Saved effort plot to: {plot_path}")
-    plt.close()
-
-
-def visualize_timestamp(t_list, dataset_path):
-    plot_path = dataset_path.replace(".pkl", "_timestamp.png")
-    h, w = 4, 10
-    fig, axs = plt.subplots(2, 1, figsize=(w, h * 2))
-    # process t_list
-    t_float = []
-    for secs, nsecs in t_list:
-        t_float.append(secs + nsecs * 10e-10)
-    t_float = np.array(t_float)
-
-    ax = axs[0]
-    ax.plot(np.arange(len(t_float)), t_float)
-    ax.set_title(f"Camera frame timestamps")
-    ax.set_xlabel("timestep")
-    ax.set_ylabel("time (sec)")
-
-    ax = axs[1]
-    ax.plot(np.arange(len(t_float) - 1), t_float[:-1] - t_float[1:])
-    ax.set_title(f"dt")
-    ax.set_xlabel("timestep")
-    ax.set_ylabel("time (sec)")
-
-    plt.tight_layout()
-    plt.savefig(plot_path)
-    print(f"Saved timestamp plot to: {plot_path}")
     plt.close()
 
 

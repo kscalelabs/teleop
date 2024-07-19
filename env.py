@@ -6,11 +6,11 @@ import time
 from typing import Any
 
 import dm_env
-import matplotlib.pyplot as plt
 import numpy as np
-from constants import DT, TIME_OFFSET
-from data_demo import run_teleop_app
-from util import ImageRecorder
+
+from data_collection.constants import DT, TIME_OFFSET
+from data_collection.util import ImageRecorder
+from demo import run_teleop_app
 
 
 class RealEnv:
@@ -81,8 +81,7 @@ class RealEnv:
 
     def step(self, ref_time: float, action: np.ndarray) -> dm_env.TimeStep:
         self.image_recorder.update()
-        time.sleep((DT - TIME_OFFSET) - (time.time() - ref_time)):
-            time.sleep(0.0001)
+        time.sleep((DT - TIME_OFFSET) - (time.time() - ref_time))
 
         return dm_env.TimeStep(
             step_type=dm_env.StepType.MID,

@@ -1,5 +1,6 @@
+"""Script to collect data from the real robot."""
+
 # Based on https://github.com/tonyzhaozh/aloha/blob/main/aloha_scripts/record_episodes.py
-# mypy: ignore-errors
 
 import argparse
 import os
@@ -10,9 +11,9 @@ from typing import Any
 import cv2
 import h5py
 import numpy as np
-from constants import CAM_HEIGHT, CAM_WIDTH, DT, TASK_CONFIGS
 from tqdm import tqdm
 
+from data_collection.constants import CAM_HEIGHT, CAM_WIDTH, DT, TASK_CONFIGS
 from env import make_real_env
 
 
@@ -28,7 +29,6 @@ def capture_one_episode(
     save_mp4: bool = False,
 ) -> bool:
     print(f"Dataset name: {dataset_name}")
-
 
     # saving dataset
     if not os.path.isdir(dataset_dir):
@@ -178,7 +178,7 @@ def print_dt_diagnosis(actual_dt_history: list) -> float:
     total_time = actual_dt_history[:, 2] - actual_dt_history[:, 0]
 
     dt_mean = np.mean(total_time)
-    dt_std = np.std(total_time)
+    # dt_std = np.std(total_time)
     freq_mean = 1 / dt_mean
     print(
         f"Avg freq: {freq_mean:.2f} Get action: {np.mean(get_action_time):.3f} Step env: {np.mean(step_env_time):.3f}"
