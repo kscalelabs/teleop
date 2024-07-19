@@ -112,7 +112,7 @@ class TeleopRobot:
     def __init__(self, shared_dict: dict = {}) -> None:
         self.app = Vuer()
         self.robot_id = None
-        self.robo: Robot | None = None
+        self.robot: Robot | None = None
         self.joint_info: dict = {}
         self.actual_pos_eel, self.actual_pos_eer = START_POS_EEL, START_POS_EER
         self.goal_pos_eel, self.goal_pos_eer = START_POS_EEL, START_POS_EER
@@ -121,13 +121,6 @@ class TeleopRobot:
 
         self.shared_data = shared_dict
         self.update_shared_data()
-        # self.shared_data['positions'] = {}
-        # self.shared_data['velocities'] = {}
-
-        # self.manager = Manager()
-        # self.shared_data = self.manager.dict()
-        # self.shared_data['positions'] = {}
-        # self.shared_data['velocities'] = {}
 
     def update_shared_data(self) -> None:
         self.shared_data["positions"] = self.get_positions()

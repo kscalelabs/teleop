@@ -23,9 +23,12 @@ class RealEnv:
                                    }
     """  # noqa: D205
 
-    def __init__(self, cameras: list[Any], pseudonyms: list[str], firmware: bool) -> None:
+    def __init__(
+        self, cameras: list[Any], pseudonyms: list[str], firmware: bool, save_mp4: bool = False, save_path: str = ""
+    ) -> None:
         print(cameras[0])
-        self.image_recorder = ImageRecorder(cameras, pseudonyms)
+        self.image_recorder = ImageRecorder(cameras, pseudonyms, save_mp4, save_path=save_path)
+        self.save_mp4 = save_mp4
 
         self.manager = multiprocessing.Manager()
         self.shared_data = self.manager.dict()
@@ -36,15 +39,12 @@ class RealEnv:
         )
         self.teleop_process.start()
         time.sleep(5)
-        # self.robot.run(use_gui=True, max_fps=60, use_firmware=firmware)
 
     def get_qpos(self) -> np.ndarray:
-        # positions = self.robot.get_shared_data()['positions']['actual']['left']
         positions = self.shared_data["positions"]["actual"]["left"]
         return positions
 
     def get_qvel(self) -> np.ndarray:
-        # velocities = self.robot.get_shared_data()['velocities']['left']
         velocities = self.shared_data["velocities"]["left"]
         return velocities
 
@@ -63,7 +63,8 @@ class RealEnv:
         obs["qpos"] = self.get_qpos()
         obs["qvel"] = self.get_qvel()
         # obs['effort'] = self.get_effort()
-        obs["images"] = self.get_images()
+        if not self.save_mp4:
+            obs["images"] = self.get_images()
         return obs
 
     def reset(self, fake: bool = False) -> dm_env.TimeStep:

@@ -9,7 +9,7 @@ from collections import deque
 import cv2
 import numpy as np
 
-from data_collection.constants import CAM_HEIGHT, CAM_WIDTH
+from data_collection.constants import CAM_HEIGHT, CAM_WIDTH, DT
 
 
 class ImageRecorder:
@@ -21,7 +21,7 @@ class ImageRecorder:
         cv2.destroyAllWindows()
         sys.exit(0)
 
-    def __init__(self, camera_ids, pseudonyms, is_debug=False):
+    def __init__(self, camera_ids, pseudonyms, is_debug=False, save_mp4=False, save_path=""):
         self.is_debug = is_debug
         self.camera_ids = camera_ids
         self.camera_names = pseudonyms
@@ -30,8 +30,10 @@ class ImageRecorder:
         self.running = True
         self.locks = {}
         self.latest_frames = {}
+        self.out = {}
+        self.save_mp4 = save_mp4
 
-        for camera_id in self.camera_ids:
+        for camera_id, camera_name in zip(self.camera_ids, self.camera_names):
             self.latest_frames[camera_id] = None
             self.locks[camera_id] = threading.Lock()
 
@@ -41,12 +43,12 @@ class ImageRecorder:
             self.caps[camera_id] = cap
             cap.set(cv2.CAP_PROP_FRAME_WIDTH, CAM_WIDTH)
             cap.set(cv2.CAP_PROP_FRAME_HEIGHT, CAM_HEIGHT)
+            if save_mp4:
+                fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+                self.out[camera_id] = cv2.VideoWriter(
+                    f"{save_path} camera_{camera_name}.mp4", fourcc, int(1 / DT), (CAM_WIDTH, CAM_HEIGHT)
+                )
             time.sleep(2)
-            print("Resize")
-
-            # Set camera properties for maximum speed
-            # cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
-            # cap.set(cv2.CAP_PROP_FPS, 120)  # Adjust based on your camera's capabilities
             self.update()
             if self.is_debug:
                 setattr(self, f"timestamps_{camera_id}", deque(maxlen=50))
@@ -67,6 +69,8 @@ class ImageRecorder:
         for camera_id in self.camera_ids:
             ret, frame = self.caps[camera_id].read()
             if ret:
+                if self.save_mp4:
+                    self.out[camera_id].write(frame)
                 self.latest_frames[camera_id] = np.array(cv2.resize(frame, (CAM_WIDTH, CAM_HEIGHT))).astype(np.uint8)
                 if self.is_debug:
                     getattr(self, f"timestamps_{camera_id}").append(time.time())

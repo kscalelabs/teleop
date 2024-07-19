@@ -25,10 +25,10 @@ def capture_one_episode(
     dataset_name: str,
     overwrite: bool,
     firmware: bool = False,
+    save_mp4: bool = False,
 ) -> bool:
     print(f"Dataset name: {dataset_name}")
 
-    env = make_real_env(camera_names, camera_pseudonyms, firmware=firmware)
 
     # saving dataset
     if not os.path.isdir(dataset_dir):
@@ -37,6 +37,8 @@ def capture_one_episode(
     if os.path.isfile(dataset_path) and not overwrite:
         print(f"Dataset already exist at \n{dataset_path}\nHint: set overwrite to True.")
         sys.exit()
+
+    env = make_real_env(camera_names, camera_pseudonyms, firmware=firmware, save_mp4=save_mp4, save_path=dataset_path)
 
     # Wait for user input to start collecting data
     print("Press Enter to start collecting data")
@@ -67,8 +69,10 @@ def capture_one_episode(
         #'/observations/effort': [],
         "/action": [],
     }
-    for cam_name in camera_pseudonyms:
-        data_dict[f"/observations/images/{cam_name}"] = []
+
+    if not save_mp4:
+        for cam_name in camera_pseudonyms:
+            data_dict[f"/observations/images/{cam_name}"] = []
 
     while actions:
         action = actions.pop(0)
@@ -77,23 +81,25 @@ def capture_one_episode(
         # data_dict['/observations/qvel'].append(ts.observation['qvel'])
         # data_dict['/observations/effort'].append(ts.observation['effort'])
         data_dict["/action"].append(action)
-        for cam_name in camera_pseudonyms:
-            data_dict[f"/observations/images/{cam_name}"].append(ts.observation["images"][cam_name])
+        if not save_mp4:
+            for cam_name in camera_pseudonyms:
+                data_dict[f"/observations/images/{cam_name}"].append(ts.observation["images"][cam_name])
 
     # HDF5
     t0 = time.time()
     with h5py.File(dataset_path + ".hdf5", "w", rdcc_nbytes=1024**2 * 2) as root:
         root.attrs["sim"] = False
         obs = root.create_group("observations")
-        image = obs.create_group("images")
-        for cam_name in camera_pseudonyms:
-            if str(cam_name) not in image:
-                _ = image.create_dataset(
-                    str(cam_name),
-                    (max_timesteps, CAM_HEIGHT, CAM_WIDTH, 3),
-                    dtype="uint8",
-                    chunks=(1, CAM_HEIGHT, CAM_WIDTH, 3),
-                )
+        if not save_mp4:
+            image = obs.create_group("images")
+            for cam_name in camera_pseudonyms:
+                if str(cam_name) not in image:
+                    _ = image.create_dataset(
+                        str(cam_name),
+                        (max_timesteps, CAM_HEIGHT, CAM_WIDTH, 3),
+                        dtype="uint8",
+                        chunks=(1, CAM_HEIGHT, CAM_WIDTH, 3),
+                    )
         _ = obs.create_dataset("qpos", (max_timesteps, 6))
         # _ = obs.create_dataset('qvel', (max_timesteps, 14))
         # _ = obs.create_dataset('effort', (max_timesteps, 14))
@@ -149,6 +155,7 @@ def main(args: Any) -> None:
             dataset_name,
             overwrite,
             firmware=args["use_firmware"],
+            save_mp4=args["save_mp4"],
         )
         if is_healthy:
             break
@@ -185,5 +192,6 @@ if __name__ == "__main__":
     parser.add_argument("--episode_idx", action="store", type=int, help="Episode index.", default=None, required=False)
     parser.add_argument("--find_cameras", action="store_true", help="Find available cameras.", default=False)
     parser.add_argument("--use_firmware", action="store_true", help="Use firmware", default=False)
+    parser.add_argument("--save_mp4", action="store_true", help="Save directly to mp4", default=False)
     main(vars(parser.parse_args()))
     # debug()
