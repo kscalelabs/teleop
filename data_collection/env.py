@@ -81,7 +81,7 @@ class RealEnv:
 
     def step(self, ref_time: float, action: np.ndarray) -> dm_env.TimeStep:
         self.image_recorder.update()
-        while time.time() - ref_time < DT - TIME_OFFSET:
+        time.sleep((DT - TIME_OFFSET) - (time.time() - ref_time)):
             time.sleep(0.0001)
 
         return dm_env.TimeStep(
