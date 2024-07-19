@@ -81,6 +81,9 @@ class RealEnv:
 
     def step(self, ref_time: float, action: np.ndarray) -> dm_env.TimeStep:
         self.image_recorder.update()
+
+        # Maintain desired frequency by adjusting sleep time before next step
+        # Calculated sleep time = desired - manual offset (small) - time taken for step
         time.sleep((DT - TIME_OFFSET) - (time.time() - ref_time))
 
         return dm_env.TimeStep(
