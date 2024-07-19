@@ -53,7 +53,7 @@ def capture_one_episode(dt: float,
         t0 = time.time()
         action = env.get_action()
         t1 = time.time()
-        ts = env.step(action)
+        ts = env.step(t0, action)
         t2 = time.time()
         timesteps.append(ts)
         actions.append(action)

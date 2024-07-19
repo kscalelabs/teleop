@@ -83,7 +83,7 @@ class RealEnv:
             discount=None,
             observation=self.get_observation())
 
-    def step(self, action):
+    def step(self, ref_time, action):
         # state_len = int(len(action) / 2)
         # left_action = action[:state_len]
         # right_action = action[state_len:]
@@ -91,7 +91,10 @@ class RealEnv:
         # self.puppet_bot_right.arm.set_joint_positions(right_action[:6], blocking=False)
         # self.set_gripper_pose(left_action[-1], right_action[-1])
         self.image_recorder.update()
-        time.sleep(DT)
+        while time.time() - ref_time < DT:
+            time.sleep(0.0001)
+
+        #time.sleep(DT)
         return dm_env.TimeStep(
             step_type=dm_env.StepType.MID,
             #reward=self.get_reward(),

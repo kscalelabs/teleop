@@ -263,13 +263,12 @@ class TeleopRobot:
             new_positions = {"left_arm": [self.q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]}
 
         while True:
-            self.update_shared_data()
             await asyncio.gather(
                 self.inverse_kinematics("left"),
                 self.inverse_kinematics("right"),
                 asyncio.sleep(1 / max_fps),
             )
-
+            self.update_shared_data() 
 
             async with self.q_lock:
                 session.upsert @ Urdf(
@@ -285,9 +284,6 @@ class TeleopRobot:
                 offset = {"left_arm": [START_Q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]}
                 self.robot.set_position(new_positions, offset=offset)
 
-    def get_shared_data(self):
-        return self.shared_data
-    
     def get_positions(self) -> Dict[str, NDArray]:
         if self.robot:
             return {
@@ -323,18 +319,16 @@ class TeleopRobot:
         @self.app.spawn(start=True)
         async def app_main(session: VuerSession):
             await self.main_loop(session, max_fps, use_firmware)
-
         while not stop_event.is_set():
+            print("running)")
             self.app.update()
-
-        self.app.shutdown()
-
         #self.app.run()
+        self.app.stop()
 
 def run_teleop_app(use_gui: bool, max_fps: int, use_firmware: bool, stop_event: multiprocessing.Event, shared_data: Dict[str, NDArray]):
     demo = TeleopRobot(shared_dict=shared_data)
     demo.run(use_gui, max_fps, use_firmware, stop_event)
-    return demo
+    #return demo
 
 def main():
     parser = argparse.ArgumentParser(description="PyBullet and Vuer integration for robot control")
