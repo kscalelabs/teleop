@@ -37,8 +37,8 @@ class ImageRecorder:
             if not cap.isOpened():
                 raise IOError(f"Cannot open camera {camera_id}")
             self.caps[camera_id] = cap
-            # cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-            # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+            cap.set(cv2.CAP_PROP_FRAME_WIDTH, 960)
+            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 540)
             time.sleep(2)
             print("Resize")
 
@@ -69,7 +69,7 @@ class ImageRecorder:
         for camera_id in self.camera_ids:
             ret, frame = self.caps[camera_id].read()
             if ret:
-                self.latest_frames[camera_id] = np.array(frame).astype(np.uint8)
+                self.latest_frames[camera_id] = np.array(cv2.resize(frame, (960, 540))).astype(np.uint8)
                 if self.is_debug:
                     getattr(self, f'timestamps_{camera_id}').append(time.time())
 

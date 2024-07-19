@@ -91,7 +91,7 @@ class RealEnv:
         # self.puppet_bot_right.arm.set_joint_positions(right_action[:6], blocking=False)
         # self.set_gripper_pose(left_action[-1], right_action[-1])
         self.image_recorder.update()
-        while time.time() - ref_time < DT:
+        while time.time() - ref_time < DT-0.002:
             time.sleep(0.0001)
 
         #time.sleep(DT)

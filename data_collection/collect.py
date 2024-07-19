@@ -105,16 +105,16 @@ def capture_one_episode(dt: float,
         image = obs.create_group('images')
         for cam_name in camera_pseudonyms:
             if str(cam_name) not in image:
-                _ = image.create_dataset(str(cam_name), (max_timesteps, 720, 1280, 3), dtype='uint8',
-                                        chunks=(1, 720, 1280, 3))
+                _ = image.create_dataset(str(cam_name), (max_timesteps, 540, 960, 3), dtype='uint8',
+                                        chunks=(1, 540, 960, 3))
         _ = obs.create_dataset('qpos', (max_timesteps, 6))
         # _ = obs.create_dataset('qvel', (max_timesteps, 14))
         # _ = obs.create_dataset('effort', (max_timesteps, 14))
         _ = root.create_dataset('action', (max_timesteps, 7))
 
         for name, array in data_dict.items():
-            print(f"{name} {array}")
-            print(name)
+            #print(f"{name} {array}")
+            #print(name)
             if(name == '/observations/images/'+camera_pseudonyms[0]):
                 array = np.array(array)
             root[name][...] = array
