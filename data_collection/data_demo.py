@@ -107,7 +107,7 @@ q = deepcopy(START_Q)
 goal_pos_eel, goal_pos_eer = START_POS_EEL, START_POS_EER
 
 class TeleopRobot:
-    def __init__(self) -> None:
+    def __init__(self, shared_dict=None) -> None:
         self.app = Vuer()
         self.robot_id = None
         self.robot = None
@@ -117,10 +117,15 @@ class TeleopRobot:
         self.q = deepcopy(START_Q)
         self.q_lock = asyncio.Lock()
 
-        self.manager = Manager()
-        self.shared_data = self.manager.dict()
-        self.shared_data['positions'] = {}
-        self.shared_data['velocities'] = {}
+        self.shared_data = shared_dict
+        self.update_shared_data()
+        #self.shared_data['positions'] = {}
+        #self.shared_data['velocities'] = {}
+
+        # self.manager = Manager()
+        # self.shared_data = self.manager.dict()
+        # self.shared_data['positions'] = {}
+        # self.shared_data['velocities'] = {}
 
     def update_shared_data(self):
         self.shared_data['positions'] = self.get_positions()
@@ -258,13 +263,13 @@ class TeleopRobot:
             new_positions = {"left_arm": [self.q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]}
 
         while True:
+            self.update_shared_data()
             await asyncio.gather(
                 self.inverse_kinematics("left"),
                 self.inverse_kinematics("right"),
                 asyncio.sleep(1 / max_fps),
             )
 
-            self.update_shared_data()
 
             async with self.q_lock:
                 session.upsert @ Urdf(
@@ -326,8 +331,8 @@ class TeleopRobot:
 
         #self.app.run()
 
-def run_teleop_app(use_gui: bool, max_fps: int, use_firmware: bool, stop_event: multiprocessing.Event):
-    demo = TeleopRobot()
+def run_teleop_app(use_gui: bool, max_fps: int, use_firmware: bool, stop_event: multiprocessing.Event, shared_data: Dict[str, NDArray]):
+    demo = TeleopRobot(shared_dict=shared_data)
     demo.run(use_gui, max_fps, use_firmware, stop_event)
     return demo
 

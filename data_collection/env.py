@@ -28,21 +28,24 @@ class RealEnv:
         print(cameras[0])
         self.image_recorder = ImageRecorder(cameras, pseudonyms)
 
+        self.manager = multiprocessing.Manager()
+        self.shared_data = self.manager.dict()
+
         self.stop_event = multiprocessing.Event()
-        self.teleop_process = multiprocessing.Process(target=run_teleop_app, args=(True, 60, firmware, self.stop_event))
+        self.teleop_process = multiprocessing.Process(target=run_teleop_app, args=(True, 60, firmware, self.stop_event, self.shared_data))
         self.teleop_process.start()
         time.sleep(5)
-        self.robot = self.teleop_process._target(*self.teleop_process._args)
-
         #self.robot.run(use_gui=True, max_fps=60, use_firmware=firmware)
 
 
     def get_qpos(self) -> np.ndarray:
-        positions = self.robot.get_shared_data()['positions']['actual']['left']
+        #positions = self.robot.get_shared_data()['positions']['actual']['left']
+        positions = self.shared_data['positions']['actual']['left']
         return positions
 
     def get_qvel(self):
-        velocities = self.robot.get_shared_data()['velocities']['left']
+        #velocities = self.robot.get_shared_data()['velocities']['left']
+        velocities = self.shared_data['velocities']['left']
         return velocities
 
     # def get_effort(self):
@@ -100,7 +103,7 @@ class RealEnv:
     def get_action(self):
         action = np.zeros(7) # 5 joint + 2 gripper
         # Arm actions
-        action[:7] = self.robot.get_positions()["expected"]["left"]
+        action[:7] = self.shared_data['positions']['expected']['left']#self.robot.get_positions()["expected"]["left"]
 
         return action
 
