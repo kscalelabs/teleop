@@ -70,10 +70,8 @@ class RealEnv:
     def reset(self, fake: bool = False) -> dm_env.TimeStep:
         if not fake:
             # Reboot puppet robot gripper motors
-            self.puppet_bot_left.dxl.robot_reboot_motors("single", "gripper", True)
-            self.puppet_bot_right.dxl.robot_reboot_motors("single", "gripper", True)
-            self._reset_joints()
-            self._reset_gripper()
+            # Add logic to reset arm motors
+            pass
         return dm_env.TimeStep(
             step_type=dm_env.StepType.FIRST,
             reward=0,

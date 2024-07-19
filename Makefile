@@ -33,10 +33,18 @@ demo:
 #          Build           #
 # ------------------------ #
 
-install:
+install: h5py
 	@pip install --verbose -e .
 .PHONY: install
 
+h5py:
+	@echo "Cloning and installing h5py"
+	@git clone https://github.com/h5py/h5py.git
+	@cd h5py && \
+		git checkout 3.1.0 && \
+		git cherry-pick 3bf862daa4ebeb2eeaf3a0491e05f5415c1818e4 && \
+		source dev-install.sh
+.PHONY: h5py
 
 install-dependencies:
 	@git submodule update --init --recursive

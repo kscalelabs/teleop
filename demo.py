@@ -1,5 +1,4 @@
-"""
-POC for integrating PyBullet with Vuer for real-time robot control.
+"""POC for integrating PyBullet with Vuer for real-time robot control.
 
 This script demonstrates the integration of PyBullet physics simulation with Vuer
 for real-time robot control and visualization. It includes inverse kinematics (IK)
@@ -15,14 +14,13 @@ Options:
     --urdf PATH Path to the URDF file (default: local path)
 """
 
-# mypy: ignore-errors
 import argparse
 import asyncio
 import logging
 import math
 from collections import OrderedDict
 from copy import deepcopy
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Tuple
 
 import numpy as np
 import pybullet as p
@@ -121,8 +119,7 @@ goal_pos_eel, goal_pos_eer = START_POS_EEL, START_POS_EER
 
 
 def setup_pybullet(use_gui: bool, urdf_path: str) -> Tuple[int, Dict]:
-    """
-    Set up PyBullet simulation environment.
+    """Set up PyBullet simulation environment.
 
     Args:
         use_gui (bool): Whether to use GUI mode.
@@ -166,10 +163,9 @@ def setup_pybullet(use_gui: bool, urdf_path: str) -> Tuple[int, Dict]:
 
 
 async def inverse_kinematics(
-    robot_id: int, joint_info: Dict, movable_joints: Dict, arm: str, max_attempts: int = 20
-) -> float:
-    """
-    Perform inverse kinematics calculation for the specified arm.
+    robot_id: int, joint_info: Dict, movable_joints: list, arm: str, max_attempts: int = 20
+) -> float | np.floating[Any]:
+    """Perform inverse kinematics calculation for the specified arm.
 
     Args:
         robot_id (int): PyBullet robot ID.
@@ -186,7 +182,7 @@ async def inverse_kinematics(
     # TODO: add right arm support
     ee_chain = EEL_CHAIN_ARM + EEL_CHAIN_HAND if arm == "left" else EER_CHAIN_ARM + EER_CHAIN_HAND
     target_pos = goal_pos_eel if arm == "left" else goal_pos_eer
-    joint_damping = [0.1 if i not in ee_chain else 100 for i in range(len(joint_info))]
+    joint_damping = [0.1 if joint_info[i] not in ee_chain else 100 for i in range(len(joint_info))]
 
     lower_limits = [joint_info[joint]["lower_limit"] for joint in ee_chain]
     upper_limits = [joint_info[joint]["upper_limit"] for joint in ee_chain]
@@ -223,9 +219,8 @@ async def inverse_kinematics(
     return error
 
 
-def hand_move_handler(event, robot_id: int, joint_info: Dict):
-    """
-    Handle hand movement events from Vuer.
+def hand_move_handler(event: Any, robot_id: int, joint_info: Dict) -> None:
+    """Handle hand movement events from Vuer.
 
     Args:
         event: Vuer hand movement event.
@@ -265,9 +260,8 @@ def hand_move_handler(event, robot_id: int, joint_info: Dict):
             p.resetJointState(robot_id, joint_info[slider]["index"], 0.05 - _s)
 
 
-async def main_loop(session: VuerSession, robot_id: int, joint_info: Dict, max_fps: int, use_firmware: bool):
-    """
-    Main application loop.
+async def main_loop(session: VuerSession, robot_id: int, joint_info: Dict, max_fps: int, use_firmware: bool) -> None:
+    """Main application loop.
 
     Args:
         session (VuerSession): Vuer session object.
@@ -320,7 +314,7 @@ async def main_loop(session: VuerSession, robot_id: int, joint_info: Dict, max_f
             robot.set_position(new_positions, offset=offset)
 
 
-def main():
+def main() -> None:
     """Main entry point of the application."""
     parser = argparse.ArgumentParser(description="PyBullet and Vuer integration for robot control")
     parser.add_argument("--firmware", action="store_true", help="Enable firmware control")
@@ -334,11 +328,11 @@ def main():
     app = Vuer()
 
     @app.add_handler("HAND_MOVE")
-    async def hand_move_wrapper(event, _):
+    async def hand_move_wrapper(event: Any, _: Any) -> None:
         hand_move_handler(event, robot_id, joint_info)
 
     @app.spawn(start=True)
-    async def app_main(session: VuerSession):
+    async def app_main(session: VuerSession) -> None:
         await main_loop(session, robot_id, joint_info, args.fps, args.firmware)
 
     app.run()
