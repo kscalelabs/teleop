@@ -18,13 +18,14 @@ from tqdm import tqdm
 
 from env import make_real_env
 
-
 def capture_one_episode(dt: float,
                         max_timesteps: int,
                         camera_names: Any,
+                        camera_pseudonyms: Any,
                         dataset_dir: str,
                         dataset_name: str,
-                        overwrite: bool) -> bool:
+                        overwrite: bool,
+                        firmware: bool = False) -> bool:
     print(f'Dataset name: {dataset_name}')
 
     # source of data
@@ -32,7 +33,7 @@ def capture_one_episode(dt: float,
     #                                          robot_name=f'master_left', init_node=True)
     #master_bot_right = InterbotixManipulatorXS(robot_model="wx250s", group_name="arm", gripper_name="gripper",
     #                                           robot_name=f'master_right', init_node=False)
-    env = make_real_env(init_node=False, setup_robots=False)
+    env = make_real_env(camera_names, camera_pseudonyms, firmware=firmware)
 
     # saving dataset
     if not os.path.isdir(dataset_dir):
@@ -82,7 +83,7 @@ def capture_one_episode(dt: float,
         #'/observations/effort': [],
         '/action': [],
     }
-    for cam_name in camera_names:
+    for cam_name in camera_pseudonyms:
         data_dict[f'/observations/images/{cam_name}'] = []
 
     # len(action): max_timesteps, len(time_steps): max_timesteps + 1
@@ -93,9 +94,8 @@ def capture_one_episode(dt: float,
         #data_dict['/observations/qvel'].append(ts.observation['qvel'])
         #data_dict['/observations/effort'].append(ts.observation['effort'])
         data_dict['/action'].append(action)
-        for cam_name in camera_names:
+        for cam_name in camera_pseudonyms:
             data_dict[f'/observations/images/{cam_name}'].append(ts.observation['images'][cam_name])
-    print(f"{data_dict['/observations/images/0'][1].size}")
 
     # HDF5
     t0 = time.time()
@@ -103,21 +103,21 @@ def capture_one_episode(dt: float,
         root.attrs['sim'] = False
         obs = root.create_group('observations')
         image = obs.create_group('images')
-        for cam_name in camera_names:
+        for cam_name in camera_pseudonyms:
             if str(cam_name) not in image:
-                _ = image.create_dataset(str(cam_name), (max_timesteps, 480, 640, 3), dtype='uint8',
-                                        chunks=(1, 480, 640, 3))
+                _ = image.create_dataset(str(cam_name), (max_timesteps, 720, 1280, 3), dtype='uint8',
+                                        chunks=(1, 720, 1280, 3))
             # compression='gzip',compression_opts=2,)
             # compression=32001, compression_opts=(0, 0, 0, 0, 9, 1, 1), shuffle=False)
-        _ = obs.create_dataset('qpos', (max_timesteps, 14))
+        _ = obs.create_dataset('qpos', (max_timesteps, 6))
         # _ = obs.create_dataset('qvel', (max_timesteps, 14))
         # _ = obs.create_dataset('effort', (max_timesteps, 14))
-        _ = root.create_dataset('action', (max_timesteps, 14))
+        _ = root.create_dataset('action', (max_timesteps, 7))
 
         for name, array in data_dict.items():
             print(f"{name} {array}")
             print(name)
-            if(name == '/observations/images/0'):
+            if(name == '/observations/images/'+camera_pseudonyms[0]):
                 #array.pop(0)
                 array = np.array(array)
             root[name][...] = array
@@ -147,6 +147,7 @@ def main(args: Any) -> None:
     dataset_dir = task_config['dataset_dir']
     max_timesteps: int = task_config['episode_len'] # noqa: PGH003
     camera_names = task_config['camera_names']
+    camera_pseudonyms = task_config['camera_keys']
 
     if args['episode_idx'] is not None:
         episode_idx = args['episode_idx']
@@ -161,9 +162,11 @@ def main(args: Any) -> None:
         is_healthy = capture_one_episode(DT,
                                          max_timesteps,
                                          camera_names,
+                                         camera_pseudonyms,
                                          str(dataset_dir),
                                          dataset_name,
-                                         overwrite)
+                                         overwrite,
+                                         firmware=args['use_firmware'])
         if is_healthy:
             break
 
@@ -195,6 +198,7 @@ if __name__ == '__main__':
     parser.add_argument('--task_name', action='store', type=str, help='Task name.', required=True)
     parser.add_argument('--episode_idx', action='store', type=int, help='Episode index.', default=None, required=False)
     parser.add_argument('--find_cameras', action='store_true', help='Find available cameras.', default=False)
+    parser.add_argument('--use_firmware', action='store_true', help='Use firmware', default=False)
     main(vars(parser.parse_args()))
     # debug()
 

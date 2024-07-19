@@ -19,10 +19,10 @@ class ImageRecorder:
         cv2.destroyAllWindows()
         sys.exit(0)
 
-    def __init__(self, camera_ids, is_debug=False):
+    def __init__(self, camera_ids, pseudonyms, is_debug=False):
         self.is_debug = is_debug
         self.camera_ids = camera_ids
-        self.camera_ids = [0]
+        self.camera_names = pseudonyms
         self.caps = {}
         self.threads = {}
         self.running = True
@@ -37,9 +37,10 @@ class ImageRecorder:
             if not cap.isOpened():
                 raise IOError(f"Cannot open camera {camera_id}")
             self.caps[camera_id] = cap
-            cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+            # cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+            # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
             time.sleep(2)
+            print("Resize")
 
             # Set camera properties for maximum speed
             # cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
@@ -74,9 +75,9 @@ class ImageRecorder:
 
     def get_images(self):
         image_dict = dict()
-        for camera_id in self.camera_ids:
+        for camera_id, camera_name in zip(self.camera_ids, self.camera_names):
             with self.locks[camera_id]:
-                image_dict[camera_id] = self.latest_frames[camera_id]
+                image_dict[camera_name] = self.latest_frames[camera_id]
                 #print(image_dict[camera_id])
         return image_dict
 

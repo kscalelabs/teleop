@@ -36,11 +36,11 @@ class RealEnv:
                                    "cam_left_wrist": (480x640x3),  # h, w, c, dtype='uint8'
                                    "cam_right_wrist": (480x640x3)} # h, w, c, dtype='uint8'
                                    """  # noqa: D205
-    def __init__(self, init_node, setup_robots=True):
-
-        self.image_recorder = ImageRecorder([0])
+    def __init__(self, cameras, pseudonyms, firmware):
+        print(cameras[0])
+        self.image_recorder = ImageRecorder(cameras, pseudonyms)
         self.robot = TeleopRobot()
-        self.robot.run(use_gui=True, max_fps=60, use_firmware=True, urdf_path=TeleopRobot.URDF_LOCAL)
+        #self.robot.run(use_gui=True, max_fps=60, use_firmware=firmware)
 
 
     def get_qpos(self) -> np.ndarray:
@@ -122,15 +122,15 @@ class RealEnv:
 
 
     def get_action(self):
-        action = np.zeros(6) # 6 joint + 1 gripper, for two arms
+        action = np.zeros(7) # 6 joint + 1 gripper, for two arms
         # Arm actions
-        action[:6] = self.robot.get_positions()["expected"]["left"]
+        action[:7] = self.robot.get_positions()["expected"]["left"]
 
         return action
 
 
-def make_real_env(init_node, setup_robots=True):
-    env = RealEnv(init_node, setup_robots)
+def make_real_env(cameras, pseudonyms, firmware=False):
+    env = RealEnv(cameras, pseudonyms, firmware=firmware)
     return env
 
 

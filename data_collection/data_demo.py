@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 # Constants
 DELTA = 10
 URDF_WEB = "https://raw.githubusercontent.com/kscalelabs/teleop/f4616b5f117842e5f7eb138b87af31258e1f7484/urdf/stompy/upper_limb_assembly_5_dof_merged_simplified.urdf"
-URDF_LOCAL = "urdf/stompy/upper_limb_assembly_5_dof_merged_simplified.urdf"
+URDF_LOCAL = "../urdf/stompy/upper_limb_assembly_5_dof_merged_simplified.urdf"
 
 # Robot configuration
 START_POS_TRUNK_PYBULLET: NDArray = np.array([0, 0, 1])
@@ -106,6 +106,7 @@ class TeleopRobot:
     def __init__(self) -> None:
         self.app = Vuer()
         self.robot_id = None
+        self.robot = None
         self.joint_info = None
         self.actual_pos_eel, self.actual_pos_eer = START_POS_EEL, START_POS_EER
         self.goal_pos_eel, self.goal_pos_eer = START_POS_EEL, START_POS_EER
@@ -280,7 +281,7 @@ class TeleopRobot:
                     'left': np.array([self.q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]),
                 },
                 "actual": {
-                    'left': np.zeros(6),
+                    'left': np.random.rand(6),
                 }
             }
     
@@ -289,7 +290,7 @@ class TeleopRobot:
             "left": np.zeros(6),
         }
 
-    def run(self, use_gui: bool, max_fps: int, use_firmware: bool, urdf_path: str):
+    def run(self, use_gui: bool, max_fps: int, use_firmware: bool, urdf_path: str=URDF_LOCAL):
         self.setup_pybullet(use_gui, urdf_path)
 
         @self.app.add_handler("HAND_MOVE")
