@@ -18,6 +18,7 @@ from tqdm import tqdm
 
 from env import make_real_env
 
+
 def capture_one_episode(dt: float,
                         max_timesteps: int,
                         camera_names: Any,
@@ -122,7 +123,8 @@ def capture_one_episode(dt: float,
                 array = np.array(array)
             root[name][...] = array
     print(f'Saving: {time.time() - t0:.1f} secs')
-
+    env.stop_event.set()
+    env.teleop_process.join()
     return True
 
 
@@ -169,6 +171,7 @@ def main(args: Any) -> None:
                                          firmware=args['use_firmware'])
         if is_healthy:
             break
+    
 
 
 def get_auto_index(dataset_dir: str, dataset_name_prefix: str = '', data_suffix: str = 'hdf5') -> int | Exception:

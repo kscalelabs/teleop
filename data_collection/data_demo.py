@@ -5,7 +5,11 @@ import logging
 import math
 from collections import OrderedDict
 from copy import deepcopy
+import multiprocessing
 from typing import Dict, List, Tuple
+from multiprocessing import Manager
+import multiprocessing
+
 
 import numpy as np
 import pybullet as p
@@ -112,6 +116,15 @@ class TeleopRobot:
         self.goal_pos_eel, self.goal_pos_eer = START_POS_EEL, START_POS_EER
         self.q = deepcopy(START_Q)
         self.q_lock = asyncio.Lock()
+
+        self.manager = Manager()
+        self.shared_data = self.manager.dict()
+        self.shared_data['positions'] = {}
+        self.shared_data['velocities'] = {}
+
+    def update_shared_data(self):
+        self.shared_data['positions'] = self.get_positions()
+        self.shared_data['velocities'] = self.get_velocities()
 
     def setup_pybullet(self, use_gui: bool, urdf_path: str) -> None:
         """Set up PyBullet simulation environment."""
@@ -251,6 +264,8 @@ class TeleopRobot:
                 asyncio.sleep(1 / max_fps),
             )
 
+            self.update_shared_data()
+
             async with self.q_lock:
                 session.upsert @ Urdf(
                     src=URDF_WEB,
@@ -265,6 +280,9 @@ class TeleopRobot:
                 offset = {"left_arm": [START_Q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]}
                 self.robot.set_position(new_positions, offset=offset)
 
+    def get_shared_data(self):
+        return self.shared_data
+    
     def get_positions(self) -> Dict[str, NDArray]:
         if self.robot:
             return {
@@ -290,7 +308,7 @@ class TeleopRobot:
             "left": np.zeros(6),
         }
 
-    def run(self, use_gui: bool, max_fps: int, use_firmware: bool, urdf_path: str=URDF_LOCAL):
+    def run(self, use_gui: bool, max_fps: int, use_firmware: bool, stop_event: multiprocessing.Event, urdf_path: str=URDF_LOCAL):
         self.setup_pybullet(use_gui, urdf_path)
 
         @self.app.add_handler("HAND_MOVE")
@@ -301,7 +319,17 @@ class TeleopRobot:
         async def app_main(session: VuerSession):
             await self.main_loop(session, max_fps, use_firmware)
 
-        self.app.run()
+        while not stop_event.is_set():
+            self.app.update()
+
+        self.app.shutdown()
+
+        #self.app.run()
+
+def run_teleop_app(use_gui: bool, max_fps: int, use_firmware: bool, stop_event: multiprocessing.Event):
+    demo = TeleopRobot()
+    demo.run(use_gui, max_fps, use_firmware, stop_event)
+    return demo
 
 def main():
     parser = argparse.ArgumentParser(description="PyBullet and Vuer integration for robot control")
@@ -311,8 +339,9 @@ def main():
     parser.add_argument("--urdf", type=str, default=URDF_LOCAL, help="Path to URDF file")
     args = parser.parse_args()
 
+    stop = multiprocessing.Event()
     demo = TeleopRobot()
-    demo.run(args.gui, args.fps, args.firmware, args.urdf)
+    demo.run(args.gui, args.fps, args.firmware, stop, args.urdf)
 
 if __name__ == "__main__":
     main()

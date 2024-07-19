@@ -1,6 +1,7 @@
 # mypy: ignore-errors
 
 import collections
+import multiprocessing
 import time
 
 import dm_env
@@ -11,7 +12,7 @@ from constants import (
 )
 from util import ImageRecorder
 
-from data_demo import TeleopRobot
+from data_demo import TeleopRobot, run_teleop_app
 
 # from util import Recorder, move_arms, move_grippers, setup_master_bot, setup_puppet_bot
 
@@ -39,17 +40,23 @@ class RealEnv:
     def __init__(self, cameras, pseudonyms, firmware):
         print(cameras[0])
         self.image_recorder = ImageRecorder(cameras, pseudonyms)
-        self.robot = TeleopRobot()
+
+        self.stop_event = multiprocessing.Event()
+        self.teleop_process = multiprocessing.Process(target=run_teleop_app, args=(True, 60, firmware, self.stop_event))
+        self.teleop_process.start()
+        time.sleep(5)
+        self.robot = self.teleop_process._target(*self.teleop_process._args)
+
         #self.robot.run(use_gui=True, max_fps=60, use_firmware=firmware)
 
 
     def get_qpos(self) -> np.ndarray:
-        positions = self.robot.get_positions()
-        return positions["actual"]["left"]
+        positions = self.robot.get_shared_data()['positions']['actual']['left']
+        return positions#["actual"]["left"]
 
     def get_qvel(self):
-        velocities = self.robot.get_velocities()
-        return velocities["left"]
+        velocities = self.robot.get_shared_data()['velocities']['left']
+        return velocities#["left"]
 
     # def get_effort(self):
     #     left_effort_raw = self.recorder_left.effort
