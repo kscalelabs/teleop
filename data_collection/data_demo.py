@@ -1,15 +1,14 @@
-# mypy: ignore-errors
+"""Demo application for PyBullet and Vuer integration for data collection."""
+
 import argparse
 import asyncio
 import logging
 import math
+import multiprocessing
 from collections import OrderedDict
 from copy import deepcopy
-import multiprocessing
-from typing import Dict, List, Tuple
 from multiprocessing import Manager
-import multiprocessing
-
+from typing import Any, Dict, List, Tuple
 
 import numpy as np
 import pybullet as p
@@ -17,6 +16,8 @@ import pybullet_data
 from numpy.typing import NDArray
 from vuer import Vuer, VuerSession
 from vuer.schemas import Hands, PointLight, Urdf
+
+from firmware.scripts.robot_controller import Robot
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -106,12 +107,13 @@ q_lock = asyncio.Lock()
 q = deepcopy(START_Q)
 goal_pos_eel, goal_pos_eer = START_POS_EEL, START_POS_EER
 
+
 class TeleopRobot:
-    def __init__(self, shared_dict=None) -> None:
+    def __init__(self, shared_dict: dict = {}) -> None:
         self.app = Vuer()
         self.robot_id = None
-        self.robot = None
-        self.joint_info = None
+        self.robo: Robot | None = None
+        self.joint_info: dict = {}
         self.actual_pos_eel, self.actual_pos_eer = START_POS_EEL, START_POS_EER
         self.goal_pos_eel, self.goal_pos_eer = START_POS_EEL, START_POS_EER
         self.q = deepcopy(START_Q)
@@ -119,17 +121,17 @@ class TeleopRobot:
 
         self.shared_data = shared_dict
         self.update_shared_data()
-        #self.shared_data['positions'] = {}
-        #self.shared_data['velocities'] = {}
+        # self.shared_data['positions'] = {}
+        # self.shared_data['velocities'] = {}
 
         # self.manager = Manager()
         # self.shared_data = self.manager.dict()
         # self.shared_data['positions'] = {}
         # self.shared_data['velocities'] = {}
 
-    def update_shared_data(self):
-        self.shared_data['positions'] = self.get_positions()
-        self.shared_data['velocities'] = self.get_velocities()
+    def update_shared_data(self) -> None:
+        self.shared_data["positions"] = self.get_positions()
+        self.shared_data["velocities"] = self.get_velocities()
 
     def setup_pybullet(self, use_gui: bool, urdf_path: str) -> None:
         """Set up PyBullet simulation environment."""
@@ -164,12 +166,12 @@ class TeleopRobot:
         p.addUserDebugPoints([self.goal_pos_eel], [[1, 0, 0]], pointSize=20)
         p.addUserDebugPoints([self.goal_pos_eer], [[0, 0, 1]], pointSize=20)
 
-    async def inverse_kinematics(self, arm: str, max_attempts: int = 20) -> float:
+    async def inverse_kinematics(self, arm: str, max_attempts: int = 20) -> float | np.floating[Any]:
         """Perform inverse kinematics calculation for the specified arm."""
         ee_id = self.joint_info[EEL_JOINT if arm == "left" else EER_JOINT]["index"]
         ee_chain = EEL_CHAIN_ARM + EEL_CHAIN_HAND if arm == "left" else EER_CHAIN_ARM + EER_CHAIN_HAND
         target_pos = self.goal_pos_eel if arm == "left" else self.goal_pos_eer
-        joint_damping = [0.1 if i not in ee_chain else 100 for i in range(len(self.joint_info))]
+        joint_damping = [0.1 if str(i) not in ee_chain else 100 for i in range(len(self.joint_info))]
 
         lower_limits = [self.joint_info[joint]["lower_limit"] for joint in ee_chain]
         upper_limits = [self.joint_info[joint]["upper_limit"] for joint in ee_chain]
@@ -179,7 +181,9 @@ class TeleopRobot:
         inv_torso_pos, inv_torso_orn = p.invertTransform(torso_pos, torso_orn)
         target_pos_local = p.multiplyTransforms(inv_torso_pos, inv_torso_orn, target_pos, [0, 0, 0, 1])[0]
 
-        movable_joints = [j for j in range(p.getNumJoints(self.robot_id)) if p.getJointInfo(self.robot_id, j)[2] != p.JOINT_FIXED]
+        movable_joints = [
+            j for j in range(p.getNumJoints(self.robot_id)) if p.getJointInfo(self.robot_id, j)[2] != p.JOINT_FIXED
+        ]
         current_positions = [p.getJointState(self.robot_id, j)[0] for j in movable_joints]
 
         solution = p.calculateInverseKinematics(
@@ -211,7 +215,7 @@ class TeleopRobot:
 
         return error
 
-    def hand_move_handler(self, event) -> None:
+    def hand_move_handler(self, event: Any) -> None:
         """Handle hand movement events from Vuer."""
         # Right hand
         rthumb_pos = np.array(event.value["rightLandmarks"][THUMB_FINGER_TIP_ID])
@@ -258,6 +262,7 @@ class TeleopRobot:
 
         if use_firmware:
             from firmware.scripts.robot_controller import Robot
+
             self.robot = Robot("left_arm")
             self.robot.zero_out()
             new_positions = {"left_arm": [self.q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]}
@@ -268,7 +273,7 @@ class TeleopRobot:
                 self.inverse_kinematics("right"),
                 asyncio.sleep(1 / max_fps),
             )
-            self.update_shared_data() 
+            self.update_shared_data()
 
             async with self.q_lock:
                 session.upsert @ Urdf(
@@ -284,32 +289,39 @@ class TeleopRobot:
                 offset = {"left_arm": [START_Q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]}
                 self.robot.set_position(new_positions, offset=offset)
 
-    def get_positions(self) -> Dict[str, NDArray]:
+    def get_positions(self) -> dict[str, dict[str, NDArray]]:
         if self.robot:
             return {
                 "expected": {
-                    'left': np.array([self.q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]),
+                    "left": np.array([self.q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]),
                 },
                 "actual": {
-                    'left': np.array(self.robot.get_motor_positions()),
-                }
+                    "left": np.array(self.robot.get_motor_positions()),
+                },
             }
         else:
             return {
                 "expected": {
-                    'left': np.array([self.q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]),
+                    "left": np.array([self.q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]),
                 },
                 "actual": {
-                    'left': np.random.rand(6),
-                }
+                    "left": np.random.rand(6),
+                },
             }
-    
+
     def get_velocities(self) -> Dict[str, NDArray]:
         return {
             "left": np.zeros(6),
         }
 
-    def run(self, use_gui: bool, max_fps: int, use_firmware: bool, stop_event: multiprocessing.Event, urdf_path: str=URDF_LOCAL):
+    def run(
+        self,
+        use_gui: bool,
+        max_fps: int,
+        use_firmware: bool,
+        stop_event: multiprocessing.Event,
+        urdf_path: str = URDF_LOCAL,
+    ) -> None:
         self.setup_pybullet(use_gui, urdf_path)
 
         @self.app.add_handler("HAND_MOVE")
@@ -319,18 +331,23 @@ class TeleopRobot:
         @self.app.spawn(start=True)
         async def app_main(session: VuerSession):
             await self.main_loop(session, max_fps, use_firmware)
+
         while not stop_event.is_set():
             print("running)")
             self.app.update()
-        #self.app.run()
+        # self.app.run()
         self.app.stop()
 
-def run_teleop_app(use_gui: bool, max_fps: int, use_firmware: bool, stop_event: multiprocessing.Event, shared_data: Dict[str, NDArray]):
+
+def run_teleop_app(
+    use_gui: bool, max_fps: int, use_firmware: bool, stop_event: multiprocessing.Event, shared_data: Dict[str, NDArray]
+) -> None:
     demo = TeleopRobot(shared_dict=shared_data)
     demo.run(use_gui, max_fps, use_firmware, stop_event)
-    #return demo
+    # return demo
 
-def main():
+
+def main() -> None:
     parser = argparse.ArgumentParser(description="PyBullet and Vuer integration for robot control")
     parser.add_argument("--firmware", action="store_true", help="Enable firmware control")
     parser.add_argument("--gui", action="store_true", help="Use PyBullet GUI mode")
@@ -341,6 +358,7 @@ def main():
     stop = multiprocessing.Event()
     demo = TeleopRobot()
     demo.run(args.gui, args.fps, args.firmware, stop, args.urdf)
+
 
 if __name__ == "__main__":
     main()

@@ -18,8 +18,8 @@ Options:
 # mypy: ignore-errors
 import argparse
 import asyncio
-import math
 import logging
+import math
 from collections import OrderedDict
 from copy import deepcopy
 from typing import Dict, List, Tuple
@@ -30,8 +30,6 @@ import pybullet_data
 from numpy.typing import NDArray
 from vuer import Vuer, VuerSession
 from vuer.schemas import Hands, PointLight, Urdf
-
-import logging
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -166,7 +164,10 @@ def setup_pybullet(use_gui: bool, urdf_path: str) -> Tuple[int, Dict]:
 
     return robot_id, joint_info
 
-async def inverse_kinematics(robot_id: int, joint_info: Dict, movable_joints: Dict, arm: str, max_attempts: int = 20) -> float:
+
+async def inverse_kinematics(
+    robot_id: int, joint_info: Dict, movable_joints: Dict, arm: str, max_attempts: int = 20
+) -> float:
     """
     Perform inverse kinematics calculation for the specified arm.
 
@@ -291,6 +292,7 @@ async def main_loop(session: VuerSession, robot_id: int, joint_info: Dict, max_f
 
     if use_firmware:
         from firmware.scripts.robot_controller import Robot
+
         # TODO update it to the actual setup depending on the robot
         robot = Robot("left_arm")
         robot.zero_out()

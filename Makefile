@@ -55,9 +55,9 @@ clean:
 # ------------------------ #
 
 format:
-	@isort --profile black demo.py
-	@black demo.py
-	@ruff format demo.py
+	@isort --profile black demo.py data_collection
+	@black demo.py data_collection
+	@ruff format demo.py data_collection
 .PHONY: format
 
 static-checks:

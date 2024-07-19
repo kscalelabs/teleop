@@ -1,18 +1,16 @@
-# mypy: ignore-errors
+"""Environment for real robot manipulation."""
 
 import collections
 import multiprocessing
 import time
+from typing import Any
 
 import dm_env
 import matplotlib.pyplot as plt
 import numpy as np
-from constants import (
-    DT,
-)
+from constants import DT, TIME_OFFSET
+from data_demo import run_teleop_app
 from util import ImageRecorder
-
-from data_demo import TeleopRobot, run_teleop_app
 
 
 class RealEnv:
@@ -21,10 +19,11 @@ class RealEnv:
 
     Observation space: {"qpos": Concat[ left_arm_qpos (6),          # absolute joint position
                         "qvel": Concat[ left_arm_qvel (6),         # absolute joint velocity (rad)
-                        "images": {"cam1": (720x1280x3),        # h, w, c, dtype='uint8'
-                                   } 
-                                   """  # noqa: D205
-    def __init__(self, cameras, pseudonyms, firmware):
+                        "images": {"cam1": (540x960x3),        # h, w, c, dtype='uint8'
+                                   }
+    """  # noqa: D205
+
+    def __init__(self, cameras: list[Any], pseudonyms: list[str], firmware: bool) -> None:
         print(cameras[0])
         self.image_recorder = ImageRecorder(cameras, pseudonyms)
 
@@ -32,20 +31,21 @@ class RealEnv:
         self.shared_data = self.manager.dict()
 
         self.stop_event = multiprocessing.Event()
-        self.teleop_process = multiprocessing.Process(target=run_teleop_app, args=(True, 60, firmware, self.stop_event, self.shared_data))
+        self.teleop_process = multiprocessing.Process(
+            target=run_teleop_app, args=(True, 60, firmware, self.stop_event, self.shared_data)
+        )
         self.teleop_process.start()
         time.sleep(5)
-        #self.robot.run(use_gui=True, max_fps=60, use_firmware=firmware)
-
+        # self.robot.run(use_gui=True, max_fps=60, use_firmware=firmware)
 
     def get_qpos(self) -> np.ndarray:
-        #positions = self.robot.get_shared_data()['positions']['actual']['left']
-        positions = self.shared_data['positions']['actual']['left']
+        # positions = self.robot.get_shared_data()['positions']['actual']['left']
+        positions = self.shared_data["positions"]["actual"]["left"]
         return positions
 
-    def get_qvel(self):
-        #velocities = self.robot.get_shared_data()['velocities']['left']
-        velocities = self.shared_data['velocities']['left']
+    def get_qvel(self) -> np.ndarray:
+        # velocities = self.robot.get_shared_data()['velocities']['left']
+        velocities = self.shared_data["velocities"]["left"]
         return velocities
 
     # def get_effort(self):
@@ -58,18 +58,15 @@ class RealEnv:
     def get_images(self) -> dict:
         return self.image_recorder.get_images()
 
-    def get_observation(self):
+    def get_observation(self) -> dict:
         obs = collections.OrderedDict()
-        obs['qpos'] = self.get_qpos()
-        obs['qvel'] = self.get_qvel()
-        #obs['effort'] = self.get_effort()
-        obs['images'] = self.get_images()
+        obs["qpos"] = self.get_qpos()
+        obs["qvel"] = self.get_qvel()
+        # obs['effort'] = self.get_effort()
+        obs["images"] = self.get_images()
         return obs
 
-    # def get_reward(self):
-    #     return 0
-
-    def reset(self, fake=False):
+    def reset(self, fake: bool = False) -> dm_env.TimeStep:
         if not fake:
             # Reboot puppet robot gripper motors
             self.puppet_bot_left.dxl.robot_reboot_motors("single", "gripper", True)
@@ -78,40 +75,32 @@ class RealEnv:
             self._reset_gripper()
         return dm_env.TimeStep(
             step_type=dm_env.StepType.FIRST,
-            #reward=self.get_reward(),
-            reward=None,
+            reward=0,
             discount=None,
-            observation=self.get_observation())
+            observation=self.get_observation(),
+        )
 
-    def step(self, ref_time, action):
-        # state_len = int(len(action) / 2)
-        # left_action = action[:state_len]
-        # right_action = action[state_len:]
-        # self.puppet_bot_left.arm.set_joint_positions(left_action[:6], blocking=False)
-        # self.puppet_bot_right.arm.set_joint_positions(right_action[:6], blocking=False)
-        # self.set_gripper_pose(left_action[-1], right_action[-1])
+    def step(self, ref_time: float, action: np.ndarray) -> dm_env.TimeStep:
         self.image_recorder.update()
-        while time.time() - ref_time < DT-0.002:
+        while time.time() - ref_time < DT - TIME_OFFSET:
             time.sleep(0.0001)
 
-        #time.sleep(DT)
         return dm_env.TimeStep(
             step_type=dm_env.StepType.MID,
-            #reward=self.get_reward(),
-            reward=None,
+            reward=0,
             discount=None,
-            observation=self.get_observation())
+            observation=self.get_observation(),
+        )
 
-
-    def get_action(self):
-        action = np.zeros(7) # 5 joint + 2 gripper
+    def get_action(self) -> np.ndarray:
+        action = np.zeros(7)  # 5 joint + 2 gripper
         # Arm actions
-        action[:7] = self.shared_data['positions']['expected']['left']#self.robot.get_positions()["expected"]["left"]
+        action[:7] = self.shared_data["positions"]["expected"]["left"]
 
         return action
 
 
-def make_real_env(cameras, pseudonyms, firmware=False):
+def make_real_env(cameras: list[Any], pseudonyms: list[str], firmware: bool = False) -> RealEnv:
     env = RealEnv(cameras, pseudonyms, firmware=firmware)
     return env
 
@@ -162,4 +151,3 @@ def make_real_env(cameras, pseudonyms, firmware=False):
 
 # if __name__ == '__main__':
 #     test_real_teleop()
-
