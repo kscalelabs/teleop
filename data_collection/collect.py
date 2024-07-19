@@ -50,11 +50,10 @@ def capture_one_episode(dt: float,
     actions = []
     actual_dt_history = []
     for t in tqdm(range(max_timesteps)):
-        t0 = time.time() #
-        action = env.get_action()#get_action(master_bot_left, master_bot_right)
-        t1 = time.time() #
-        #ts = env.step(action)
-        ts = env.step(None)
+        t0 = time.time()
+        action = env.get_action()
+        t1 = time.time()
+        ts = env.step(action)
         t2 = time.time()
         timesteps.append(ts)
         actions.append(action)
@@ -108,8 +107,6 @@ def capture_one_episode(dt: float,
             if str(cam_name) not in image:
                 _ = image.create_dataset(str(cam_name), (max_timesteps, 720, 1280, 3), dtype='uint8',
                                         chunks=(1, 720, 1280, 3))
-            # compression='gzip',compression_opts=2,)
-            # compression=32001, compression_opts=(0, 0, 0, 0, 9, 1, 1), shuffle=False)
         _ = obs.create_dataset('qpos', (max_timesteps, 6))
         # _ = obs.create_dataset('qvel', (max_timesteps, 14))
         # _ = obs.create_dataset('effort', (max_timesteps, 14))
@@ -119,7 +116,6 @@ def capture_one_episode(dt: float,
             print(f"{name} {array}")
             print(name)
             if(name == '/observations/images/'+camera_pseudonyms[0]):
-                #array.pop(0)
                 array = np.array(array)
             root[name][...] = array
     print(f'Saving: {time.time() - t0:.1f} secs')
