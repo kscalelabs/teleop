@@ -78,13 +78,18 @@ class RealEnv:
             discount=None,
             observation=self.get_observation(),
         )
+    
+    def write_video(self):
+        self.image_recorder.close()
 
     def step(self, ref_time: float, action: np.ndarray) -> dm_env.TimeStep:
         self.image_recorder.update()
 
         # Maintain desired frequency by adjusting sleep time before next step
         # Calculated sleep time = desired - manual offset (small) - time taken for step
-        time.sleep((DT - TIME_OFFSET) - (time.time() - ref_time))
+        calc_sleep = DT - (time.time() - ref_time) - TIME_OFFSET
+        if calc_sleep > 0:
+            time.sleep(calc_sleep)
 
         return dm_env.TimeStep(
             step_type=dm_env.StepType.MID,
@@ -101,8 +106,8 @@ class RealEnv:
         return action
 
 
-def make_real_env(cameras: list[Any], pseudonyms: list[str], firmware: bool = False) -> RealEnv:
-    env = RealEnv(cameras, pseudonyms, firmware=firmware)
+def make_real_env(cameras: list[Any], pseudonyms: list[str], firmware: bool = False, save_mp4: bool = False, save_path: str = "") -> RealEnv:
+    env = RealEnv(cameras, pseudonyms, firmware=firmware, save_mp4=save_mp4, save_path=save_path)
     return env
 
 

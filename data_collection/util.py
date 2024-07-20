@@ -21,8 +21,8 @@ class ImageRecorder:
         cv2.destroyAllWindows()
         sys.exit(0)
 
-    def __init__(self, camera_ids, pseudonyms, is_debug=False, save_mp4=False, save_path=""):
-        self.is_debug = is_debug
+    def __init__(self, camera_ids, pseudonyms, save_mp4=False, save_path=""):
+        self.is_debug = False
         self.camera_ids = camera_ids
         self.camera_names = pseudonyms
         self.caps = {}
@@ -69,11 +69,17 @@ class ImageRecorder:
         for camera_id in self.camera_ids:
             ret, frame = self.caps[camera_id].read()
             if ret:
+                post = np.array(cv2.resize(frame, (CAM_WIDTH, CAM_HEIGHT))).astype(np.uint8)
                 if self.save_mp4:
-                    self.out[camera_id].write(frame)
-                self.latest_frames[camera_id] = np.array(cv2.resize(frame, (CAM_WIDTH, CAM_HEIGHT))).astype(np.uint8)
+                    self.out[camera_id].write(post)
+                self.latest_frames[camera_id] = post
                 if self.is_debug:
                     getattr(self, f"timestamps_{camera_id}").append(time.time())
+    def close(self):
+        if self.save_mp4:
+            for vid in self.out.values():
+                print(f"Releasing {vid}")
+                vid.release()
 
     def get_images(self):
         image_dict = dict()

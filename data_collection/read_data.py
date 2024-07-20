@@ -11,8 +11,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from constants import DT
 
-JOINT_NAMES = ["waist", "shoulder", "elbow", "forearm_roll", "wrist_angle", "wrist_rotate"]
-STATE_NAMES = JOINT_NAMES + ["gripper"]
+# Label according to current teleop setups
+JOINT_NAMES = ["shoulder_pitch", "shoulder_yaw", "elbow_yaw", "elbow_pitch", "wrist_angle", "gripper"]
+STATE_NAMES = JOINT_NAMES + ["gripper_2"]
 
 
 def load_hdf5(dataset_dir: str, dataset_name: str) -> tuple:

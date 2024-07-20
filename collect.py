@@ -73,6 +73,8 @@ def capture_one_episode(
     if not save_mp4:
         for cam_name in camera_pseudonyms:
             data_dict[f"/observations/images/{cam_name}"] = []
+    else:
+        env.write_video()
 
     while actions:
         action = actions.pop(0)

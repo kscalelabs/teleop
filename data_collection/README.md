@@ -14,10 +14,11 @@ to view the camera devices that you slot into camera_names in the config
 
 To collect data, run the following command:
 ```
-python data_collection.py --task_name CONFIG_TASK_NAME --use_firmware True
+python data_collection.py --task_name CONFIG_TASK_NAME --use_firmware True --save_mp4
 ```
 where CONFIG_TASK_NAME is the name of the task you want to collect data for. The config can be found in constants.py.\
---use_firmware is an optional argument that can be set to True if you want to use the firmware to control the robot. If set to False, images will be collected without any robot control.
+--use_firmware is an optional argument that can be set to True if you want to use the firmware to control the robot. If set to False, images will be collected without any robot control.\
+--save_mp4 is an optional argument that can be set to True if you want to save images directly to an mp4 file. Note that this slows down frequency of data collection (to around 20hz on Jetson NX)
 
 To view the collected data, run the following command:
 ```

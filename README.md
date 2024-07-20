@@ -60,6 +60,11 @@ make install-dependencies
 pip install -r requirements.txt
 ```
 
+### Scripts
+```demo.py``` - POC for integrating PyBullet with Vuer for real-time robot control
+
+```collect.py``` - Data collection script that interfaces with demo.py for video and position collection
+
 ### Usage
 
 Start the server on the robot computer.
