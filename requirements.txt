@@ -6,6 +6,7 @@ vuer[all]==0.0.30
 ngrok==1.3.0
 dm_env
 matplotlib
+rerun-sdk
 
 black==24.4.2
 ruff==0.5.1
