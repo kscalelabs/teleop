@@ -78,8 +78,8 @@ class RealEnv:
             discount=None,
             observation=self.get_observation(),
         )
-    
-    def write_video(self):
+
+    def write_video(self) -> None:
         self.image_recorder.close()
 
     def step(self, ref_time: float, action: np.ndarray) -> dm_env.TimeStep:
@@ -106,7 +106,9 @@ class RealEnv:
         return action
 
 
-def make_real_env(cameras: list[Any], pseudonyms: list[str], firmware: bool = False, save_mp4: bool = False, save_path: str = "") -> RealEnv:
+def make_real_env(
+    cameras: list[Any], pseudonyms: list[str], firmware: bool = False, save_mp4: bool = False, save_path: str = ""
+) -> RealEnv:
     env = RealEnv(cameras, pseudonyms, firmware=firmware, save_mp4=save_mp4, save_path=save_path)
     return env
 

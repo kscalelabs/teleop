@@ -75,6 +75,7 @@ class ImageRecorder:
                 self.latest_frames[camera_id] = post
                 if self.is_debug:
                     getattr(self, f"timestamps_{camera_id}").append(time.time())
+
     def close(self):
         if self.save_mp4:
             for vid in self.out.values():

@@ -1,10 +1,12 @@
-import h5py
-import numpy as np
-import rerun as rr
+"""Script to convert data from HDF5 file to rerun format."""
+
 import argparse
 
-def main(args: dict) -> None:
+import h5py
+import rerun as rr
 
+
+def main(args: dict) -> None:
     # Initialize rerun
     rr.init("my_robot_data")
 
@@ -36,6 +38,7 @@ def main(args: dict) -> None:
 
     if args["view"]:
         rr.spawn()
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
