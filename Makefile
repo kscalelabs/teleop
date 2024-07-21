@@ -37,6 +37,21 @@ install:
 	@pip install --verbose -e .
 .PHONY: install
 
+h5py:
+	@echo "Cloning and installing h5py"
+	sudo apt-get update
+	sudo apt-get install libhdf5-serial-dev hdf5-tools libhdf5-dev zlib1g-dev zip libjpeg8-dev liblapack-dev libblas-dev gfortran
+	sudo apt-get install python3-pip
+	sudo pip3 install -U pip testresources setuptools
+	sudo ln -s /usr/include/locale.h /usr/include/xlocale.h
+	pip3 install Cython==0.29.36
+	pip3 install pkgconfig
+	git clone https://github.com/h5py/h5py.git
+	git checkout 3.1.0
+	git cherry-pick 3bf862daa4ebeb2eeaf3a0491e05f5415c1818e4
+	H5PY_SETUP_REQUIRES=0 pip3 install . --no-deps --no-build-isolation
+	cd h5py && source dev-install.sh
+.PHONY: h5py
 
 install-dependencies:
 	@git submodule update --init --recursive
@@ -55,9 +70,9 @@ clean:
 # ------------------------ #
 
 format:
-	@isort --profile black demo.py
-	@black demo.py
-	@ruff format demo.py
+	@isort --profile black demo.py data_collection
+	@black demo.py data_collection
+	@ruff format demo.py data_collection
 .PHONY: format
 
 static-checks:
