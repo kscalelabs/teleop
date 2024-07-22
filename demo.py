@@ -16,7 +16,7 @@ from numpy.typing import NDArray
 from vuer import Vuer, VuerSession
 from vuer.schemas import Hands, PointLight, Urdf
 
-from firmware.scripts.robot_controller import Robot
+from firmware.robot.robot import Robot
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -253,9 +253,7 @@ class TeleopRobot:
         )
 
         if use_firmware:
-            from firmware.scripts.robot_controller import Robot
-
-            self.robot = Robot("left_arm")
+            self.robot = Robot(config_path="config.yaml", setup="left_arm")
             self.robot.zero_out()
             new_positions = {"left_arm": [self.q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]}
 
