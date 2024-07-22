@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 # Constants
 DELTA = 10
 URDF_WEB = "https://raw.githubusercontent.com/kscalelabs/teleop/f4616b5f117842e5f7eb138b87af31258e1f7484/urdf/stompy/upper_limb_assembly_5_dof_merged_simplified.urdf"
-URDF_LOCAL = "../urdf/stompy/upper_limb_assembly_5_dof_merged_simplified.urdf"
+URDF_LOCAL = "urdf/stompy/upper_limb_assembly_5_dof_merged_simplified.urdf"
 
 # Robot configuration
 START_POS_TRUNK_PYBULLET: NDArray = np.array([0, 0, 1])
