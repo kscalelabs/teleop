@@ -65,6 +65,7 @@ def capture_one_episode(
 
     data_dict: dict[str, list] = {
         "/observations/qpos": [],
+        "/observations/qpos_virt": [],
         #'/observations/qvel': [],
         #'/observations/effort': [],
         "/action": [],
@@ -80,6 +81,7 @@ def capture_one_episode(
         action = actions.pop(0)
         ts = timesteps.pop(0)
         data_dict["/observations/qpos"].append(ts.observation["qpos"])
+        data_dict["/observations/qpos_virt"].append(ts.observation["qpos_virt"])
         # data_dict['/observations/qvel'].append(ts.observation['qvel'])
         # data_dict['/observations/effort'].append(ts.observation['effort'])
         data_dict["/action"].append(action)
@@ -103,6 +105,7 @@ def capture_one_episode(
                         chunks=(1, CAM_HEIGHT, CAM_WIDTH, 3),
                     )
         _ = obs.create_dataset("qpos", (max_timesteps, 6))
+        _ = obs.create_dataset("qpos_virt", (max_timesteps, 7))
         # _ = obs.create_dataset('qvel', (max_timesteps, 14))
         # _ = obs.create_dataset('effort', (max_timesteps, 14))
         _ = root.create_dataset("action", (max_timesteps, 7))

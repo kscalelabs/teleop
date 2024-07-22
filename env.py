@@ -43,6 +43,10 @@ class RealEnv:
     def get_qpos(self) -> np.ndarray:
         positions = self.shared_data["positions"]["actual"]["left"]
         return positions
+    
+    def get_qpos_vert(self) -> np.ndarray:
+        positions = self.shared_data["positions"]["expected"]["left"]
+        return positions
 
     def get_qvel(self) -> np.ndarray:
         velocities = self.shared_data["velocities"]["left"]
@@ -61,6 +65,7 @@ class RealEnv:
     def get_observation(self) -> dict:
         obs = collections.OrderedDict()
         obs["qpos"] = self.get_qpos()
+        obs["qpos_virt"] = self.get_qpos_vert()
         obs["qvel"] = self.get_qvel()
         # obs['effort'] = self.get_effort()
         if not self.save_mp4:

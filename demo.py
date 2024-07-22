@@ -108,22 +108,34 @@ goal_pos_eel, goal_pos_eer = START_POS_EEL, START_POS_EER
 
 
 class TeleopRobot:
-    def __init__(self, shared_dict: dict = {}) -> None:
+    def __init__(self, use_firmware: bool =False, shared_dict: dict = {}) -> None:
         self.app = Vuer()
         self.robot_id = None
-        self.robot: Robot | None = None
         self.joint_info: dict = {}
         self.actual_pos_eel, self.actual_pos_eer = START_POS_EEL, START_POS_EER
         self.goal_pos_eel, self.goal_pos_eer = START_POS_EEL, START_POS_EER
         self.q = deepcopy(START_Q)
         self.q_lock = asyncio.Lock()
 
+        if use_firmware:
+            self.robot = Robot(config_path="config.yaml", setup="left_arm_teleop")
+            self.robot.zero_out()
+        else:
+            self.robot = None
+
         self.shared_data = shared_dict
+        self.update_positions()
         self.update_shared_data()
 
     def update_shared_data(self) -> None:
         self.shared_data["positions"] = self.get_positions()
         self.shared_data["velocities"] = self.get_velocities()
+
+    def test(self):
+        if not self.robot:
+            print("Firmware not enabled")
+            return
+        self.robot.test_motors(low=0, high=25)
 
     def setup_pybullet(self, use_gui: bool, urdf_path: str) -> None:
         """Set up PyBullet simulation environment."""
@@ -239,7 +251,7 @@ class TeleopRobot:
                 self.q[slider] = 0.05 - _s
                 p.resetJointState(self.robot_id, self.joint_info[slider]["index"], 0.05 - _s)
 
-    async def main_loop(self, session: VuerSession, max_fps: int, use_firmware: bool) -> None:
+    async def main_loop(self, session: VuerSession, max_fps: int) -> None:
         """Main application loop."""
         session.upsert @ PointLight(intensity=10.0, position=[0, 2, 2])
         session.upsert @ Hands(fps=30, stream=True, key="hands")
@@ -252,11 +264,10 @@ class TeleopRobot:
             key="robot",
         )
 
-        if use_firmware:
-            self.robot = Robot(config_path="config.yaml", setup="left_arm")
-            self.robot.zero_out()
+        if self.robot:
             new_positions = {"left_arm": [self.q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]}
 
+        counter = 0
         while True:
             await asyncio.gather(
                 self.inverse_kinematics("left"),
@@ -264,6 +275,11 @@ class TeleopRobot:
                 asyncio.sleep(1 / max_fps),
             )
             self.update_shared_data()
+
+            if counter == 1:
+                self.update_positions()
+                counter=0
+            counter+=1
 
             async with self.q_lock:
                 session.upsert @ Urdf(
@@ -274,10 +290,16 @@ class TeleopRobot:
                     key="robot",
                 )
 
-            if use_firmware:
+            if self.robot:
                 new_positions["left_arm"] = [self.q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]
                 offset = {"left_arm": [START_Q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]}
                 self.robot.set_position(new_positions, offset=offset)
+
+    def update_positions(self):
+        if self.robot:
+            self.robot.update_motor_data()
+            pos = self.robot.get_motor_positions()['left_arm']
+            self.positions = np.array(pos)
 
     def get_positions(self) -> dict[str, dict[str, NDArray]]:
         if self.robot:
@@ -286,7 +308,7 @@ class TeleopRobot:
                     "left": np.array([self.q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]),
                 },
                 "actual": {
-                    "left": np.array(self.robot.get_motor_positions()),
+                    "left": self.positions,
                 },
             }
         else:
@@ -308,7 +330,6 @@ class TeleopRobot:
         self,
         use_gui: bool,
         max_fps: int,
-        use_firmware: bool,
         stop_event: multiprocessing.Event,
         urdf_path: str = URDF_LOCAL,
     ) -> None:
@@ -320,14 +341,14 @@ class TeleopRobot:
 
         @self.app.spawn(start=True)
         async def app_main(session: VuerSession) -> None:
-            await self.main_loop(session, max_fps, use_firmware)
+            await self.main_loop(session, max_fps)
 
 
 def run_teleop_app(
     use_gui: bool, max_fps: int, use_firmware: bool, stop_event: multiprocessing.Event, shared_data: Dict[str, NDArray]
 ) -> None:
-    teleop = TeleopRobot(shared_dict=shared_data)
-    teleop.run(use_gui, max_fps, use_firmware, stop_event)
+    teleop = TeleopRobot(use_firmware=use_firmware, shared_dict=shared_data)
+    teleop.run(use_gui, max_fps, stop_event)
 
 
 def main() -> None:
@@ -339,8 +360,10 @@ def main() -> None:
     args = parser.parse_args()
 
     stop = multiprocessing.Event()
-    demo = TeleopRobot()
-    demo.run(args.gui, args.fps, args.firmware, stop, args.urdf)
+    demo = TeleopRobot(use_firmware=args.firmware)
+    #demo.robot.zero_out()
+    #demo.test()
+    demo.run(args.gui, args.fps, stop, args.urdf)
 
 
 if __name__ == "__main__":

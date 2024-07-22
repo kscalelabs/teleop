@@ -21,7 +21,7 @@ robots:
         increments: [4, 4, 4, 4, 4, 4]
         maximum_values: [60, 60, 60, 60, 60, 60]
         offsets: [0, 0, 0, 0, 0, 0]
-  - setup: "left_arm"
+  - setup: "left_arm_teleop"
     delta_change: 10
     body_parts:
       left_arm:
@@ -30,5 +30,5 @@ robots:
       arm:
         signs: [1, -1, 1, -1, 1, 1]
         increments: [4, 4, 4, 4, 4, 4]
-        maximum_values: [60, 60, 60, 60, 0, 10]
+        maximum_values: [80, 80, 80, 70, 0, 10]
         offsets: [0, 0, 0, 0, 0, 0]
