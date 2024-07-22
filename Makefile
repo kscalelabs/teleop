@@ -33,7 +33,7 @@ demo:
 #          Build           #
 # ------------------------ #
 
-install:
+install: install-dependencies
 	@pip install --verbose -e .
 .PHONY: install
 
