@@ -4,15 +4,12 @@ import argparse
 import os
 import sys
 import time
-from typing import Any
 
 import h5py
-import numpy as np
-from data_collection.constants import DT
 
+from data_collection.constants import DT
 from firmware.robot.robot import Robot
 
-STEP_SIZE = 20
 
 def main(args: argparse.Namespace) -> None:
     dataset_dir = args.dataset_dir
@@ -34,18 +31,19 @@ def main(args: argparse.Namespace) -> None:
     print(f"timesteps: {timesteps}")
 
     robot = Robot(config_path="config.yaml", setup="left_arm_replay")
+
     if True:
         robot.zero_out()
-    robot.update_motor_data()
 
-    print(f"Setting to {qpos[0]}")
-    
     for t in range(timesteps):
+        start_time = time.time()
         robot.set_position({"left_arm": qpos[t]}, radians=False)
         robot.update_motor_data()
-        print(f"Motor at {robot.get_motor_positions()}")
+        print(f"Robot at {robot.get_motor_positions()}")
         print(f"Moving to {qpos[t]}")
-        time.sleep(DT/2)
+        wait_time = DT - (time.time() - start_time)
+        if wait_time > 0:
+            time.sleep(wait_time)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Replay qpos data from HDF5 file on the real robot.")

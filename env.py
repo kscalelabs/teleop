@@ -13,13 +13,13 @@ from data_collection.util import ImageRecorder
 
 class RealEnv:
     """Environment for real robot bi-manual manipulation
-    Action space:      [left_arm_qpos (6),             # absolute joint position.
+    Action space:      [left_arm_qpos (6)]             # absolute joint position.
 
-    Observation space: {"qpos": Concat[ left_arm_qpos (6),          # absolute joint position
-                        "qvel": Concat[ left_arm_qvel (6),         # absolute joint velocity (rad)
-                        "images": {"cam1": (510x910x3),        # h, w, c, dtype='uint8'
+    Observation space: {"qpos": Concat[ left_arm_qpos (6),]          # absolute joint position
+                        "qvel": Concat[ left_arm_qvel (6),]         # absolute joint velocity (rad)
+                        "images": {"cam1": (510x910x3),}        # h, w, c, dtype='uint8'
                                    }
-    """  # noqa: D205
+    """
 
     def __init__(
         self, img_recorder: ImageRecorder, shared_data: dict, save_mp4: bool = False) -> None:

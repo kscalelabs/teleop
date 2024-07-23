@@ -1,9 +1,8 @@
-"""Script to collect data from the real robot."""
+"""Script to collect data from a real robot."""
 
 # Based on https://github.com/tonyzhaozh/aloha/blob/main/aloha_scripts/record_episodes.py
 
 import argparse
-import gc
 import multiprocessing
 import os
 import sys
@@ -16,9 +15,9 @@ import numpy as np
 from tqdm import tqdm
 
 from data_collection.constants import CAM_HEIGHT, CAM_WIDTH, DT, TASK_CONFIGS
+from data_collection.util import ImageRecorder
 from demo import run_teleop_app
 from env import make_real_env
-from data_collection.util import ImageRecorder
 
 
 def capture_one_episode(
