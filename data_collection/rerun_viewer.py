@@ -36,7 +36,7 @@ def make_rerun(hdf5: str, cams: list[str]) -> None:
 
             # Log images from video files
             for cam_name in cams:
-                vid_path = hdf5.split(".")[0] + f" camera_{cam_name}.mp4"
+                vid_path = hdf5.split(".")[0] + f"_{cam_name}.mp4"
                 if os.path.exists(vid_path):
                     if cam_name not in video_captures:
                         video_captures[cam_name] = cv2.VideoCapture(vid_path)

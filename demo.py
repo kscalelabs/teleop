@@ -294,7 +294,7 @@ class TeleopRobot:
             if self.robot:
                 new_positions["left_arm"] = [self.q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]
                 offset = {"left_arm": OFFSET_LEFT}
-                self.robot.set_position(new_positions, offset=offset)
+                self.robot.set_position(new_positions, offset=offset, radians=True)
 
     def update_positions(self) -> None:
         if self.robot:

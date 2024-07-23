@@ -18,7 +18,7 @@ from tqdm import tqdm
 from data_collection.constants import CAM_HEIGHT, CAM_WIDTH, DT, TASK_CONFIGS
 from demo import run_teleop_app
 from env import make_real_env
-from util import ImageRecorder
+from data_collection.util import ImageRecorder
 
 
 def capture_one_episode(
@@ -116,7 +116,6 @@ def capture_one_episode(
                 array = np.array(array)
             root[name][...] = array
     print(f"Saving: {time.time() - t0:.1f} secs")
-    env.close()
     return True
 
 
@@ -164,7 +163,7 @@ def main(args: Any) -> None:
 
         dataset_name = f"episode_{episode_idx}"
         print(dataset_name + "\n")
-        image_recorder.set_save_path(os.path.join(dataset_dir, dataset_name))
+        image_recorder.set_save_path(os.path.join(str(dataset_dir), dataset_name))
         for camera_id, camera_name in zip(camera_names, camera_pseudonyms):
             image_recorder.make_writer(camera_id, camera_name)
 

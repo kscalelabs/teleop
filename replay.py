@@ -7,10 +7,12 @@ import time
 from typing import Any
 
 import h5py
-from constants import DT
+import numpy as np
+from data_collection.constants import DT
 
 from firmware.robot.robot import Robot
 
+STEP_SIZE = 20
 
 def main(args: argparse.Namespace) -> None:
     dataset_dir = args.dataset_dir
@@ -31,13 +33,19 @@ def main(args: argparse.Namespace) -> None:
     print(f"action: {action.shape}")
     print(f"timesteps: {timesteps}")
 
-    robot = Robot(config_path="config.yaml", setup="left_arm")
-    robot.zero_out()
+    robot = Robot(config_path="config.yaml", setup="left_arm_replay")
+    if False:
+        robot.zero_out()
+    robot.update_motor_data()
 
+    print(f"Setting to {qpos[0]}")
+    
     for t in range(timesteps):
+        robot.set_position({"left_arm": qpos[t]}, radians=False)
+        robot.update_motor_data()
+        print(f"Motor at {robot.get_motor_positions()}")
+        print(f"Moving to {qpos[t]}")
         time.sleep(DT)
-        robot.set_positions(qpos[t])
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Replay qpos data from HDF5 file on the real robot.")
