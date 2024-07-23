@@ -40,16 +40,17 @@ START_POS_EER: NDArray = np.array([-0.35, 0.25, 0.0]) + START_POS_TRUNK_PYBULLET
 PB_TO_VUER_AXES: NDArray = np.array([2, 0, 1], dtype=np.uint8)
 PB_TO_VUER_AXES_SIGN: NDArray = np.array([1, 1, 1], dtype=np.int8)
 
+
 # Starting joint positions
 START_Q: Dict[str, float] = OrderedDict(
     [
         # trunk
         ("joint_torso_1_rmd_x8_90_mock_1_dof_x8", 0),
         # left arm
-        ("joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8", 0.503),
+        ("joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8", 0.544),
         ("joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8", -1.33),
         ("joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4", 0),
-        ("joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4", 5.03),
+        ("joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4", 4.8),
         ("joint_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4", 1.76),
         # left gripper
         ("joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1", 0.0),
@@ -135,7 +136,7 @@ class TeleopRobot:
         if not self.robot:
             print("Firmware not enabled")
             return
-        self.robot.test_motors(low=0, high=25)
+        self.robot.test_motors(low=0, high=45)
 
     def setup_pybullet(self, use_gui: bool, urdf_path: str) -> None:
         """Set up PyBullet simulation environment."""
@@ -188,11 +189,12 @@ class TeleopRobot:
         movable_joints = [
             j for j in range(p.getNumJoints(self.robot_id)) if p.getJointInfo(self.robot_id, j)[2] != p.JOINT_FIXED
         ]
-        if self.robot:
-            current_positions = self.positions.tolist.append(0)
+        if self.robot and False:
+            current_positions = list(self.positions)
+            current_positions += 7*[0]
+            print(len(movable_joints))
         else:
             current_positions = [p.getJointState(self.robot_id, j)[0] for j in movable_joints]
-
         solution = p.calculateInverseKinematics(
             self.robot_id,
             ee_id,
@@ -296,7 +298,7 @@ class TeleopRobot:
             if self.robot:
                 new_positions["left_arm"] = [self.q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]
                 offset = {"left_arm": [START_Q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]}
-                self.robot.set_position(new_positions)#, offset=offset)
+                self.robot.set_position(new_positions, offset=offset)
 
     def update_positions(self) -> None:
         if self.robot:
@@ -308,7 +310,7 @@ class TeleopRobot:
         if self.robot:
             return {
                 "expected": {
-                    "left": np.array([self.q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]),
+                    "left": np.array([math.degrees(self.q[pos]) for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]),
                 },
                 "actual": {
                     "left": self.positions,
@@ -317,7 +319,7 @@ class TeleopRobot:
         else:
             return {
                 "expected": {
-                    "left": np.array([self.q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]),
+                    "left": np.array([math.degrees(self.q[pos]) for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]),
                 },
                 "actual": {
                     "left": np.random.rand(6),
@@ -364,8 +366,6 @@ def main() -> None:
 
     stop = multiprocessing.Event()
     demo = TeleopRobot(use_firmware=args.firmware)
-    #demo.robot.zero_out()
-    #demo.test()
     demo.run(args.gui, args.fps, stop, args.urdf)
 
 

@@ -21,6 +21,15 @@ class ImageRecorder:
         cv2.destroyAllWindows()
         sys.exit(0)
 
+    def close_cameras(self):
+        for cap in self.caps:
+            try:
+                if cap.isOpened():
+                    cap.release()
+            except AttributeError as e:
+                print(e)
+        cv2.destroyAllWindows()
+
     def __init__(self, camera_ids, pseudonyms, save_mp4=False, save_path=""):
         self.is_debug = False
         self.camera_ids = camera_ids

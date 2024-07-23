@@ -1,7 +1,6 @@
 """Environment for real robot manipulation."""
 
 import collections
-import multiprocessing
 import time
 from typing import Any
 
@@ -24,28 +23,18 @@ class RealEnv:
     """  # noqa: D205
 
     def __init__(
-        self, cameras: list[Any], pseudonyms: list[str], firmware: bool, save_mp4: bool = False, save_path: str = ""
-    ) -> None:
+        self, cameras: list[Any], pseudonyms: list[str], shared_data: dict, save_mp4: bool = False, save_path: str = "") -> None:
         print(cameras[0])
         self.image_recorder = ImageRecorder(cameras, pseudonyms, save_mp4, save_path=save_path)
         self.save_mp4 = save_mp4
 
-        self.manager = multiprocessing.Manager()
-        self.shared_data = self.manager.dict()
-
-        self.stop_event = multiprocessing.Event()
-        self.teleop_process = multiprocessing.Process(
-            target=run_teleop_app, args=(True, 60, firmware, self.stop_event, self.shared_data)
-        )
-        self.teleop_process.start()
-        time.sleep(5)
+        self.shared_data = shared_data
+    
+    def close(self) -> None:
+        self.image_recorder.close_cameras()
 
     def get_qpos(self) -> np.ndarray:
         positions = self.shared_data["positions"]["actual"]["left"]
-        return positions
-
-    def get_qpos_vert(self) -> np.ndarray:
-        positions = self.shared_data["positions"]["expected"]["left"]
         return positions
 
     def get_qvel(self) -> np.ndarray:
@@ -65,7 +54,6 @@ class RealEnv:
     def get_observation(self) -> dict:
         obs = collections.OrderedDict()
         obs["qpos"] = self.get_qpos()
-        obs["qpos_virt"] = self.get_qpos_vert()
         obs["qvel"] = self.get_qvel()
         # obs['effort'] = self.get_effort()
         if not self.save_mp4:
@@ -112,9 +100,9 @@ class RealEnv:
 
 
 def make_real_env(
-    cameras: list[Any], pseudonyms: list[str], firmware: bool = False, save_mp4: bool = False, save_path: str = ""
+    cameras: list[Any], pseudonyms: list[str], shared_data: dict = {}, save_mp4: bool = False, save_path: str = ""
 ) -> RealEnv:
-    env = RealEnv(cameras, pseudonyms, firmware=firmware, save_mp4=save_mp4, save_path=save_path)
+    env = RealEnv(cameras, pseudonyms, shared_data=shared_data, save_mp4=save_mp4, save_path=save_path)
     return env
 
 

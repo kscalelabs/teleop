@@ -6,7 +6,7 @@ TASK_CONFIGS: dict[str, dict[str, int | str | list]] = {
         "dataset_dir": DATA_DIR + "/left_arm",
         "num_episodes": 50,
         "episode_len": 300,
-        "camera_names": ["/dev/video1"],
+        "camera_names": ["/dev/video0"],
         "camera_keys": ["cam1"],
     },
     "left_arm_mac": {
