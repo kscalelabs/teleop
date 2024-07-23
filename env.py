@@ -9,7 +9,6 @@ import numpy as np
 
 from data_collection.constants import DT, TIME_OFFSET
 from data_collection.util import ImageRecorder
-from demo import run_teleop_app
 
 
 class RealEnv:
@@ -18,7 +17,7 @@ class RealEnv:
 
     Observation space: {"qpos": Concat[ left_arm_qpos (6),          # absolute joint position
                         "qvel": Concat[ left_arm_qvel (6),         # absolute joint velocity (rad)
-                        "images": {"cam1": (540x960x3),        # h, w, c, dtype='uint8'
+                        "images": {"cam1": (510x910x3),        # h, w, c, dtype='uint8'
                                    }
     """  # noqa: D205
 
@@ -29,7 +28,7 @@ class RealEnv:
         self.save_mp4 = save_mp4
 
         self.shared_data = shared_data
-    
+
     def close(self) -> None:
         self.image_recorder.close_cameras()
 
@@ -104,51 +103,3 @@ def make_real_env(
 ) -> RealEnv:
     env = RealEnv(cameras, pseudonyms, shared_data=shared_data, save_mp4=save_mp4, save_path=save_path)
     return env
-
-
-# def test_real_teleop():
-#     """
-#     Test bimanual teleoperation and show image observations onscreen.
-#     It first reads joint poses from both master arms.
-#     Then use it as actions to step the environment.
-#     The environment returns full observations including images.
-
-#     An alternative approach is to have separate scripts for teleoperation and observation recording.
-#     This script will result in higher fidelity (obs, action) pairs
-#     """
-
-#     onscreen_render = True
-#     render_cam = 'cam_left_wrist'
-
-#     # source of data
-#     master_bot_left = InterbotixManipulatorXS(robot_model="wx250s", group_name="arm", gripper_name="gripper",
-#                                               robot_name=f'master_left', init_node=True)
-#     master_bot_right = InterbotixManipulatorXS(robot_model="wx250s", group_name="arm", gripper_name="gripper",
-#                                                robot_name=f'master_right', init_node=False)
-#     setup_master_bot(master_bot_left)
-#     setup_master_bot(master_bot_right)
-
-#     # setup the environment
-#     env = make_real_env(init_node=False)
-#     ts = env.reset(fake=True)
-#     episode = [ts]
-#     # setup visualization
-#     if onscreen_render:
-#         ax = plt.subplot()
-#         plt_img = ax.imshow(ts.observation['images'][render_cam])
-#         plt.ion()
-
-#     for t in range(1000):
-#         action = get_action(master_bot_left, master_bot_right)
-#         ts = env.step(action)
-#         episode.append(ts)
-
-#         if onscreen_render:
-#             plt_img.set_data(ts.observation['images'][render_cam])
-#             plt.pause(DT)
-#         else:
-#             time.sleep(DT)
-
-
-# if __name__ == '__main__':
-#     test_real_teleop()

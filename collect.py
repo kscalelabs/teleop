@@ -3,6 +3,7 @@
 # Based on https://github.com/tonyzhaozh/aloha/blob/main/aloha_scripts/record_episodes.py
 
 import argparse
+import gc
 import multiprocessing
 import os
 import sys
@@ -115,6 +116,8 @@ def capture_one_episode(
             root[name][...] = array
     print(f"Saving: {time.time() - t0:.1f} secs")
     env.close()
+    del env
+    gc.collect()
     return True
 
 
@@ -142,10 +145,9 @@ def main(args: Any) -> None:
 
     manager = multiprocessing.Manager()
     shared_data = manager.dict()
-    stop_event = multiprocessing.Event()
 
     teleop_process = multiprocessing.Process(
-            target=run_teleop_app, args=(True, 60, args["use_firmware"], stop_event, shared_data)
+            target=run_teleop_app, args=(True, 60, args["use_firmware"], shared_data)
     )
 
     teleop_process.start()

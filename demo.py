@@ -189,12 +189,8 @@ class TeleopRobot:
         movable_joints = [
             j for j in range(p.getNumJoints(self.robot_id)) if p.getJointInfo(self.robot_id, j)[2] != p.JOINT_FIXED
         ]
-        if self.robot and False:
-            current_positions = list(self.positions)
-            current_positions += 7*[0]
-            print(len(movable_joints))
-        else:
-            current_positions = [p.getJointState(self.robot_id, j)[0] for j in movable_joints]
+
+        current_positions = [p.getJointState(self.robot_id, j)[0] for j in movable_joints]
         solution = p.calculateInverseKinematics(
             self.robot_id,
             ee_id,
@@ -335,7 +331,6 @@ class TeleopRobot:
         self,
         use_gui: bool,
         max_fps: int,
-        stop_event: multiprocessing.Event,
         urdf_path: str = URDF_LOCAL,
     ) -> None:
         self.setup_pybullet(use_gui, urdf_path)
@@ -350,10 +345,10 @@ class TeleopRobot:
 
 
 def run_teleop_app(
-    use_gui: bool, max_fps: int, use_firmware: bool, stop_event: multiprocessing.Event, shared_data: Dict[str, NDArray]
+    use_gui: bool, max_fps: int, use_firmware: bool, shared_data: Dict[str, NDArray]
 ) -> None:
     teleop = TeleopRobot(use_firmware=use_firmware, shared_dict=shared_data)
-    teleop.run(use_gui, max_fps, stop_event)
+    teleop.run(use_gui, max_fps)
 
 
 def main() -> None:
@@ -364,9 +359,8 @@ def main() -> None:
     parser.add_argument("--urdf", type=str, default=URDF_LOCAL, help="Path to URDF file")
     args = parser.parse_args()
 
-    stop = multiprocessing.Event()
     demo = TeleopRobot(use_firmware=args.firmware)
-    demo.run(args.gui, args.fps, stop, args.urdf)
+    demo.run(args.gui, args.fps, args.urdf)
 
 
 if __name__ == "__main__":
