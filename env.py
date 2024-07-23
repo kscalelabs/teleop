@@ -22,15 +22,11 @@ class RealEnv:
     """  # noqa: D205
 
     def __init__(
-        self, cameras: list[Any], pseudonyms: list[str], shared_data: dict, save_mp4: bool = False, save_path: str = "") -> None:
-        print(cameras[0])
-        self.image_recorder = ImageRecorder(cameras, pseudonyms, save_mp4, save_path=save_path)
+        self, img_recorder: ImageRecorder, shared_data: dict, save_mp4: bool = False) -> None:
+        self.image_recorder = img_recorder
         self.save_mp4 = save_mp4
 
         self.shared_data = shared_data
-
-    def close(self) -> None:
-        self.image_recorder.close_cameras()
 
     def get_qpos(self) -> np.ndarray:
         positions = self.shared_data["positions"]["actual"]["left"]
@@ -99,7 +95,8 @@ class RealEnv:
 
 
 def make_real_env(
-    cameras: list[Any], pseudonyms: list[str], shared_data: dict = {}, save_mp4: bool = False, save_path: str = ""
+    image_recorder: ImageRecorder, shared_data: dict = {}, save_mp4: bool = False
 ) -> RealEnv:
-    env = RealEnv(cameras, pseudonyms, shared_data=shared_data, save_mp4=save_mp4, save_path=save_path)
+    env = RealEnv(image_recorder, shared_data=shared_data, save_mp4=save_mp4)
     return env
+

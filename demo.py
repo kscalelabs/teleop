@@ -4,7 +4,6 @@ import argparse
 import asyncio
 import logging
 import math
-import multiprocessing
 from collections import OrderedDict
 from copy import deepcopy
 from typing import Any, Dict
@@ -41,7 +40,7 @@ PB_TO_VUER_AXES: NDArray = np.array([2, 0, 1], dtype=np.uint8)
 PB_TO_VUER_AXES_SIGN: NDArray = np.array([1, 1, 1], dtype=np.int8)
 
 
-# Starting joint positions
+# Starting joint positions in PyBullet (corresponds to 0 on real robot)
 START_Q: Dict[str, float] = OrderedDict(
     [
         # trunk
@@ -66,8 +65,6 @@ START_Q: Dict[str, float] = OrderedDict(
         ("joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_2", 0.0),
     ]
 )
-
-OFFSET = list(START_Q.values())
 
 # End effector links
 EEL_JOINT: str = "left_end_effector_joint"
@@ -97,6 +94,9 @@ EER_CHAIN_HAND = [
     "joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_2",
 ]
 
+OFFSET = list(START_Q.values())
+OFFSET_LEFT = [START_Q[joint] for joint in EEL_CHAIN_ARM + EEL_CHAIN_HAND]
+
 # Hand tracking parameters
 INDEX_FINGER_TIP_ID, THUMB_FINGER_TIP_ID, MIDDLE_FINGER_TIP_ID = 8, 4, 14
 PINCH_DIST_CLOSED, PINCH_DIST_OPENED = 0.1, 0.1  # 10 cm
@@ -109,7 +109,7 @@ goal_pos_eel, goal_pos_eer = START_POS_EEL, START_POS_EER
 
 
 class TeleopRobot:
-    def __init__(self, use_firmware: bool =False, shared_dict: dict = {}) -> None:
+    def __init__(self, use_firmware: bool = False, shared_dict: dict = {}) -> None:
         self.app = Vuer()
         self.robot_id = None
         self.joint_info: dict = {}
@@ -279,8 +279,8 @@ class TeleopRobot:
 
             if counter == 1:
                 self.update_positions()
-                counter=0
-            counter+=1
+                counter = 0
+            counter += 1
 
             async with self.q_lock:
                 session.upsert @ Urdf(
@@ -293,20 +293,22 @@ class TeleopRobot:
 
             if self.robot:
                 new_positions["left_arm"] = [self.q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]
-                offset = {"left_arm": [START_Q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]}
+                offset = {"left_arm": OFFSET_LEFT}
                 self.robot.set_position(new_positions, offset=offset)
 
     def update_positions(self) -> None:
         if self.robot:
             self.robot.update_motor_data()
-            pos = self.robot.get_motor_positions()['left_arm']
+            pos = self.robot.get_motor_positions()["left_arm"]
             self.positions = np.array(pos)
 
     def get_positions(self) -> dict[str, dict[str, NDArray]]:
         if self.robot:
             return {
                 "expected": {
-                    "left": np.array([math.degrees(self.q[pos]) for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]),
+                    "left": np.array(
+                        [math.degrees(self.q[pos] - START_Q[pos]) for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]
+                    ),
                 },
                 "actual": {
                     "left": self.positions,
@@ -344,9 +346,7 @@ class TeleopRobot:
             await self.main_loop(session, max_fps)
 
 
-def run_teleop_app(
-    use_gui: bool, max_fps: int, use_firmware: bool, shared_data: Dict[str, NDArray]
-) -> None:
+def run_teleop_app(use_gui: bool, max_fps: int, use_firmware: bool, shared_data: Dict[str, NDArray]) -> None:
     teleop = TeleopRobot(use_firmware=use_firmware, shared_dict=shared_data)
     teleop.run(use_gui, max_fps)
 

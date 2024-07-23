@@ -51,22 +51,23 @@ def make_rerun(hdf5: str, cams: list[str]) -> None:
         for cap in video_captures.values():
             cap.release()
 
+
 def main(args: dict) -> None:
     # Initialize rerun
     rr.init("my_robot_data")
-    cam_list = args['cams'].split(",")
-    if args['save_all']:
+    cam_list = args["cams"].split(",")
+    if args["save_all"]:
         hdf5list = glob.glob(f"{args['dataset_dir']}/*.hdf5")
         for hdf5 in hdf5list:
-            rr.init(args['dataset_dir'].split("/")[1])
+            rr.init(args["dataset_dir"].split("/")[1])
             make_rerun(hdf5, cam_list)
             rr.save(f"{hdf5.split('.')[0]}.rrd")
-    elif args['rerun']:
+    elif args["rerun"]:
         rr.log_file_from_path(args.rerun)
         rr.spawn()
     else:
         rr.init("my_robot_data")
-        make_rerun(args['dataset_dir'], cam_list)
+        make_rerun(args["dataset_dir"], cam_list)
         if args["save"]:
             rr.save(args["dataset_dir"].split(".")[0] + ".rrd")
         if args["view"]:

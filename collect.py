@@ -18,13 +18,14 @@ from tqdm import tqdm
 from data_collection.constants import CAM_HEIGHT, CAM_WIDTH, DT, TASK_CONFIGS
 from demo import run_teleop_app
 from env import make_real_env
+from util import ImageRecorder
 
 
 def capture_one_episode(
     dt: float,
     max_timesteps: int,
-    camera_names: Any,
-    camera_pseudonyms: Any,
+    image_recorder: ImageRecorder,
+    camera_pseudonyms: list,
     dataset_dir: str,
     dataset_name: str,
     overwrite: bool,
@@ -41,7 +42,7 @@ def capture_one_episode(
         print(f"Dataset already exist at \n{dataset_path}\nHint: set overwrite to True.")
         sys.exit()
 
-    env = make_real_env(camera_names, camera_pseudonyms, shared_data=shared_dict, save_mp4=save_mp4, save_path=dataset_path)
+    env = make_real_env(image_recorder, shared_data=shared_dict, save_mp4=save_mp4)
 
     # Wait for user input to start collecting data
     print("Press Enter to start collecting data")
@@ -116,8 +117,6 @@ def capture_one_episode(
             root[name][...] = array
     print(f"Saving: {time.time() - t0:.1f} secs")
     env.close()
-    del env
-    gc.collect()
     return True
 
 
@@ -136,12 +135,15 @@ def main(args: Any) -> None:
         print("Connected camera IDs:", arr)
         return
 
+
     task_config = TASK_CONFIGS[args["task_name"]]
     dataset_dir = task_config["dataset_dir"]
-    max_timesteps: int = task_config["episode_len"]  # noqa: PGH003
+    max_timesteps: int = task_config["episode_len"]
     camera_names = task_config["camera_names"]
     camera_pseudonyms = task_config["camera_keys"]
     overwrite = True
+
+    image_recorder = ImageRecorder(camera_names, camera_pseudonyms, args["save_mp4"])
 
     manager = multiprocessing.Manager()
     shared_data = manager.dict()
@@ -162,10 +164,14 @@ def main(args: Any) -> None:
 
         dataset_name = f"episode_{episode_idx}"
         print(dataset_name + "\n")
+        image_recorder.set_save_path(os.path.join(dataset_dir, dataset_name))
+        for camera_id, camera_name in zip(camera_names, camera_pseudonyms):
+            image_recorder.make_writer(camera_id, camera_name)
+
         is_healthy = capture_one_episode(
             DT,
             max_timesteps,
-            camera_names,
+            image_recorder,
             camera_pseudonyms,
             str(dataset_dir),
             dataset_name,
@@ -176,6 +182,7 @@ def main(args: Any) -> None:
         if not is_healthy:
             sys.exit()
         print("Next episode")
+        image_recorder.close()
         time.sleep(5)
 
 
