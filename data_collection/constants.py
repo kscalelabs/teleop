@@ -16,6 +16,13 @@ TASK_CONFIGS: dict[str, dict[str, int | str | list]] = {
         "camera_names": [0],
         "camera_keys": ["cam1"],
     },
+    "left_arm_long": {
+        "dataset_dir": DATA_DIR + "/left_arm",
+        "num_episodes": 50,
+        "episode_len": 1000,
+        "camera_names": ["/dev/video0"],
+        "camera_keys": ["cam1"],
+    },
 }
 DT = 0.04
 TIME_OFFSET = 0.002

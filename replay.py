@@ -34,7 +34,7 @@ def main(args: argparse.Namespace) -> None:
     print(f"timesteps: {timesteps}")
 
     robot = Robot(config_path="config.yaml", setup="left_arm_replay")
-    if False:
+    if True:
         robot.zero_out()
     robot.update_motor_data()
 
@@ -45,7 +45,7 @@ def main(args: argparse.Namespace) -> None:
         robot.update_motor_data()
         print(f"Motor at {robot.get_motor_positions()}")
         print(f"Moving to {qpos[t]}")
-        time.sleep(DT)
+        time.sleep(DT/2)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Replay qpos data from HDF5 file on the real robot.")

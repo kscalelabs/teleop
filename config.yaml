@@ -28,8 +28,8 @@ robots:
         start_id: 1
     motor_config:
       arm:
-        signs: [1, -1, 1, -1, 1, -1]
-        # signs: [1, 1, 1, -1, 1, -1]
+        #signs: [1, -1, 1, -1, 1, -1]
+        signs: [1, -1, 1, 1, 1, -1]
         increments: [4, 4, 4, 4, 4, 4]
         maximum_values: [80, 80, 80, 70, 0, 10]
         offsets: [0, 0, 0, 0, 0, 0]
