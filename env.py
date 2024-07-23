@@ -43,7 +43,7 @@ class RealEnv:
     def get_qpos(self) -> np.ndarray:
         positions = self.shared_data["positions"]["actual"]["left"]
         return positions
-    
+
     def get_qpos_vert(self) -> np.ndarray:
         positions = self.shared_data["positions"]["expected"]["left"]
         return positions

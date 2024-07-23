@@ -131,7 +131,7 @@ class TeleopRobot:
         self.shared_data["positions"] = self.get_positions()
         self.shared_data["velocities"] = self.get_velocities()
 
-    def test(self):
+    def test(self) -> None:
         if not self.robot:
             print("Firmware not enabled")
             return
