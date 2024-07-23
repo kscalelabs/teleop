@@ -188,7 +188,10 @@ class TeleopRobot:
         movable_joints = [
             j for j in range(p.getNumJoints(self.robot_id)) if p.getJointInfo(self.robot_id, j)[2] != p.JOINT_FIXED
         ]
-        current_positions = [p.getJointState(self.robot_id, j)[0] for j in movable_joints]
+        if self.robot:
+            current_positions = self.positions.tolist.append(0)
+        else:
+            current_positions = [p.getJointState(self.robot_id, j)[0] for j in movable_joints]
 
         solution = p.calculateInverseKinematics(
             self.robot_id,
@@ -293,9 +296,9 @@ class TeleopRobot:
             if self.robot:
                 new_positions["left_arm"] = [self.q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]
                 offset = {"left_arm": [START_Q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]}
-                self.robot.set_position(new_positions, offset=offset)
+                self.robot.set_position(new_positions)#, offset=offset)
 
-    def update_positions(self):
+    def update_positions(self) -> None:
         if self.robot:
             self.robot.update_motor_data()
             pos = self.robot.get_motor_positions()['left_arm']

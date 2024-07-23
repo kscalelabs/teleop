@@ -18,7 +18,7 @@ def make_rerun(hdf5: str, cams: list[str]) -> None:
         # Create a dictionary to store video captures for each camera
         video_captures = {}
 
-        joint_names = ["shoulder_pitch", "shoulder_roll", "elbow_yaw", "elbow_pitch", "wrist", "gripper"]
+        joint_names = ["shoulder_pitch", "shoulder_roll", "elbow_roll", "elbow_pitch", "wrist", "gripper"]
 
         for t in range(max_timesteps):
             # Log timestamp
