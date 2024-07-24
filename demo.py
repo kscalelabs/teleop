@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 DELTA = 10
 URDF_WEB = "https://raw.githubusercontent.com/kscalelabs/teleop/f4616b5f117842e5f7eb138b87af31258e1f7484/urdf/stompy/upper_limb_assembly_5_dof_merged_simplified.urdf"
 URDF_LOCAL = "urdf/stompy/upper_limb_assembly_5_dof_merged_simplified.urdf"
+UPDATE_RATE = 1
 
 # Robot configuration
 START_POS_TRUNK_PYBULLET: NDArray = np.array([0, 0, 1])
@@ -277,7 +278,8 @@ class TeleopRobot:
             )
             self.update_shared_data()
 
-            if counter == 1:
+            # Skip updating positions every UPDATE_RATE frames (adjust if CAN buffer is being overflowed)
+            if counter > UPDATE_RATE:
                 self.update_positions()
                 counter = 0
             counter += 1

@@ -32,8 +32,7 @@ def main(args: argparse.Namespace) -> None:
 
     robot = Robot(config_path="config.yaml", setup="left_arm_replay")
 
-    if True:
-        robot.zero_out()
+    robot.zero_out()
 
     for t in range(timesteps):
         start_time = time.time()
