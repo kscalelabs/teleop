@@ -39,3 +39,5 @@ The data_collection.py script is structured as follows:
         3. Collect action from app
     3. Save episode
 
+### Notes
+The first place to check if there is a large discrepancy between actions and robot states is how you're interpreting the two values. Check their units, offsets, and any other factors that might be causing the numbers being recorded to be different than you expect.

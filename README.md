@@ -46,9 +46,10 @@ A minimal implementation of a bi-manual remote robotic teleoperation system usin
 
 ✅ tested on real world robot
 
+✅ record & playback trajectories
+
 ⬜️ debug 6dof end effector control
 
-⬜️ record & playback trajectories
 
 
 ### Setup
@@ -67,19 +68,52 @@ pip install -r requirements.txt
 
 ### Usage
 
-Start the server on the robot computer.
-
-```bash
-python demo.py
-```
-
 Start ngrok on the robot computer.
 
 ```bash
 ngrok http 8012
 ```
 
-Open the browser app on the HMD and go to the ngrok URL.
+Open the browser app on the HMD and go to the ngrok URL (there will not be any content until you start the server on the robot computer).
+
+#### Teleop
+Start the server on the robot computer.
+
+```bash
+python demo.py --gui --firmware
+```
+
+#### Data Collection
+Start the server on the robot computer.
+
+```bash
+python collect.py --task_name CONFIG_TASK_NAME --use_firmware True
+```
+
+#### Replaying Trajectories
+Simply run the following command to replay the recorded trajectories. This currently only works with episodes split into hdf5 and mp4 files.
+
+```bash
+python replay.py --dataset_dir PATH/TO/DATASET --episode_idx EPISODE_IDX
+```
+
+### Common Issues
+#### Large Errors in Robot State and Actions
+Check the units, offsets, and any other factors that might be causing the numbers being recorded to be different than you expect. Also, check that the motor configs are correct (signs, offsets, etc). The Robot class has a handy method to test motors. 
+
+```python
+robot.test_motors()
+```
+
+#### Robot Not Moving
+Check that the robot is connected to the firmware and that the firmware is running. Check the status of the can bus and restart if needed.
+
+  ```bash
+  sudo ip link show can0
+  ```
+
+#### Jerky Robot Movement
+Depending on your setup (power supply, battery, etc), check that current draw is not too high. An abnormally high current draw is also indicative of large errors in motor state and actions since we are using a closed loop PD torque controller. 
 
 ### Dependencies
 

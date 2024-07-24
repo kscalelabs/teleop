@@ -1,0 +1,48 @@
+robots:
+  - setup: "full_body"
+    delta_change: 10
+    body_parts:
+      left_arm:
+        start_id: 1
+      right_arm:
+        start_id: 7
+      left_leg:
+        start_id: 13
+      right_leg:
+        start_id: 19
+    motor_config:
+      arm:
+        signs: [1, -1, 1, -1, 1, 1]
+        increments: [4, 4, 4, 4, 4, 4]
+        maximum_values: [60, 60, 60, 60, 0, 10]
+        offsets: [0, 0, 0, 0, 0, 0]
+      leg:
+        signs: [1, -1, 1, -1, 1, -1]
+        increments: [4, 4, 4, 4, 4, 4]
+        maximum_values: [60, 60, 60, 60, 60, 60]
+        offsets: [0, 0, 0, 0, 0, 0]
+  - setup: "left_arm_teleop"
+    delta_change: 10
+    body_parts:
+      left_arm:
+        start_id: 1
+    motor_config:
+      arm:
+        #signs: [1, -1, 1, -1, 1, -1]
+        signs: [1, -1, 1, 1, 1, -1]
+        increments: [4, 4, 4, 4, 4, 4]
+        maximum_values: [80, 80, 80, 70, 0, 10]
+        offsets: [0, 0, 0, 0, 0, 0]
+  - setup: "left_arm_replay"
+    delta_change: 10
+    body_parts:
+      left_arm:
+        start_id: 1
+    motor_config:
+      arm:
+        signs: [1, -1, 1, 1, 1, -1]
+        # signs: [1, 1, 1, -1, 1, -1]
+        increments: [4, 4, 4, 4, 4, 4]
+        maximum_values: [80, 80, 80, 70, 0, 10]
+        offsets: [0, 0, 0, 0, 0, 0]
+

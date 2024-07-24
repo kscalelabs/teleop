@@ -1,8 +1,9 @@
-"""Script to collect data from the real robot."""
+"""Script to collect data from a real robot."""
 
 # Based on https://github.com/tonyzhaozh/aloha/blob/main/aloha_scripts/record_episodes.py
 
 import argparse
+import multiprocessing
 import os
 import sys
 import time
@@ -14,18 +15,20 @@ import numpy as np
 from tqdm import tqdm
 
 from data_collection.constants import CAM_HEIGHT, CAM_WIDTH, DT, TASK_CONFIGS
+from data_collection.util import ImageRecorder
+from demo import run_teleop_app
 from env import make_real_env
 
 
 def capture_one_episode(
     dt: float,
     max_timesteps: int,
-    camera_names: Any,
-    camera_pseudonyms: Any,
+    image_recorder: ImageRecorder,
+    camera_pseudonyms: list,
     dataset_dir: str,
     dataset_name: str,
     overwrite: bool,
-    firmware: bool = False,
+    shared_dict: dict,
     save_mp4: bool = False,
 ) -> bool:
     print(f"Dataset name: {dataset_name}")
@@ -38,7 +41,7 @@ def capture_one_episode(
         print(f"Dataset already exist at \n{dataset_path}\nHint: set overwrite to True.")
         sys.exit()
 
-    env = make_real_env(camera_names, camera_pseudonyms, firmware=firmware, save_mp4=save_mp4, save_path=dataset_path)
+    env = make_real_env(image_recorder, shared_data=shared_dict, save_mp4=save_mp4)
 
     # Wait for user input to start collecting data
     print("Press Enter to start collecting data")
@@ -112,8 +115,6 @@ def capture_one_episode(
                 array = np.array(array)
             root[name][...] = array
     print(f"Saving: {time.time() - t0:.1f} secs")
-    env.stop_event.set()
-    env.teleop_process.join()
     return True
 
 
@@ -132,35 +133,55 @@ def main(args: Any) -> None:
         print("Connected camera IDs:", arr)
         return
 
+
     task_config = TASK_CONFIGS[args["task_name"]]
     dataset_dir = task_config["dataset_dir"]
-    max_timesteps: int = task_config["episode_len"]  # noqa: PGH003
+    max_timesteps: int = task_config["episode_len"]
     camera_names = task_config["camera_names"]
     camera_pseudonyms = task_config["camera_keys"]
-
-    if args["episode_idx"] is not None:
-        episode_idx = args["episode_idx"]
-    else:
-        episode_idx = get_auto_index(str(dataset_dir))
     overwrite = True
 
-    dataset_name = f"episode_{episode_idx}"
-    print(dataset_name + "\n")
+    image_recorder = ImageRecorder(camera_names, camera_pseudonyms, args["save_mp4"])
+
+    manager = multiprocessing.Manager()
+    shared_data = manager.dict()
+
+    teleop_process = multiprocessing.Process(
+            target=run_teleop_app, args=(True, 60, args["use_firmware"], shared_data)
+    )
+
+    teleop_process.start()
+
+    time.sleep(5)
 
     while True:
+        if args["episode_idx"] is not None:
+            episode_idx = args["episode_idx"]
+        else:
+            episode_idx = get_auto_index(str(dataset_dir))
+
+        dataset_name = f"episode_{episode_idx}"
+        print(dataset_name + "\n")
+        image_recorder.set_save_path(os.path.join(str(dataset_dir), dataset_name))
+        for camera_id, camera_name in zip(camera_names, camera_pseudonyms):
+            image_recorder.make_writer(camera_id, camera_name)
+
         is_healthy = capture_one_episode(
             DT,
             max_timesteps,
-            camera_names,
+            image_recorder,
             camera_pseudonyms,
             str(dataset_dir),
             dataset_name,
             overwrite,
-            firmware=args["use_firmware"],
+            shared_data,
             save_mp4=args["save_mp4"],
         )
-        if is_healthy:
-            break
+        if not is_healthy:
+            sys.exit()
+        print("Next episode")
+        image_recorder.close()
+        time.sleep(5)
 
 
 def get_auto_index(dataset_dir: str, dataset_name_prefix: str = "", data_suffix: str = "hdf5") -> int | Exception:
