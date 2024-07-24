@@ -31,7 +31,7 @@ robots:
         #signs: [1, -1, 1, -1, 1, -1]
         signs: [1, -1, 1, 1, 1, -1]
         increments: [4, 4, 4, 4, 4, 4]
-        maximum_values: [80, 80, 80, 70, 0, 10]
+        maximum_values: [80, 80, 80, 80, 60, 100]
         offsets: [0, 0, 0, 0, 0, 0]
   - setup: "left_arm_replay"
     delta_change: 10
@@ -43,6 +43,6 @@ robots:
         signs: [1, -1, 1, 1, 1, -1]
         # signs: [1, 1, 1, -1, 1, -1]
         increments: [4, 4, 4, 4, 4, 4]
-        maximum_values: [80, 80, 80, 70, 0, 10]
+        maximum_values: [80, 80, 80, 80, 60, 100]
         offsets: [0, 0, 0, 0, 0, 0]
 
