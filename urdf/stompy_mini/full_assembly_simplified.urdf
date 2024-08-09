@@ -6866,4 +6866,17 @@
     <parent link="link_lower_half_assembly_1_left_leg_1_foot_left_inner_1" />
     <child link="link_lower_half_assembly_1_left_leg_1_foot_pad_1" />
     </joint>
+
+    <link name="left_end_effector_link"/>
+    <joint name="left_end_effector_joint" type="fixed">
+      <parent link="link_upper_half_assembly_1_left_arm_1_robstride_01_mock_4_rs_01_rotor_1"/>
+      <child link="left_end_effector_link"/>
+      <origin xyz="-.05 0 -.1" rpy="0 0 0"/>  <!-- Adjust these values to position it at the tip -->
+    </joint>
+  <link name="right_end_effector_link"/>
+    <joint name="right_end_effector_joint" type="fixed">
+      <parent link="link_upper_half_assembly_1_right_arm_1_robstride_01_mock_4_rs_01_rotor_1"/>
+      <child link="right_end_effector_link"/>
+      <origin xyz="-.05 0 -.1" rpy="0 0 0"/>  <!-- Adjust these values to position it at the tip -->
+    </joint>
   </robot>

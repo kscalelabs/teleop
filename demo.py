@@ -1,5 +1,10 @@
-"""Demo application for PyBullet and Vuer integration for data collection."""
+"""Demo application for PyBullet and Vuer integration for data collection.
 
+
+TODO:
+1. Test stub
+
+"""
 import argparse
 import asyncio
 import logging
@@ -15,7 +20,6 @@ from numpy.typing import NDArray
 from vuer import Vuer, VuerSession
 from vuer.schemas import Hands, PointLight, Urdf
 
-from firmware.robot.robot import Robot
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -23,15 +27,16 @@ logger = logging.getLogger(__name__)
 
 # Constants
 DELTA = 10
-URDF_WEB = "https://raw.githubusercontent.com/kscalelabs/teleop/f4616b5f117842e5f7eb138b87af31258e1f7484/urdf/stompy/upper_limb_assembly_5_dof_merged_simplified.urdf"
-URDF_LOCAL = "urdf/stompy/upper_limb_assembly_5_dof_merged_simplified.urdf"
+URDF_WEB = "https://raw.githubusercontent.com/kscalelabs/teleop/c65a3ea28ace532c66dc9fa369707a45997d19ec/urdf/stompy_mini/full_assembly_simplified.urdf"
+URDF_LOCAL = "urdf/stompy_mini/full_assembly_simplified.urdf"
 UPDATE_RATE = 1
 
 # Robot configuration
 START_POS_TRUNK_PYBULLET: NDArray = np.array([0, 0, 1])
-START_EUL_TRUNK_PYBULLET: NDArray = np.array([-math.pi / 2, 0, 2.15])
+START_EUL_TRUNK_PYBULLET: NDArray = np.array([math.pi, 0, 0])
 START_POS_TRUNK_VUER: NDArray = np.array([0, 1, 0])
-START_EUL_TRUNK_VUER: NDArray = np.array([-math.pi, -0.68, 0])
+# START_EUL_TRUNK_VUER: NDArray = np.array([-math.pi, -0.68, 0])
+START_EUL_TRUNK_VUER: NDArray = np.array([0,0, 0])
 
 # Starting positions for robot end effectors
 START_POS_EEL: NDArray = np.array([-0.35, -0.25, 0.0]) + START_POS_TRUNK_PYBULLET
@@ -44,26 +49,19 @@ PB_TO_VUER_AXES_SIGN: NDArray = np.array([1, 1, 1], dtype=np.int8)
 # Starting joint positions in PyBullet (corresponds to 0 on real robot)
 START_Q: Dict[str, float] = OrderedDict(
     [
-        # trunk
-        ("joint_torso_1_rmd_x8_90_mock_1_dof_x8", 0),
         # left arm
-        ("joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8", 0.544),
-        ("joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8", -1.33),
-        ("joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4", 0),
-        ("joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4", 4.8),
-        ("joint_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4", 1.76),
-        # left gripper
-        ("joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1", 0.0),
-        ("joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2", 0.0),
+        ("left shoulder pitch", -1.02),
+        ("left shoulder yaw", 1.38),
+        ("left shoulder roll", -3.24),
+        ("left elbow pitch", 1.2),
+        ("left wrist roll", 0),
+
         # right arm
-        ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8", 0.68),
-        ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8", 1.24),
-        ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4", 0),
-        ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4", 3.45),
-        ("joint_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4", 0),
-        # right gripper
-        ("joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_1", 0.0),
-        ("joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_2", 0.0),
+        ("right shoulder pitch", 0.68),
+        ("right shoulder yaw", -1.98),
+        ("right shoulder roll", -1.38),
+        ("right elbow pitch", 1.32),
+        ("right wrist roll", 0),
     ]
 )
 
@@ -73,27 +71,22 @@ EER_JOINT: str = "right_end_effector_joint"
 
 # Kinematic chains for each arm
 EEL_CHAIN_ARM = [
-    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8",
-    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8",
-    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4",
-    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4",
-    "joint_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4",
+    "left shoulder pitch",
+    "left shoulder yaw",
+    "left shoulder roll",
+    "left elbow pitch",
+    "left wrist roll",
 ]
 EER_CHAIN_ARM = [
-    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8",
-    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8",
-    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4",
-    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4",
-    "joint_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4",
+    "right shoulder pitch",
+    "right shoulder yaw",
+    "right shoulder roll",
+    "right elbow pitch",
+    "right wrist roll",
 ]
-EEL_CHAIN_HAND = [
-    "joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1",
-    "joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2",
-]
-EER_CHAIN_HAND = [
-    "joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_1",
-    "joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_2",
-]
+
+EEL_CHAIN_HAND = []
+EER_CHAIN_HAND = []
 
 OFFSET = list(START_Q.values())
 OFFSET_LEFT = [START_Q[joint] for joint in EEL_CHAIN_ARM + EEL_CHAIN_HAND]
@@ -120,6 +113,7 @@ class TeleopRobot:
         self.q_lock = asyncio.Lock()
 
         if use_firmware:
+            from firmware.robot.robot import Robot
             self.robot = Robot(config_path="config.yaml", setup="left_arm_teleop")
             self.robot.zero_out()
         else:
