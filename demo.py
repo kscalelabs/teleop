@@ -40,21 +40,20 @@ START_POS_TRUNK_VUER: NDArray = np.array([0, 1, 0])
 START_EUL_TRUNK_VUER: NDArray = np.array([0,0, 0])
 
 # Starting positions for robot end effectors
-START_POS_EEL: NDArray = np.array([-0.35, -0.25, 0.0]) + START_POS_TRUNK_PYBULLET
-START_POS_EER: NDArray = np.array([-0.35, 0.25, 0.0]) + START_POS_TRUNK_PYBULLET
+START_POS_EEL: NDArray = np.array([-0.25, -0.25, 0.0]) + START_POS_TRUNK_PYBULLET
+START_POS_EER: NDArray = np.array([-0.25, 0.35, 0.0]) + START_POS_TRUNK_PYBULLET
 
 PB_TO_VUER_AXES: NDArray = np.array([2, 0, 1], dtype=np.uint8)
 PB_TO_VUER_AXES_SIGN: NDArray = np.array([1, 1, 1], dtype=np.int8)
-
 
 # Starting joint positions in PyBullet (corresponds to 0 on real robot)
 START_Q: Dict[str, float] = OrderedDict(
     [
         # left arm
-        ("left shoulder pitch", -1.02),
-        ("left shoulder yaw", 1.38),
-        ("left shoulder roll", -3.24),
-        ("left elbow pitch", 1.2),
+        # ("left shoulder pitch", -1.02),
+        # ("left shoulder yaw", 1.38),
+        # ("left shoulder roll", -3.24),
+        # ("left elbow pitch", 1.2),
         # ("left wrist roll", 0),
 
         # right arm
@@ -72,10 +71,10 @@ EER_JOINT: str = "right_end_effector_joint"
 
 # Kinematic chains for each arm
 EEL_CHAIN_ARM = [
-    "left shoulder pitch",
-    "left shoulder yaw",
-    "left shoulder roll",
-    "left elbow pitch",
+    # "left shoulder pitch",
+    # "left shoulder yaw",
+    # "left shoulder roll",
+    # "left elbow pitch",
     # "left wrist roll",
 ]
 EER_CHAIN_ARM = [
@@ -238,7 +237,7 @@ class TeleopRobot:
         lpinch_dist = np.linalg.norm(np.array(event.value["leftLandmarks"][INDEX_FINGER_TIP_ID]) - lthumb_pos)
         if lpinch_dist < PINCH_DIST_CLOSED:
             self.goal_pos_eel = np.multiply(lthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN)
-            print(self.goal_pos_eel)
+            # print(self.goal_pos_eel)
             # # Gripper control
             # lmiddl_pos = np.array(event.value["leftLandmarks"][MIDDLE_FINGER_TIP_ID])
             # lgrip_dist = np.linalg.norm(lthumb_pos - lmiddl_pos) / PINCH_DIST_OPENED
@@ -267,8 +266,8 @@ class TeleopRobot:
         counter = 0
         while True:
             await asyncio.gather(
-                self.inverse_kinematics("left"),
-                # self.inverse_kinematics("right"),
+                # self.inverse_kinematics("left"),
+                self.inverse_kinematics("right"),
                 asyncio.sleep(1 / max_fps),
             )
             self.update_shared_data()
