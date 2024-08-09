@@ -33,7 +33,7 @@ UPDATE_RATE = 1
 
 # Robot configuration
 START_POS_TRUNK_PYBULLET: NDArray = np.array([0, 0, 1])
-START_EUL_TRUNK_PYBULLET: NDArray = np.array([math.pi, 0, 0])
+START_EUL_TRUNK_PYBULLET: NDArray = np.array([math.pi/2, 0, 0])
 START_POS_TRUNK_VUER: NDArray = np.array([0, 1, 0])
 # START_EUL_TRUNK_VUER: NDArray = np.array([-math.pi, -0.68, 0])
 START_EUL_TRUNK_VUER: NDArray = np.array([0,0, 0])
@@ -57,7 +57,7 @@ START_Q: Dict[str, float] = OrderedDict(
         ("left wrist roll", 0),
 
         # right arm
-        ("right shoulder pitch", 0.68),
+        ("right shoulder pitch", 3.12),
         ("right shoulder yaw", -1.98),
         ("right shoulder roll", -1.38),
         ("right elbow pitch", 1.32),
