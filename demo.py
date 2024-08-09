@@ -28,13 +28,13 @@ logger = logging.getLogger(__name__)
 
 # Constants
 DELTA = 10
-# URDF_WEB = "https://raw.githubusercontent.com/kscalelabs/teleop/c65a3ea28ace532c66dc9fa369707a45997d19ec/urdf/stompy_mini/full_assembly_simplified.urdf"
+URDF_WEB = "https://raw.githubusercontent.com/kscalelabs/teleop/59796c35863461f8f32a4c21f41903b965cc878e/urdf/stompy_mini/upper_half_assembly_simplified.urdf"
 URDF_LOCAL = "urdf/stompy_mini/upper_half_assembly_simplified.urdf"
 UPDATE_RATE = 1
 
 # Robot configuration
 START_POS_TRUNK_PYBULLET: NDArray = np.array([0, 0, 1])
-START_EUL_TRUNK_PYBULLET: NDArray = np.array([math.pi, 0, 0])
+START_EUL_TRUNK_PYBULLET: NDArray = np.array([-math.pi/2,  0, -math.pi/2])
 START_POS_TRUNK_VUER: NDArray = np.array([0, 1, 0])
 # START_EUL_TRUNK_VUER: NDArray = np.array([-math.pi, -0.68, 0])
 START_EUL_TRUNK_VUER: NDArray = np.array([0,0, 0])
@@ -224,29 +224,29 @@ class TeleopRobot:
         if rpinch_dist < PINCH_DIST_CLOSED:
             self.goal_pos_eer = np.multiply(rthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN)
 
-            # Gripper control
-            rmiddl_pos = np.array(event.value["rightLandmarks"][MIDDLE_FINGER_TIP_ID])
-            rgrip_dist = np.linalg.norm(rthumb_pos - rmiddl_pos) / PINCH_DIST_OPENED
-            _s = EE_S_MIN + rgrip_dist * (EE_S_MAX - EE_S_MIN)
+            # # Gripper control
+            # rmiddl_pos = np.array(event.value["rightLandmarks"][MIDDLE_FINGER_TIP_ID])
+            # rgrip_dist = np.linalg.norm(rthumb_pos - rmiddl_pos) / PINCH_DIST_OPENED
+            # _s = EE_S_MIN + rgrip_dist * (EE_S_MAX - EE_S_MIN)
 
-            for slider in EER_CHAIN_HAND:
-                self.q[slider] = 0.05 - _s
-                p.resetJointState(self.robot_id, self.joint_info[slider]["index"], 0.05 - _s)
+            # for slider in EER_CHAIN_HAND:
+            #     self.q[slider] = 0.05 - _s
+            #     p.resetJointState(self.robot_id, self.joint_info[slider]["index"], 0.05 - _s)
 
         # Left hand
         lthumb_pos = np.array(event.value["leftLandmarks"][THUMB_FINGER_TIP_ID])
         lpinch_dist = np.linalg.norm(np.array(event.value["leftLandmarks"][INDEX_FINGER_TIP_ID]) - lthumb_pos)
         if lpinch_dist < PINCH_DIST_CLOSED:
             self.goal_pos_eel = np.multiply(lthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN)
+            print(self.goal_pos_eel)
+            # # Gripper control
+            # lmiddl_pos = np.array(event.value["leftLandmarks"][MIDDLE_FINGER_TIP_ID])
+            # lgrip_dist = np.linalg.norm(lthumb_pos - lmiddl_pos) / PINCH_DIST_OPENED
+            # _s = EE_S_MIN + lgrip_dist * (EE_S_MAX - EE_S_MIN)
 
-            # Gripper control
-            lmiddl_pos = np.array(event.value["leftLandmarks"][MIDDLE_FINGER_TIP_ID])
-            lgrip_dist = np.linalg.norm(lthumb_pos - lmiddl_pos) / PINCH_DIST_OPENED
-            _s = EE_S_MIN + lgrip_dist * (EE_S_MAX - EE_S_MIN)
-
-            for slider in EEL_CHAIN_HAND:
-                self.q[slider] = 0.05 - _s
-                p.resetJointState(self.robot_id, self.joint_info[slider]["index"], 0.05 - _s)
+            # for slider in EEL_CHAIN_HAND:
+            #     self.q[slider] = 0.05 - _s
+            #     p.resetJointState(self.robot_id, self.joint_info[slider]["index"], 0.05 - _s)
 
     async def main_loop(self, session: VuerSession, max_fps: int) -> None:
         """Main application loop."""
@@ -268,7 +268,7 @@ class TeleopRobot:
         while True:
             await asyncio.gather(
                 self.inverse_kinematics("left"),
-                self.inverse_kinematics("right"),
+                # self.inverse_kinematics("right"),
                 asyncio.sleep(1 / max_fps),
             )
             self.update_shared_data()
