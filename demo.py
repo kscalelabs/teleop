@@ -21,19 +21,20 @@ from vuer import Vuer, VuerSession
 from vuer.schemas import Hands, PointLight, Urdf
 
 
+
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Constants
 DELTA = 10
-URDF_WEB = "https://raw.githubusercontent.com/kscalelabs/teleop/c65a3ea28ace532c66dc9fa369707a45997d19ec/urdf/stompy_mini/full_assembly_simplified.urdf"
-URDF_LOCAL = "urdf/stompy_mini/full_assembly_simplified.urdf"
+# URDF_WEB = "https://raw.githubusercontent.com/kscalelabs/teleop/c65a3ea28ace532c66dc9fa369707a45997d19ec/urdf/stompy_mini/full_assembly_simplified.urdf"
+URDF_LOCAL = "urdf/stompy_mini/upper_half_assembly_simplified.urdf"
 UPDATE_RATE = 1
 
 # Robot configuration
 START_POS_TRUNK_PYBULLET: NDArray = np.array([0, 0, 1])
-START_EUL_TRUNK_PYBULLET: NDArray = np.array([math.pi/2, 0, 0])
+START_EUL_TRUNK_PYBULLET: NDArray = np.array([math.pi, 0, 0])
 START_POS_TRUNK_VUER: NDArray = np.array([0, 1, 0])
 # START_EUL_TRUNK_VUER: NDArray = np.array([-math.pi, -0.68, 0])
 START_EUL_TRUNK_VUER: NDArray = np.array([0,0, 0])
@@ -54,14 +55,14 @@ START_Q: Dict[str, float] = OrderedDict(
         ("left shoulder yaw", 1.38),
         ("left shoulder roll", -3.24),
         ("left elbow pitch", 1.2),
-        ("left wrist roll", 0),
+        # ("left wrist roll", 0),
 
         # right arm
         ("right shoulder pitch", 3.12),
         ("right shoulder yaw", -1.98),
         ("right shoulder roll", -1.38),
         ("right elbow pitch", 1.32),
-        ("right wrist roll", 0),
+        # ("right wrist roll", 0),
     ]
 )
 
@@ -75,14 +76,14 @@ EEL_CHAIN_ARM = [
     "left shoulder yaw",
     "left shoulder roll",
     "left elbow pitch",
-    "left wrist roll",
+    # "left wrist roll",
 ]
 EER_CHAIN_ARM = [
     "right shoulder pitch",
     "right shoulder yaw",
     "right shoulder roll",
     "right elbow pitch",
-    "right wrist roll",
+    # "right wrist roll",
 ]
 
 EEL_CHAIN_HAND = []
