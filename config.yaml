@@ -45,4 +45,27 @@ robots:
         increments: [4, 4, 4, 4, 4, 4]
         maximum_values: [80, 80, 80, 70, 0, 10]
         offsets: [0, 0, 0, 0, 0, 0]
-
+  - setup: "teleop_test"
+    motor_type: "bionic"
+    delta_change: 10
+    body_parts:
+      left_arm:
+        start_id: 1
+        canbus_id: 0
+        dof: 6
+    motor_config:
+      arm:
+        signs: [-1, 1, -1, -1, -1, 1]
+        increments: [4, 4, 4, 4, 4, 4]
+        maximum_values: [60, 60, 60, 60, 0, 10]
+        offsets: [0, 0, 0, 0, 0, 0]
+    params:
+      - motor_id: "default"
+        kp: 10
+        kd: 2
+      - motor_id: 1
+        kp: 30
+        kd: 2
+      - motor_id: 2
+        kp: 30
+        kd: 2

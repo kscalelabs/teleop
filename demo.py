@@ -7,6 +7,7 @@ import math
 from collections import OrderedDict
 from copy import deepcopy
 from typing import Any, Dict
+import time
 
 import numpy as np
 import pybullet as p
@@ -120,8 +121,12 @@ class TeleopRobot:
         self.q_lock = asyncio.Lock()
 
         if use_firmware:
-            self.robot = Robot(config_path="config.yaml", setup="left_arm_teleop")
-            self.robot.zero_out()
+            self.robot = Robot(config_path="config.yaml", setup="teleop_test")
+
+            for i in range(5):
+                self.robot.zero_out()
+                time.sleep(0.1)
+            self.robot.update_motor_data()
         else:
             self.robot = None
 
@@ -274,7 +279,7 @@ class TeleopRobot:
             await asyncio.gather(
                 self.inverse_kinematics("left"),
                 self.inverse_kinematics("right"),
-                asyncio.sleep(1 / max_fps),
+                # asyncio.sleep(1 / max_fps),
             )
             self.update_shared_data()
 
@@ -359,7 +364,7 @@ def main() -> None:
     parser.add_argument("--gui", action="store_true", help="Use PyBullet GUI mode")
     parser.add_argument("--fps", type=int, default=60, help="Maximum frames per second")
     parser.add_argument("--urdf", type=str, default=URDF_LOCAL, help="Path to URDF file")
-    args = parser.parse_args()
+    args, _ = parser.parse_known_args()
 
     demo = TeleopRobot(use_firmware=args.firmware)
     demo.run(args.gui, args.fps, args.urdf)
