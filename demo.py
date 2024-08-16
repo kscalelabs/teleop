@@ -11,6 +11,7 @@ import logging
 import math
 from collections import OrderedDict
 from copy import deepcopy
+import time
 from typing import Any, Dict
 
 import numpy as np
@@ -33,32 +34,32 @@ URDF_LOCAL = "urdf/stompy_mini/upper_half_assembly_simplified.urdf"
 UPDATE_RATE = 1
 
 # Robot configuration
-START_POS_TRUNK_PYBULLET: NDArray = np.array([0, 0, 1.3])
+START_POS_TRUNK_PYBULLET: NDArray = np.array([0, 0, 1])
 START_EUL_TRUNK_PYBULLET: NDArray = np.array([-math.pi/2,  0, -math.pi/2])
-START_POS_TRUNK_VUER: NDArray = np.array([0, 1.1, 0])
+START_POS_TRUNK_VUER: NDArray = np.array([0, 1, 0])
 # START_EUL_TRUNK_VUER: NDArray = np.array([-math.pi, -0.68, 0])
 START_EUL_TRUNK_VUER: NDArray = np.array([0,0, 0])
 
 # Starting positions for robot end effectors
-START_POS_EEL: NDArray = np.array([-0.25, -0.35, 0.0]) + START_POS_TRUNK_PYBULLET
-START_POS_EER: NDArray = np.array([-0.2, 0.35, -0.2]) + START_POS_TRUNK_PYBULLET
+START_POS_EEL: NDArray = np.array([-0.25, -0.25, 0.0]) + START_POS_TRUNK_PYBULLET
+START_POS_EER: NDArray = np.array([-0.25, 0.35, 0.0]) + START_POS_TRUNK_PYBULLET
 
-PB_TO_VUER_AXES: NDArray = np.array([1,0,2], dtype=np.uint8)
+PB_TO_VUER_AXES: NDArray = np.array([2, 0, 1], dtype=np.uint8)
 PB_TO_VUER_AXES_SIGN: NDArray = np.array([1, 1, 1], dtype=np.int8)
 
 # Starting joint positions in PyBullet (corresponds to 0 on real robot)
 START_Q: Dict[str, float] = OrderedDict(
     [
         # left arm
-        ("left shoulder pitch", 4.8),
-        ("left shoulder yaw", 1.2),
-        ("left shoulder roll", 0),
-        ("left elbow pitch", -0.5),
+        ("left shoulder pitch", -1.02),
+        ("left shoulder yaw", 1.38),
+        ("left shoulder roll", -3.24),
+        ("left elbow pitch", 1.2),
         ("left wrist roll", 0),
 
         # right arm
         ("right shoulder pitch", 3.12),
-        ("right shoulder yaw", -1.85),
+        ("right shoulder yaw", -1.98),
         ("right shoulder roll", -1.38),
         ("right elbow pitch", 1.32),
         ("right wrist roll", 0),
@@ -90,7 +91,6 @@ EER_CHAIN_HAND = []
 
 OFFSET = list(START_Q.values())
 OFFSET_LEFT = [START_Q[joint] for joint in EEL_CHAIN_ARM + EEL_CHAIN_HAND]
-OFFSET_RIGHT = [START_Q[joint] for joint in EER_CHAIN_ARM + EER_CHAIN_HAND]
 
 # Hand tracking parameters
 INDEX_FINGER_TIP_ID, THUMB_FINGER_TIP_ID, MIDDLE_FINGER_TIP_ID = 8, 4, 14
@@ -115,9 +115,8 @@ class TeleopRobot:
 
         if use_firmware:
             from firmware.robot.robot import Robot
-            self.robot = Robot(config_path="config.yaml", setup="right_arm_mini")
+            self.robot = Robot(config_path="config.yaml", setup="left_arm_teleop")
             self.robot.zero_out()
-            self.robot.test_motors(low=0, high=45)
         else:
             self.robot = None
 
@@ -167,7 +166,6 @@ class TeleopRobot:
         # Add goal position markers
         p.addUserDebugPoints([self.goal_pos_eel], [[1, 0, 0]], pointSize=20)
         p.addUserDebugPoints([self.goal_pos_eer], [[0, 0, 1]], pointSize=20)
-        p.addUserDebugPoints([START_POS_EER], [[1, 1, 1]], pointSize=30)
 
     async def inverse_kinematics(self, arm: str, max_attempts: int = 20) -> float | np.floating[Any]:
         """Perform inverse kinematics calculation for the specified arm."""
@@ -179,9 +177,8 @@ class TeleopRobot:
         lower_limits = [self.joint_info[joint]["lower_limit"] for joint in ee_chain]
         upper_limits = [self.joint_info[joint]["upper_limit"] for joint in ee_chain]
         joint_ranges = [upper - lower for upper, lower in zip(upper_limits, lower_limits)]
-        
-        
-        target_pos = START_POS_EER
+
+        target_pos = START_POS_EER + np.array([-0.5,0,time.time() % 0.1])
 
         torso_pos, torso_orn = p.getBasePositionAndOrientation(self.robot_id)
         inv_torso_pos, inv_torso_orn = p.invertTransform(torso_pos, torso_orn)
@@ -191,34 +188,30 @@ class TeleopRobot:
             j for j in range(p.getNumJoints(self.robot_id)) if p.getJointInfo(self.robot_id, j)[2] != p.JOINT_FIXED
         ]
 
-
         current_positions = [p.getJointState(self.robot_id, j)[0] for j in movable_joints]
         solution = p.calculateInverseKinematics(
             self.robot_id,
             ee_id,
             target_pos_local,
-            # currentPositions=current_positions,
-            # lowerLimits=lower_limits,
-            # upperLimits=upper_limits,
-            # jointRanges=joint_ranges,
+            currentPositions=current_positions,
+            lowerLimits=lower_limits,
+            upperLimits=upper_limits,
+            jointRanges=joint_ranges,
             restPoses=OFFSET,
-            # jointDamping=joint_damping,
+            jointDamping=joint_damping,
         )
 
         actual_pos, _ = p.getLinkState(self.robot_id, ee_id)[:2]
         error = np.linalg.norm(np.array(target_pos) - np.array(actual_pos))
-        # p.addUserDebugPoints([actual_pos], [[0,0,1]], pointSize=6)
-        p.addUserDebugPoints([target_pos_local], [[1,0,0]], pointSize=6)
 
         if arm == "left":
             self.actual_pos_eel = actual_pos
         else:
             self.actual_pos_eer = actual_pos
-        print(f"Solution: {solution}, target: {target_pos}, actual: {actual_pos}, error: {error}")
+
         async with self.q_lock:
-            for i, val in enumerate(solution, start=4):#4):
+            for i, val in enumerate(solution, start=(0 if arm == "left" else len(EEL_CHAIN_ARM))):
                 joint_name = list(START_Q.keys())[i]
-                #print(f"Checking if {joint_name} is in {ee_chain}")
                 if joint_name in ee_chain:
                     self.q[joint_name] = val
                     p.resetJointState(self.robot_id, self.joint_info[joint_name]["index"], val)
@@ -241,6 +234,7 @@ class TeleopRobot:
             # for slider in EER_CHAIN_HAND:
             #     self.q[slider] = 0.05 - _s
             #     p.resetJointState(self.robot_id, self.joint_info[slider]["index"], 0.05 - _s)
+
         # Left hand
         lthumb_pos = np.array(event.value["leftLandmarks"][THUMB_FINGER_TIP_ID])
         lpinch_dist = np.linalg.norm(np.array(event.value["leftLandmarks"][INDEX_FINGER_TIP_ID]) - lthumb_pos)
@@ -270,8 +264,7 @@ class TeleopRobot:
         )
 
         if self.robot:
-            # new_positions = {"left_arm": [self.q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]}
-            new_positions = {"right_arm": [self.q[pos] for pos in EER_CHAIN_ARM + EER_CHAIN_HAND]}
+            new_positions = {"left_arm": [self.q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]}
 
         counter = 0
         while True:
@@ -298,17 +291,14 @@ class TeleopRobot:
                 )
 
             if self.robot:
-                # new_positions["left_arm"] = [self.q[pos]/2 for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]
-                # offset = {"left_arm": [i/2 for i in OFFSET_LEFT]}
-                new_positions["right_arm"] = [self.q[pos] for pos in EER_CHAIN_ARM + EER_CHAIN_HAND]
-                offset = {"right_arm": OFFSET_RIGHT}
-                # print(f"Setting to {np.array(new_positions['right_arm']) - np.array(offset['right_arm'])}")
-                self.robot.set_position(new_positions, offset=offset, radians=False)
+                new_positions["left_arm"] = [self.q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]
+                offset = {"left_arm": OFFSET_LEFT}
+                self.robot.set_position(new_positions, offset=offset, radians=True)
 
     def update_positions(self) -> None:
         if self.robot:
             self.robot.update_motor_data()
-            pos = self.robot.get_motor_positions()["right_arm"]
+            pos = self.robot.get_motor_positions()["left_arm"]
             self.positions = np.array(pos)
 
     def get_positions(self) -> dict[str, dict[str, NDArray]]:
@@ -364,7 +354,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="PyBullet and Vuer integration for robot control")
     parser.add_argument("--firmware", action="store_true", help="Enable firmware control")
     parser.add_argument("--gui", action="store_true", help="Use PyBullet GUI mode")
-    parser.add_argument("--fps", type=int, default=10, help="Maximum frames per second")
+    parser.add_argument("--fps", type=int, default=60, help="Maximum frames per second")
     parser.add_argument("--urdf", type=str, default=URDF_LOCAL, help="Path to URDF file")
     args = parser.parse_args()
 
