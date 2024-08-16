@@ -45,4 +45,55 @@ robots:
         increments: [4, 4, 4, 4, 4, 4]
         maximum_values: [80, 80, 80, 70, 0, 10]
         offsets: [0, 0, 0, 0, 0, 0]
-
+  - setup: "right_arm_mini"
+    motor_type: "robstride"
+    delta_change: 10
+    body_parts:
+      right_arm:
+        start_id: 1
+        canbus_id: 0
+        dof: 5
+    motor_config:
+      arm:
+        signs: [-1, 1, -1, 1, 1, 1]
+        increments: [4, 4, 4, 4, 4, 4]
+        maximum_values: [60, 60, 60, 60, 0, 10]
+        offsets: [0, 0, 0, 0, 0, 0]
+    params:
+      - motor_id: "default"
+        limit_torque: 10
+        cur_kp: 0.1
+        cur_ki: 0.1
+        cur_fit_gain: 0.1
+        limit_spd: 100
+        limit_cur: 10
+        loc_kp: 3
+        spd_kp: 0.5
+        spd_ki: 0.4
+        spd_filt_gain: 0.1
+  - setup: "left_arm_mini"
+    motor_type: "robstride"
+    delta_change: 10
+    body_parts:
+      left_arm:
+        start_id: 6
+        canbus_id: 0
+        dof: 5
+    motor_config:
+      arm:
+        signs: [-1, 1, -1, 1, 1, 1]
+        increments: [4, 4, 4, 4, 4, 4]
+        maximum_values: [60, 60, 60, 60, 0, 10]
+        offsets: [0, 0, 0, 0, 0, 0]
+    params:
+      - motor_id: "default"
+        limit_torque: 10
+        cur_kp: 0.1
+        cur_ki: 0.1
+        cur_fit_gain: 0.1
+        limit_spd: 100
+        limit_cur: 10
+        loc_kp: 3
+        spd_kp: 0.5
+        spd_ki: 0.4
+        spd_filt_gain: 0.1

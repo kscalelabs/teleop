@@ -115,8 +115,9 @@ class TeleopRobot:
 
         if use_firmware:
             from firmware.robot.robot import Robot
-            self.robot = Robot(config_path="config.yaml", setup="left_arm_teleop")
+            self.robot = Robot(config_path="config.yaml", setup="right_arm_mini")
             self.robot.zero_out()
+            self.robot.test_motors(low=0, high=45)
         else:
             self.robot = None
 
@@ -206,10 +207,11 @@ class TeleopRobot:
             self.actual_pos_eel = actual_pos
         else:
             self.actual_pos_eer = actual_pos
-
+        print(f"Solution: {solution}, target: {target_pos}, actual: {actual_pos}, error: {error}")
         async with self.q_lock:
-            for i, val in enumerate(solution):
+            for i, val in enumerate(solution, start=4):#4):
                 joint_name = list(START_Q.keys())[i]
+                #print(f"Checking if {joint_name} is in {ee_chain}")
                 if joint_name in ee_chain:
                     self.q[joint_name] = val
                     p.resetJointState(self.robot_id, self.joint_info[joint_name]["index"], val)
@@ -232,7 +234,6 @@ class TeleopRobot:
             # for slider in EER_CHAIN_HAND:
             #     self.q[slider] = 0.05 - _s
             #     p.resetJointState(self.robot_id, self.joint_info[slider]["index"], 0.05 - _s)
-
         # Left hand
         lthumb_pos = np.array(event.value["leftLandmarks"][THUMB_FINGER_TIP_ID])
         lpinch_dist = np.linalg.norm(np.array(event.value["leftLandmarks"][INDEX_FINGER_TIP_ID]) - lthumb_pos)
@@ -262,7 +263,7 @@ class TeleopRobot:
         )
 
         if self.robot:
-            #new_positions = {"left_arm": [self.q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]}
+            # new_positions = {"left_arm": [self.q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]}
             new_positions = {"right_arm": [self.q[pos] for pos in EER_CHAIN_ARM + EER_CHAIN_HAND]}
 
         counter = 0
@@ -290,16 +291,17 @@ class TeleopRobot:
                 )
 
             if self.robot:
-                #new_positions["left_arm"] = [self.q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]
-                #offset = {"left_arm": OFFSET_LEFT}
+                # new_positions["left_arm"] = [self.q[pos]/2 for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]
+                # offset = {"left_arm": [i/2 for i in OFFSET_LEFT]}
                 new_positions["right_arm"] = [self.q[pos] for pos in EER_CHAIN_ARM + EER_CHAIN_HAND]
                 offset = {"right_arm": OFFSET_RIGHT}
+                # print(f"Setting to {np.array(new_positions['right_arm']) - np.array(offset['right_arm'])}")
                 self.robot.set_position(new_positions, offset=offset, radians=False)
 
     def update_positions(self) -> None:
         if self.robot:
             self.robot.update_motor_data()
-            pos = self.robot.get_motor_positions()["left_arm"]
+            pos = self.robot.get_motor_positions()["right_arm"]
             self.positions = np.array(pos)
 
     def get_positions(self) -> dict[str, dict[str, NDArray]]:
