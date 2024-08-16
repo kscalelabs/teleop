@@ -40,7 +40,7 @@ START_POS_TRUNK_VUER: NDArray = np.array([0, 1, 0])
 START_EUL_TRUNK_VUER: NDArray = np.array([0,0, 0])
 
 # Starting positions for robot end effectors
-START_POS_EEL: NDArray = np.array([-0.25, -0.25, 0.0]) + START_POS_TRUNK_PYBULLET
+START_POS_EEL: NDArray = np.array([-0.25, -0.35, 0.0]) + START_POS_TRUNK_PYBULLET
 START_POS_EER: NDArray = np.array([-0.25, 0.35, 0.0]) + START_POS_TRUNK_PYBULLET
 
 PB_TO_VUER_AXES: NDArray = np.array([2, 0, 1], dtype=np.uint8)
@@ -50,18 +50,18 @@ PB_TO_VUER_AXES_SIGN: NDArray = np.array([1, 1, 1], dtype=np.int8)
 START_Q: Dict[str, float] = OrderedDict(
     [
         # left arm
-        # ("left shoulder pitch", -1.02),
-        # ("left shoulder yaw", 1.38),
-        # ("left shoulder roll", -3.24),
-        # ("left elbow pitch", 1.2),
-        # ("left wrist roll", 0),
+        ("left shoulder pitch", 4.8),
+        ("left shoulder yaw", 1.2),
+        ("left shoulder roll", 0),
+        ("left elbow pitch", -0.5),
+        ("left wrist roll", 0),
 
         # right arm
         ("right shoulder pitch", 3.12),
-        ("right shoulder yaw", -1.98),
+        ("right shoulder yaw", -1.85),
         ("right shoulder roll", -1.38),
         ("right elbow pitch", 1.32),
-        # ("right wrist roll", 0),
+        ("right wrist roll", 0),
     ]
 )
 
@@ -71,18 +71,18 @@ EER_JOINT: str = "right_end_effector_joint"
 
 # Kinematic chains for each arm
 EEL_CHAIN_ARM = [
-    # "left shoulder pitch",
-    # "left shoulder yaw",
-    # "left shoulder roll",
-    # "left elbow pitch",
-    # "left wrist roll",
+    "left shoulder pitch",
+    "left shoulder yaw",
+    "left shoulder roll",
+    "left elbow pitch",
+    "left wrist roll",
 ]
 EER_CHAIN_ARM = [
     "right shoulder pitch",
     "right shoulder yaw",
     "right shoulder roll",
     "right elbow pitch",
-    # "right wrist roll",
+    "right wrist roll",
 ]
 
 EEL_CHAIN_HAND = []
@@ -90,6 +90,7 @@ EER_CHAIN_HAND = []
 
 OFFSET = list(START_Q.values())
 OFFSET_LEFT = [START_Q[joint] for joint in EEL_CHAIN_ARM + EEL_CHAIN_HAND]
+OFFSET_RIGHT = [START_Q[joint] for joint in EER_CHAIN_ARM + EER_CHAIN_HAND]
 
 # Hand tracking parameters
 INDEX_FINGER_TIP_ID, THUMB_FINGER_TIP_ID, MIDDLE_FINGER_TIP_ID = 8, 4, 14
@@ -261,7 +262,8 @@ class TeleopRobot:
         )
 
         if self.robot:
-            new_positions = {"left_arm": [self.q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]}
+            #new_positions = {"left_arm": [self.q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]}
+            new_positions = {"right_arm": [self.q[pos] for pos in EER_CHAIN_ARM + EER_CHAIN_HAND]}
 
         counter = 0
         while True:
@@ -288,9 +290,11 @@ class TeleopRobot:
                 )
 
             if self.robot:
-                new_positions["left_arm"] = [self.q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]
-                offset = {"left_arm": OFFSET_LEFT}
-                self.robot.set_position(new_positions, offset=offset, radians=True)
+                #new_positions["left_arm"] = [self.q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]
+                #offset = {"left_arm": OFFSET_LEFT}
+                new_positions["right_arm"] = [self.q[pos] for pos in EER_CHAIN_ARM + EER_CHAIN_HAND]
+                offset = {"right_arm": OFFSET_RIGHT}
+                self.robot.set_position(new_positions, offset=offset, radians=False)
 
     def update_positions(self) -> None:
         if self.robot:
