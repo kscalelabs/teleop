@@ -33,17 +33,17 @@ URDF_LOCAL = "urdf/stompy_mini/upper_half_assembly_simplified.urdf"
 UPDATE_RATE = 1
 
 # Robot configuration
-START_POS_TRUNK_PYBULLET: NDArray = np.array([0, 0, 1])
+START_POS_TRUNK_PYBULLET: NDArray = np.array([0, 0, 1.3])
 START_EUL_TRUNK_PYBULLET: NDArray = np.array([-math.pi/2,  0, -math.pi/2])
-START_POS_TRUNK_VUER: NDArray = np.array([0, 1, 0])
+START_POS_TRUNK_VUER: NDArray = np.array([0, 1.1, 0])
 # START_EUL_TRUNK_VUER: NDArray = np.array([-math.pi, -0.68, 0])
 START_EUL_TRUNK_VUER: NDArray = np.array([0,0, 0])
 
 # Starting positions for robot end effectors
 START_POS_EEL: NDArray = np.array([-0.25, -0.35, 0.0]) + START_POS_TRUNK_PYBULLET
-START_POS_EER: NDArray = np.array([-0.25, 0.35, 0.0]) + START_POS_TRUNK_PYBULLET
+START_POS_EER: NDArray = np.array([-0.2, 0.35, -0.2]) + START_POS_TRUNK_PYBULLET
 
-PB_TO_VUER_AXES: NDArray = np.array([2, 0, 1], dtype=np.uint8)
+PB_TO_VUER_AXES: NDArray = np.array([1,0,2], dtype=np.uint8)
 PB_TO_VUER_AXES_SIGN: NDArray = np.array([1, 1, 1], dtype=np.int8)
 
 # Starting joint positions in PyBullet (corresponds to 0 on real robot)
@@ -167,6 +167,7 @@ class TeleopRobot:
         # Add goal position markers
         p.addUserDebugPoints([self.goal_pos_eel], [[1, 0, 0]], pointSize=20)
         p.addUserDebugPoints([self.goal_pos_eer], [[0, 0, 1]], pointSize=20)
+        p.addUserDebugPoints([START_POS_EER], [[1, 1, 1]], pointSize=30)
 
     async def inverse_kinematics(self, arm: str, max_attempts: int = 20) -> float | np.floating[Any]:
         """Perform inverse kinematics calculation for the specified arm."""
@@ -178,6 +179,9 @@ class TeleopRobot:
         lower_limits = [self.joint_info[joint]["lower_limit"] for joint in ee_chain]
         upper_limits = [self.joint_info[joint]["upper_limit"] for joint in ee_chain]
         joint_ranges = [upper - lower for upper, lower in zip(upper_limits, lower_limits)]
+        
+        
+        target_pos = START_POS_EER
 
         torso_pos, torso_orn = p.getBasePositionAndOrientation(self.robot_id)
         inv_torso_pos, inv_torso_orn = p.invertTransform(torso_pos, torso_orn)
@@ -187,21 +191,24 @@ class TeleopRobot:
             j for j in range(p.getNumJoints(self.robot_id)) if p.getJointInfo(self.robot_id, j)[2] != p.JOINT_FIXED
         ]
 
+
         current_positions = [p.getJointState(self.robot_id, j)[0] for j in movable_joints]
         solution = p.calculateInverseKinematics(
             self.robot_id,
             ee_id,
             target_pos_local,
-            currentPositions=current_positions,
-            lowerLimits=lower_limits,
-            upperLimits=upper_limits,
-            jointRanges=joint_ranges,
+            # currentPositions=current_positions,
+            # lowerLimits=lower_limits,
+            # upperLimits=upper_limits,
+            # jointRanges=joint_ranges,
             restPoses=OFFSET,
-            jointDamping=joint_damping,
+            # jointDamping=joint_damping,
         )
 
         actual_pos, _ = p.getLinkState(self.robot_id, ee_id)[:2]
         error = np.linalg.norm(np.array(target_pos) - np.array(actual_pos))
+        # p.addUserDebugPoints([actual_pos], [[0,0,1]], pointSize=6)
+        p.addUserDebugPoints([target_pos_local], [[1,0,0]], pointSize=6)
 
         if arm == "left":
             self.actual_pos_eel = actual_pos
@@ -357,7 +364,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="PyBullet and Vuer integration for robot control")
     parser.add_argument("--firmware", action="store_true", help="Enable firmware control")
     parser.add_argument("--gui", action="store_true", help="Use PyBullet GUI mode")
-    parser.add_argument("--fps", type=int, default=60, help="Maximum frames per second")
+    parser.add_argument("--fps", type=int, default=10, help="Maximum frames per second")
     parser.add_argument("--urdf", type=str, default=URDF_LOCAL, help="Path to URDF file")
     args = parser.parse_args()
 
