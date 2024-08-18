@@ -29,14 +29,15 @@ logger = logging.getLogger(__name__)
 
 # Constants
 DELTA = 10
-URDF_WEB = "https://raw.githubusercontent.com/kscalelabs/teleop/59796c35863461f8f32a4c21f41903b965cc878e/urdf/stompy_mini/upper_half_assembly_simplified.urdf"
+#URDF_WEB = "https://raw.githubusercontent.com/kscalelabs/teleop/59796c35863461f8f32a4c21f41903b965cc878e/urdf/stompy_mini/upper_half_assembly_simplified.urdf"
+URDF_WEB = "https://raw.githubusercontent.com/kscalelabs/teleop/pawel/add_stompy_mini/urdf/stompy_mini/upper_half_assembly_simplified.urdf"
 URDF_LOCAL = "urdf/stompy_mini/upper_half_assembly_simplified.urdf"
 UPDATE_RATE = 1
 
 # Robot configuration
 START_POS_TRUNK_PYBULLET: NDArray = np.array([0, 0, 1])
 START_EUL_TRUNK_PYBULLET: NDArray = np.array([-math.pi/2,  0, -math.pi/2])
-START_POS_TRUNK_VUER: NDArray = np.array([0, 1, 0])
+START_POS_TRUNK_VUER: NDArray = np.array([0, 1.2, 0])
 # START_EUL_TRUNK_VUER: NDArray = np.array([-math.pi, -0.68, 0])
 START_EUL_TRUNK_VUER: NDArray = np.array([0,0, 0])
 
@@ -47,6 +48,8 @@ START_POS_EER: NDArray = np.array([-0.25, 0.35, 0.0]) + START_POS_TRUNK_PYBULLET
 PB_TO_VUER_AXES: NDArray = np.array([2, 0, 1], dtype=np.uint8)
 PB_TO_VUER_AXES_SIGN: NDArray = np.array([1, 1, 1], dtype=np.int8)
 
+VUER_TO_PB_TRUNK_OFFSET = START_POS_TRUNK_PYBULLET - START_POS_TRUNK_VUER[PB_TO_VUER_AXES] * PB_TO_VUER_AXES_SIGN # Offset between Vuer and PyBullet trunk positions / coordinates
+
 # Starting joint positions in PyBullet (corresponds to 0 on real robot)
 START_Q: Dict[str, float] = OrderedDict(
     [
@@ -55,14 +58,14 @@ START_Q: Dict[str, float] = OrderedDict(
         ("left shoulder yaw", 1.38),
         ("left shoulder roll", -3.24),
         ("left elbow pitch", 1.2),
-        ("left wrist roll", 0),
+        # ("left wrist roll", 0),
 
         # right arm
-        ("right shoulder pitch", 3.12),
-        ("right shoulder yaw", -1.98),
-        ("right shoulder roll", -1.38),
+        ("right shoulder pitch", 3.15),
+        ("right shoulder yaw", -1.92),
+        ("right shoulder roll", -1.46),
         ("right elbow pitch", 1.32),
-        ("right wrist roll", 0),
+        # # ("right wrist roll", 0),
     ]
 )
 
@@ -76,14 +79,14 @@ EEL_CHAIN_ARM = [
     "left shoulder yaw",
     "left shoulder roll",
     "left elbow pitch",
-    "left wrist roll",
+    # "left wrist roll",
 ]
 EER_CHAIN_ARM = [
     "right shoulder pitch",
     "right shoulder yaw",
     "right shoulder roll",
     "right elbow pitch",
-    "right wrist roll",
+    # "right wrist roll",
 ]
 
 EEL_CHAIN_HAND = []
@@ -91,6 +94,7 @@ EER_CHAIN_HAND = []
 
 OFFSET = list(START_Q.values())
 OFFSET_LEFT = [START_Q[joint] for joint in EEL_CHAIN_ARM + EEL_CHAIN_HAND]
+OFFSET_RIGHT = [START_Q[joint] for joint in EER_CHAIN_ARM + EER_CHAIN_HAND]
 
 # Hand tracking parameters
 INDEX_FINGER_TIP_ID, THUMB_FINGER_TIP_ID, MIDDLE_FINGER_TIP_ID = 8, 4, 14
@@ -115,7 +119,7 @@ class TeleopRobot:
 
         if use_firmware:
             from firmware.robot.robot import Robot
-            self.robot = Robot(config_path="config.yaml", setup="left_arm_teleop")
+            self.robot = Robot(config_path="config.yaml", setup="right_arm_mini")
             self.robot.zero_out()
         else:
             self.robot = None
@@ -178,8 +182,6 @@ class TeleopRobot:
         upper_limits = [self.joint_info[joint]["upper_limit"] for joint in ee_chain]
         joint_ranges = [upper - lower for upper, lower in zip(upper_limits, lower_limits)]
 
-        target_pos = START_POS_EER + np.array([-0.5,0,time.time() % 0.1])
-
         torso_pos, torso_orn = p.getBasePositionAndOrientation(self.robot_id)
         inv_torso_pos, inv_torso_orn = p.invertTransform(torso_pos, torso_orn)
         target_pos_local = p.multiplyTransforms(inv_torso_pos, inv_torso_orn, target_pos, [0, 0, 0, 1])[0]
@@ -187,7 +189,7 @@ class TeleopRobot:
         movable_joints = [
             j for j in range(p.getNumJoints(self.robot_id)) if p.getJointInfo(self.robot_id, j)[2] != p.JOINT_FIXED
         ]
-
+        
         current_positions = [p.getJointState(self.robot_id, j)[0] for j in movable_joints]
         solution = p.calculateInverseKinematics(
             self.robot_id,
@@ -197,8 +199,8 @@ class TeleopRobot:
             lowerLimits=lower_limits,
             upperLimits=upper_limits,
             jointRanges=joint_ranges,
-            restPoses=OFFSET,
-            jointDamping=joint_damping,
+            restPoses=OFFSET_RIGHT,
+            # jointDamping=joint_damping,
         )
 
         actual_pos, _ = p.getLinkState(self.robot_id, ee_id)[:2]
@@ -224,7 +226,7 @@ class TeleopRobot:
         rthumb_pos = np.array(event.value["rightLandmarks"][THUMB_FINGER_TIP_ID])
         rpinch_dist = np.linalg.norm(np.array(event.value["rightLandmarks"][INDEX_FINGER_TIP_ID]) - rthumb_pos)
         if rpinch_dist < PINCH_DIST_CLOSED:
-            self.goal_pos_eer = np.multiply(rthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN)
+            self.goal_pos_eer = np.multiply(rthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN) + VUER_TO_PB_TRUNK_OFFSET
 
             # # Gripper control
             # rmiddl_pos = np.array(event.value["rightLandmarks"][MIDDLE_FINGER_TIP_ID])
@@ -239,7 +241,7 @@ class TeleopRobot:
         lthumb_pos = np.array(event.value["leftLandmarks"][THUMB_FINGER_TIP_ID])
         lpinch_dist = np.linalg.norm(np.array(event.value["leftLandmarks"][INDEX_FINGER_TIP_ID]) - lthumb_pos)
         if lpinch_dist < PINCH_DIST_CLOSED:
-            self.goal_pos_eel = np.multiply(lthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN)
+            self.goal_pos_eel = np.multiply(lthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN) + VUER_TO_PB_TRUNK_OFFSET
             # print(self.goal_pos_eel)
             # # Gripper control
             # lmiddl_pos = np.array(event.value["leftLandmarks"][MIDDLE_FINGER_TIP_ID])
@@ -264,7 +266,8 @@ class TeleopRobot:
         )
 
         if self.robot:
-            new_positions = {"left_arm": [self.q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]}
+            # new_positions = {"left_arm": [self.q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]}
+            new_positions = {"right_arm": [self.q[pos] for pos in EER_CHAIN_ARM + EER_CHAIN_HAND]}
 
         counter = 0
         while True:
@@ -291,14 +294,16 @@ class TeleopRobot:
                 )
 
             if self.robot:
-                new_positions["left_arm"] = [self.q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]
-                offset = {"left_arm": OFFSET_LEFT}
-                self.robot.set_position(new_positions, offset=offset, radians=True)
+                # new_positions["left_arm"] = [self.q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]
+                # offset = {"left_arm": OFFSET_LEFT}
+                new_positions["right_arm"] = [self.q[pos] for pos in EER_CHAIN_ARM + EER_CHAIN_HAND]
+                offset = {"right_arm": OFFSET_RIGHT}
+                self.robot.set_position(new_positions, offset=offset, radians=False)
 
     def update_positions(self) -> None:
         if self.robot:
             self.robot.update_motor_data()
-            pos = self.robot.get_motor_positions()["left_arm"]
+            pos = self.robot.get_motor_positions()["right_arm"]
             self.positions = np.array(pos)
 
     def get_positions(self) -> dict[str, dict[str, NDArray]]:
