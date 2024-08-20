@@ -21,81 +21,19 @@ logger = logging.getLogger(__name__)
 
 # Constants
 DELTA = 10
-# URDF_WEB = "https://raw.githubusercontent.com/kscalelabs/teleop/59796c35863461f8f32a4c21f41903b965cc878e/urdf/stompy_mini/upper_half_assembly_simplified.urdf"
-URDF_WEB = "https://raw.githubusercontent.com/kscalelabs/teleop/pawel/add_stompy_mini/urdf/stompy_mini/upper_half_assembly_simplified.urdf"
-URDF_LOCAL = "urdf/stompy_mini/upper_half_assembly_simplified.urdf"
 UPDATE_RATE = 1
-
-# # Robot configuration
-# START_POS_TRUNK_PYBULLET: NDArray = np.array([0, 0, 1])
-# START_EUL_TRUNK_PYBULLET: NDArray = np.array([-math.pi/2,  0, -math.pi/2])
-# START_POS_TRUNK_VUER: NDArray = np.array([0, 1.2, 0])
-# # START_EUL_TRUNK_VUER: NDArray = np.array([-math.pi, -0.68, 0])
-# START_EUL_TRUNK_VUER: NDArray = np.array([0,0, 0])
-
-# # Starting positions for robot end effectors
-# START_POS_EEL: NDArray = np.array([-0.25, -0.25, 0.0]) + START_POS_TRUNK_PYBULLET
-# START_POS_EER: NDArray = np.array([-0.25, 0.35, 0.0]) + START_POS_TRUNK_PYBULLET
 
 PB_TO_VUER_AXES: NDArray = np.array([2, 0, 1], dtype=np.uint8)
 PB_TO_VUER_AXES_SIGN: NDArray = np.array([1, 1, 1], dtype=np.int8)
-
-# # Starting joint positions in PyBullet (corresponds to 0 on real robot)
-# START_Q: Dict[str, float] = OrderedDict(
-#     [
-#         # left arm
-#         ("left shoulder pitch", -1.02),
-#         ("left shoulder yaw", 1.38),
-#         ("left shoulder roll", -3.24),
-#         ("left elbow pitch", 1.2),
-#         # ("left wrist roll", 0),
-
-#         # right arm
-#         ("right shoulder pitch", 3.15),
-#         ("right shoulder yaw", -1.92),
-#         ("right shoulder roll", -1.46),
-#         ("right elbow pitch", 1.32),
-#         # # ("right wrist roll", 0),
-#     ]
-# )
 
 # End effector links
 EEL_JOINT: str = "left_end_effector_joint"
 EER_JOINT: str = "right_end_effector_joint"
 
-# # Kinematic chains for each arm
-# EEL_CHAIN_ARM = [
-#     "left shoulder pitch",
-#     "left shoulder yaw",
-#     "left shoulder roll",
-#     "left elbow pitch",
-#     # "left wrist roll",
-# ]
-# EER_CHAIN_ARM = [
-#     "right shoulder pitch",
-#     "right shoulder yaw",
-#     "right shoulder roll",
-#     "right elbow pitch",
-#     # "right wrist roll",
-# ]
-
-# EEL_CHAIN_HAND = []
-# EER_CHAIN_HAND = []
-
-# OFFSET = list(START_Q.values())
-# OFFSET_LEFT = [START_Q[joint] for joint in EEL_CHAIN_ARM + EEL_CHAIN_HAND]
-# OFFSET_RIGHT = [START_Q[joint] for joint in EER_CHAIN_ARM + EER_CHAIN_HAND]
-
 # Hand tracking parameters
 INDEX_FINGER_TIP_ID, THUMB_FINGER_TIP_ID, MIDDLE_FINGER_TIP_ID = 8, 4, 14
 PINCH_DIST_CLOSED, PINCH_DIST_OPENED = 0.1, 0.1  # 10 cm
 EE_S_MIN, EE_S_MAX = 0.0, 0.05
-
-# Global variables
-# q_lock = asyncio.Lock()
-# q = deepcopy(START_Q)
-# goal_pos_eel, goal_pos_eer = START_POS_EEL, START_POS_EER
-
 
 def load_config(config_path: str) -> Dict[str, Any]:
     with open(config_path, "r") as file:
@@ -205,7 +143,6 @@ class TeleopRobot:
             self.eel_chain_arm + self.eel_chain_hand if arm == "left" else self.eer_chain_arm + self.eer_chain_hand
         )
         target_pos = self.goal_pos_eel if arm == "left" else self.goal_pos_eer
-        joint_damping = [0.1 if str(i) not in ee_chain else 100 for i in range(len(self.joint_info))]
 
         lower_limits = [self.joint_info[joint]["lower_limit"] for joint in ee_chain]
         upper_limits = [self.joint_info[joint]["upper_limit"] for joint in ee_chain]
@@ -229,7 +166,6 @@ class TeleopRobot:
             upperLimits=upper_limits,
             jointRanges=joint_ranges,
             restPoses=self.offsets["offset_left" if arm == "left" else "offset_right"],
-            # jointDamping=joint_damping,
         )
 
         actual_pos, _ = p.getLinkState(self.robot_id, ee_id)[:2]
@@ -384,7 +320,7 @@ class TeleopRobot:
         self,
         use_gui: bool,
         max_fps: int,
-        urdf_path: str = URDF_LOCAL,
+        urdf_path: str,
     ) -> None:
         self.setup_pybullet(use_gui, urdf_path)
 
@@ -406,7 +342,7 @@ def run_teleop_app(
     shared_data: Dict[str, NDArray],
 ) -> None:
     teleop = TeleopRobot(config, embodiment, use_firmware=use_firmware, shared_dict=shared_data)
-    teleop.run(use_gui, max_fps)
+    teleop.run(use_gui, max_fps, config["embodiments"][embodiment]["urdf_local"])
 
 
 def main() -> None:
