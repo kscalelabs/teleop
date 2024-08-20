@@ -73,4 +73,4 @@ embodiments:
       right_hand: ["joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_1",
                    "joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_2"]
 
-robot_config_path: "robot_config.yaml"
+robot_config_path: "firmware/firmware/robot/teleop_configs.yaml"
