@@ -2,7 +2,7 @@ embodiments:
   stompy_mini:
     sides: ["right"]
     robot_setup: "right_arm_mini"
-    urdf_web: "https://raw.githubusercontent.com/kscalelabs/teleop/pawel/add_stompy_mini/urdf/stompy_mini/upper_half_assembly_simplified.urdf"
+    urdf_web: "https://raw.githubusercontent.com/kscalelabs/teleop/59796c35863461f8f32a4c21f41903b965cc878e/urdf/stompy_mini/upper_half_assembly_simplified.urdf"
     urdf_local: "urdf/stompy_mini/upper_half_assembly_simplified.urdf"
     start_pos_trunk_pybullet: [0, 0, 1]
     start_eul_trunk_pybullet: [-1.5707963267948966, 0, -1.5707963267948966]
