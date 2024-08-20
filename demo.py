@@ -296,7 +296,7 @@ class TeleopRobot:
 
             async with self.q_lock:
                 session.upsert @ Urdf(
-                    src=URDF_WEB,
+                    src=self.config["urdf_web"],
                     jointValues=self.q,
                     position=self.config["start_pos_trunk_vuer"],
                     rotation=self.config["start_eul_trunk_vuer"],
@@ -320,7 +320,7 @@ class TeleopRobot:
             return {
                 "expected": {
                     "left": np.array(
-                        [math.degrees(self.q[pos] - START_Q[pos]) for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]
+                        [math.degrees(self.q[pos] - self.config["start_q"][pos]) for pos in self.eel_chain_arm + self.eel_chain_hand]
                     ),
                 },
                 "actual": {
@@ -330,7 +330,7 @@ class TeleopRobot:
         else:
             return {
                 "expected": {
-                    "left": np.array([math.degrees(self.q[pos]) for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]),
+                    "left": np.array([math.degrees(self.q[pos]) for pos in self.eel_chain_arm + self.eel_chain_hand]),
                 },
                 "actual": {
                     "left": np.random.rand(6),
@@ -359,8 +359,8 @@ class TeleopRobot:
             await self.main_loop(session, max_fps)
 
 
-def run_teleop_app(use_gui: bool, max_fps: int, use_firmware: bool, shared_data: Dict[str, NDArray]) -> None:
-    teleop = TeleopRobot(use_firmware=use_firmware, shared_dict=shared_data)
+def run_teleop_app(config: Dict[str, Any], embodiment: str, use_gui: bool, max_fps: int, use_firmware: bool, shared_data: Dict[str, NDArray]) -> None:
+    teleop = TeleopRobot(config, embodiment, use_firmware=use_firmware, shared_dict=shared_data)
     teleop.run(use_gui, max_fps)
 
 
@@ -368,12 +368,14 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="PyBullet and Vuer integration for robot control")
     parser.add_argument("--firmware", action="store_true", help="Enable firmware control")
     parser.add_argument("--gui", action="store_true", help="Use PyBullet GUI mode")
-    parser.add_argument("--fps", type=int, default=60, help="Maximum frames per second")
-    parser.add_argument("--urdf", type=str, default=URDF_LOCAL, help="Path to URDF file")
+    parser.add_argument("--config", type=str, default="config.yaml", help="Path to configuration file")
+    parser.add_argument("--embodiment", type=str, default="stompy_mini", help="Robot embodiment to use")
     args = parser.parse_args()
 
-    demo = TeleopRobot(use_firmware=args.firmware)
-    demo.run(args.gui, args.fps, args.urdf)
+    config = load_config(args.config)
+
+    demo = TeleopRobot(config, args.embodiment, use_firmware=args.firmware)
+    demo.run(args.gui, args.fps, config['robot_embodiments'][args.embodiment]['urdf_local'])
 
 
 if __name__ == "__main__":
