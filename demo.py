@@ -1,17 +1,16 @@
 """Demo application for PyBullet and Vuer integration for data collection."""
+
 import argparse
 import asyncio
 import logging
 import math
-import time
-import yaml
-from collections import OrderedDict
 from copy import deepcopy
 from typing import Any, Dict
 
 import numpy as np
 import pybullet as p
 import pybullet_data
+import yaml
 from numpy.typing import NDArray
 from vuer import Vuer, VuerSession
 from vuer.schemas import Hands, PointLight, Urdf
@@ -22,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 # Constants
 DELTA = 10
-#URDF_WEB = "https://raw.githubusercontent.com/kscalelabs/teleop/59796c35863461f8f32a4c21f41903b965cc878e/urdf/stompy_mini/upper_half_assembly_simplified.urdf"
+# URDF_WEB = "https://raw.githubusercontent.com/kscalelabs/teleop/59796c35863461f8f32a4c21f41903b965cc878e/urdf/stompy_mini/upper_half_assembly_simplified.urdf"
 URDF_WEB = "https://raw.githubusercontent.com/kscalelabs/teleop/pawel/add_stompy_mini/urdf/stompy_mini/upper_half_assembly_simplified.urdf"
 URDF_LOCAL = "urdf/stompy_mini/upper_half_assembly_simplified.urdf"
 UPDATE_RATE = 1
@@ -97,24 +96,37 @@ EE_S_MIN, EE_S_MAX = 0.0, 0.05
 # q = deepcopy(START_Q)
 # goal_pos_eel, goal_pos_eer = START_POS_EEL, START_POS_EER
 
+
 def load_config(config_path: str) -> Dict[str, Any]:
     with open(config_path, "r") as file:
         return yaml.safe_load(file)
 
+
 class TeleopRobot:
-    def __init__(self, config: Dict[str, Any], embodiment: str, use_firmware: bool = False, shared_dict: dict = {}) -> None:
+    def __init__(
+        self, config: Dict[str, Any], embodiment: str, use_firmware: bool = False, shared_dict: dict = {}
+    ) -> None:
         self.app = Vuer()
         self.robot_id = None
         self.joint_info: dict = {}
         self.config = config["embodiments"][embodiment]
 
-        self.actual_pos_eel, self.actual_pos_eer = np.array(self.config['start_pos_eel']), np.array(self.config['start_pos_eer'])
-        self.goal_pos_eel, self.goal_pos_eer = np.array(self.config['start_pos_eel']), np.array(self.config['start_pos_eer'])
-        self.q = deepcopy(self.config['start_q'])
+        self.actual_pos_eel, self.actual_pos_eer = (
+            np.array(self.config["start_pos_eel"]),
+            np.array(self.config["start_pos_eer"]),
+        )
+        self.goal_pos_eel, self.goal_pos_eer = (
+            np.array(self.config["start_pos_eel"]),
+            np.array(self.config["start_pos_eer"]),
+        )
+        self.q = deepcopy(self.config["start_q"])
         self.q_lock = asyncio.Lock()
 
         # Offset between Vuer and PyBullet trunk positions / coordinates
-        self.vuer_to_pb_trunk_offset = np.array(self.config["start_pos_trunk_pybullet"]) - np.array(self.config["start_pos_trunk_vuer"])[PB_TO_VUER_AXES] * PB_TO_VUER_AXES_SIGN
+        self.vuer_to_pb_trunk_offset = (
+            np.array(self.config["start_pos_trunk_pybullet"])
+            - np.array(self.config["start_pos_trunk_vuer"])[PB_TO_VUER_AXES] * PB_TO_VUER_AXES_SIGN
+        )
 
         self.eel_chain_arm = self.config["kinematic_chains"]["left_arm"]
         self.eer_chain_arm = self.config["kinematic_chains"]["right_arm"]
@@ -123,13 +135,14 @@ class TeleopRobot:
         self.eer_chain_hand = self.config["kinematic_chains"]["right_hand"]
 
         self.offsets = {
-             "offset": list(self.config["start_q"].values()),
-             "offset_left": [self.config["start_q"][joint] for joint in self.eel_chain_arm + self.eel_chain_hand],
-             "offset_right": [self.config["start_q"][joint] for joint in self.eer_chain_arm + self.eer_chain_hand]
+            "offset": list(self.config["start_q"].values()),
+            "offset_left": [self.config["start_q"][joint] for joint in self.eel_chain_arm + self.eel_chain_hand],
+            "offset_right": [self.config["start_q"][joint] for joint in self.eer_chain_arm + self.eer_chain_hand],
         }
 
         if use_firmware:
             from firmware.robot.robot import Robot
+
             self.robot = Robot(config_path=config["robot_config_path"], setup=self.config["robot_setup"])
             self.robot.zero_out()
         else:
@@ -175,7 +188,10 @@ class TeleopRobot:
             p.getQuaternionFromEuler(self.config["start_eul_trunk_pybullet"]),
         )
         p.resetDebugVisualizerCamera(
-            cameraDistance=2.0, cameraYaw=50, cameraPitch=-35, cameraTargetPosition=self.config["start_pos_trunk_pybullet"]
+            cameraDistance=2.0,
+            cameraYaw=50,
+            cameraPitch=-35,
+            cameraTargetPosition=self.config["start_pos_trunk_pybullet"],
         )
 
         # Add goal position markers
@@ -185,7 +201,9 @@ class TeleopRobot:
     async def inverse_kinematics(self, arm: str, max_attempts: int = 20) -> float | np.floating[Any]:
         """Perform inverse kinematics calculation for the specified arm."""
         ee_id = self.joint_info[EEL_JOINT if arm == "left" else EER_JOINT]["index"]
-        ee_chain = self.eel_chain_arm + self.eel_chain_hand if arm == "left" else self.eer_chain_arm + self.eer_chain_hand
+        ee_chain = (
+            self.eel_chain_arm + self.eel_chain_hand if arm == "left" else self.eer_chain_arm + self.eer_chain_hand
+        )
         target_pos = self.goal_pos_eel if arm == "left" else self.goal_pos_eer
         joint_damping = [0.1 if str(i) not in ee_chain else 100 for i in range(len(self.joint_info))]
 
@@ -223,7 +241,9 @@ class TeleopRobot:
             self.actual_pos_eer = actual_pos
 
         async with self.q_lock:
-            for i, val in enumerate(solution, start=(0 if arm == "left" else len(self.eel_chain_arm + self.eel_chain_hand))):
+            for i, val in enumerate(
+                solution, start=(0 if arm == "left" else len(self.eel_chain_arm + self.eel_chain_hand))
+            ):
                 joint_name = list(self.config["start_q"].keys())[i]
                 if joint_name in ee_chain:
                     self.q[joint_name] = val
@@ -237,7 +257,9 @@ class TeleopRobot:
         rthumb_pos = np.array(event.value["rightLandmarks"][THUMB_FINGER_TIP_ID])
         rpinch_dist = np.linalg.norm(np.array(event.value["rightLandmarks"][INDEX_FINGER_TIP_ID]) - rthumb_pos)
         if rpinch_dist < PINCH_DIST_CLOSED:
-            self.goal_pos_eer = np.multiply(rthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN) + self.vuer_to_pb_trunk_offset
+            self.goal_pos_eer = (
+                np.multiply(rthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN) + self.vuer_to_pb_trunk_offset
+            )
 
             # Gripper control
             rmiddl_pos = np.array(event.value["rightLandmarks"][MIDDLE_FINGER_TIP_ID])
@@ -252,7 +274,9 @@ class TeleopRobot:
         lthumb_pos = np.array(event.value["leftLandmarks"][THUMB_FINGER_TIP_ID])
         lpinch_dist = np.linalg.norm(np.array(event.value["leftLandmarks"][INDEX_FINGER_TIP_ID]) - lthumb_pos)
         if lpinch_dist < PINCH_DIST_CLOSED:
-            self.goal_pos_eel = np.multiply(lthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN) + self.vuer_to_pb_trunk_offset
+            self.goal_pos_eel = (
+                np.multiply(lthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN) + self.vuer_to_pb_trunk_offset
+            )
             # Gripper control
             lmiddl_pos = np.array(event.value["leftLandmarks"][MIDDLE_FINGER_TIP_ID])
             lgrip_dist = np.linalg.norm(lthumb_pos - lmiddl_pos) / PINCH_DIST_OPENED
@@ -277,7 +301,13 @@ class TeleopRobot:
 
         if self.robot:
             for side in self.config["sides"]:
-                new_positions = {f"{side}_arm": [self.q[pos] for pos in self.config["kinematic_chains"][f"{side}_arm"] + self.config["kinematic_chains"][f"{side}_hand"]]}
+                new_positions = {
+                    f"{side}_arm": [
+                        self.q[pos]
+                        for pos in self.config["kinematic_chains"][f"{side}_arm"]
+                        + self.config["kinematic_chains"][f"{side}_hand"]
+                    ]
+                }
 
         counter = 0
         while True:
@@ -306,7 +336,11 @@ class TeleopRobot:
             if self.robot:
                 offset = {}
                 for side in self.config["sides"]:
-                    new_positions[f"{side}_arm"] = [self.q[pos] for pos in self.config["kinematic_chains"][f"{side}_arm"] + self.config["kinematic_chains"][f"{side}_hand"]]
+                    new_positions[f"{side}_arm"] = [
+                        self.q[pos]
+                        for pos in self.config["kinematic_chains"][f"{side}_arm"]
+                        + self.config["kinematic_chains"][f"{side}_hand"]
+                    ]
                     offset[f"{side}_arm"] = self.offsets[f"offset_{side}"]
                 self.robot.set_position(new_positions, offset=offset, radians=False)
 
@@ -321,7 +355,10 @@ class TeleopRobot:
             return {
                 "expected": {
                     "left": np.array(
-                        [math.degrees(self.q[pos] - self.config["start_q"][pos]) for pos in self.eel_chain_arm + self.eel_chain_hand]
+                        [
+                            math.degrees(self.q[pos] - self.config["start_q"][pos])
+                            for pos in self.eel_chain_arm + self.eel_chain_hand
+                        ]
                     ),
                 },
                 "actual": {
@@ -360,7 +397,14 @@ class TeleopRobot:
             await self.main_loop(session, max_fps)
 
 
-def run_teleop_app(config: Dict[str, Any], embodiment: str, use_gui: bool, max_fps: int, use_firmware: bool, shared_data: Dict[str, NDArray]) -> None:
+def run_teleop_app(
+    config: Dict[str, Any],
+    embodiment: str,
+    use_gui: bool,
+    max_fps: int,
+    use_firmware: bool,
+    shared_data: Dict[str, NDArray],
+) -> None:
     teleop = TeleopRobot(config, embodiment, use_firmware=use_firmware, shared_dict=shared_data)
     teleop.run(use_gui, max_fps)
 
@@ -377,7 +421,7 @@ def main() -> None:
     config = load_config(args.config)
 
     demo = TeleopRobot(config, args.embodiment, use_firmware=args.firmware)
-    demo.run(args.gui, args.fps, config['embodiments'][args.embodiment]['urdf_local'])
+    demo.run(args.gui, args.fps, config["embodiments"][args.embodiment]["urdf_local"])
 
 
 if __name__ == "__main__":
