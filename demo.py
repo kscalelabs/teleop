@@ -114,7 +114,7 @@ class TeleopRobot:
         self.q_lock = asyncio.Lock()
 
         # Offset between Vuer and PyBullet trunk positions / coordinates
-        self.vuer_to_pb_trunk_offset = self.config["start_pos_trunk_pybullet"] - self.config["start_pos_trunk_vuer"][PB_TO_VUER_AXES] * PB_TO_VUER_AXES_SIGN
+        self.vuer_to_pb_trunk_offset = np.array(self.config["start_pos_trunk_pybullet"]) - np.array(self.config["start_pos_trunk_vuer"])[PB_TO_VUER_AXES] * PB_TO_VUER_AXES_SIGN
 
         self.eel_chain_arm = self.config["kinematic_chains"]["left_arm"]
         self.eer_chain_arm = self.config["kinematic_chains"]["right_arm"]
@@ -277,7 +277,7 @@ class TeleopRobot:
 
         if self.robot:
             for side in self.config["sides"]:
-                new_positions = {side: [self.q[pos] for pos in self.config["kinematic_chains"][f"{side}_arm"] + self.config["kinematic_chains"][f"{side}_hand"]]}
+                new_positions = {f"{side}_arm": [self.q[pos] for pos in self.config["kinematic_chains"][f"{side}_arm"] + self.config["kinematic_chains"][f"{side}_hand"]]}
 
         counter = 0
         while True:
@@ -304,9 +304,10 @@ class TeleopRobot:
                 )
 
             if self.robot:
+                offset = {}
                 for side in self.config["sides"]:
-                    new_positions[side] = [self.q[pos] for pos in self.config["kinematic_chains"][f"{side}_arm"] + self.config["kinematic_chains"][f"{side}_hand"]]
-                    offset = {f"{side}_arm": self.offsets[f"offset_{side}"]}
+                    new_positions[f"{side}_arm"] = [self.q[pos] for pos in self.config["kinematic_chains"][f"{side}_arm"] + self.config["kinematic_chains"][f"{side}_hand"]]
+                    offset[f"{side}_arm"] = self.offsets[f"offset_{side}"]
                 self.robot.set_position(new_positions, offset=offset, radians=False)
 
     def update_positions(self) -> None:
@@ -368,6 +369,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="PyBullet and Vuer integration for robot control")
     parser.add_argument("--firmware", action="store_true", help="Enable firmware control")
     parser.add_argument("--gui", action="store_true", help="Use PyBullet GUI mode")
+    parser.add_argument("--fps", type=int, default=60, help="Maximum frames per second")
     parser.add_argument("--config", type=str, default="config.yaml", help="Path to configuration file")
     parser.add_argument("--embodiment", type=str, default="stompy_mini", help="Robot embodiment to use")
     args = parser.parse_args()
@@ -375,7 +377,7 @@ def main() -> None:
     config = load_config(args.config)
 
     demo = TeleopRobot(config, args.embodiment, use_firmware=args.firmware)
-    demo.run(args.gui, args.fps, config['robot_embodiments'][args.embodiment]['urdf_local'])
+    demo.run(args.gui, args.fps, config['embodiments'][args.embodiment]['urdf_local'])
 
 
 if __name__ == "__main__":
