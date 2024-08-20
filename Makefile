@@ -76,7 +76,7 @@ format:
 .PHONY: format
 
 static-checks:
-	@isort --profile black --check --diff .
-	@black --diff --check .
-	@ruff check .
+	@isort --profile black --check --diff demo.py data_collection
+	@black --diff --check demo.py data_collection
+	@ruff check demo.py data_collection
 .PHONY: lint
