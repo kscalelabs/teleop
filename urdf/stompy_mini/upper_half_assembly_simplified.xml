@@ -1,0 +1,234 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mujoco model="upper_half_assembly">
+  <compiler angle="radian" meshdir="meshes" />
+  <asset>
+    <mesh name="torso_top_left_1_simple" file="torso_top_left_1_simple.stl" />
+    <mesh name="torso_top_half_right_2_simple" file="torso_top_half_right_2_simple.stl" />
+    <mesh name="front_plate_top_section_1_simple" file="front_plate_top_section_1_simple.stl" />
+    <mesh name="washer_m4_15_simple" file="washer_m4_15_simple.stl" />
+    <mesh name="washer_m4_10_simple" file="washer_m4_10_simple.stl" />
+    <mesh name="washer_m4_13_simple" file="washer_m4_13_simple.stl" />
+    <mesh name="washer_m4_14_simple" file="washer_m4_14_simple.stl" />
+    <mesh name="washer_m4_16_simple" file="washer_m4_16_simple.stl" />
+    <mesh name="washer_m4_12_simple" file="washer_m4_12_simple.stl" />
+    <mesh name="washer_m4_17_simple" file="washer_m4_17_simple.stl" />
+    <mesh name="washer_m4_18_simple" file="washer_m4_18_simple.stl" />
+    <mesh name="washer_m4_19_simple" file="washer_m4_19_simple.stl" />
+    <mesh name="washer_m4_24_simple" file="washer_m4_24_simple.stl" />
+    <mesh name="head_assembly_1_neck_1_simple" file="head_assembly_1_neck_1_simple.stl" />
+    <mesh name="washer_m4_6_simple" file="washer_m4_6_simple.stl" />
+    <mesh name="washer_m4_7_simple" file="washer_m4_7_simple.stl" />
+    <mesh name="washer_m4_5_simple" file="washer_m4_5_simple.stl" />
+    <mesh name="washer_m4_8_simple" file="washer_m4_8_simple.stl" />
+    <mesh name="washer_m4_9_simple" file="washer_m4_9_simple.stl" />
+    <mesh name="washer_m4_4_simple" file="washer_m4_4_simple.stl" />
+    <mesh name="washer_m4_11_simple" file="washer_m4_11_simple.stl" />
+    <mesh name="back_plate_upper_section_2_simple" file="back_plate_upper_section_2_simple.stl" />
+    <mesh name="washer_m4_33_simple" file="washer_m4_33_simple.stl" />
+    <mesh name="washer_m4_26_simple" file="washer_m4_26_simple.stl" />
+    <mesh name="washer_m4_3_simple" file="washer_m4_3_simple.stl" />
+    <mesh name="36v_battery_1_simple" file="36v_battery_1_simple.stl" />
+    <mesh name="front_plate_bottom_section_1_simple" file="front_plate_bottom_section_1_simple.stl" />
+    <mesh name="robstride_04_mock_2_rs_04_stator_1_simple" file="robstride_04_mock_2_rs_04_stator_1_simple.stl" />
+    <mesh name="head_assembly_1_head_inner_1_simple" file="head_assembly_1_head_inner_1_simple.stl" />
+    <mesh name="robstride_04_mock_1_rs_04_stator_1_simple" file="robstride_04_mock_1_rs_04_stator_1_simple.stl" />
+    <mesh name="torso_bottom_left_1_simple" file="torso_bottom_left_1_simple.stl" />
+    <mesh name="robstride_04_mock_2_rs_04_rotor_1_simple" file="robstride_04_mock_2_rs_04_rotor_1_simple.stl" />
+    <mesh name="head_assembly_1_head_outter_1_simple" file="head_assembly_1_head_outter_1_simple.stl" />
+    <mesh name="head_assembly_1_camera_mount_1_simple" file="head_assembly_1_camera_mount_1_simple.stl" />
+    <mesh name="robstride_04_mock_1_rs_04_rotor_1_simple" file="robstride_04_mock_1_rs_04_rotor_1_simple.stl" />
+    <mesh name="torso_bottom_half_right_1_simple" file="torso_bottom_half_right_1_simple.stl" />
+    <mesh name="back_plate_lower_section_1_simple" file="back_plate_lower_section_1_simple.stl" />
+    <mesh name="robot_side_connector_1_simple" file="robot_side_connector_1_simple.stl" />
+    <mesh name="left_arm_1_shoulder_1_simple" file="left_arm_1_shoulder_1_simple.stl" />
+    <mesh name="head_assembly_1_camera_2_board_1_simple" file="head_assembly_1_camera_2_board_1_simple.stl" />
+    <mesh name="head_assembly_1_camera_1_board_1_simple" file="head_assembly_1_camera_1_board_1_simple.stl" />
+    <mesh name="right_arm_1_shoulder_1_simple" file="right_arm_1_shoulder_1_simple.stl" />
+    <mesh name="removable_cap_1_simple" file="removable_cap_1_simple.stl" />
+    <mesh name="left_arm_1_washer_m4_1_simple" file="left_arm_1_washer_m4_1_simple.stl" />
+    <mesh name="head_assembly_1_camera_2_lens_1_simple" file="head_assembly_1_camera_2_lens_1_simple.stl" />
+    <mesh name="head_assembly_1_camera_1_lens_1_simple" file="head_assembly_1_camera_1_lens_1_simple.stl" />
+    <mesh name="right_arm_1_washer_m4_3_simple" file="right_arm_1_washer_m4_3_simple.stl" />
+    <mesh name="main_case_section_1_simple" file="main_case_section_1_simple.stl" />
+    <mesh name="left_arm_1_robstride_01_mock_1_rs_01_stator_1_simple" file="left_arm_1_robstride_01_mock_1_rs_01_stator_1_simple.stl" />
+    <mesh name="right_arm_1_robstride_01_mock_1_rs_01_stator_1_simple" file="right_arm_1_robstride_01_mock_1_rs_01_stator_1_simple.stl" />
+    <mesh name="left_arm_1_robstride_01_mock_1_rs_01_rotor_1_simple" file="left_arm_1_robstride_01_mock_1_rs_01_rotor_1_simple.stl" />
+    <mesh name="right_arm_1_robstride_01_mock_1_rs_01_rotor_1_simple" file="right_arm_1_robstride_01_mock_1_rs_01_rotor_1_simple.stl" />
+    <mesh name="left_arm_1_left_arm_part_1a_1_simple" file="left_arm_1_left_arm_part_1a_1_simple.stl" />
+    <mesh name="right_arm_1_right_arm_part_1a_1_simple" file="right_arm_1_right_arm_part_1a_1_simple.stl" />
+    <mesh name="left_arm_1_washer_m4_11_simple" file="left_arm_1_washer_m4_11_simple.stl" />
+    <mesh name="right_arm_1_washer_m4_10_simple" file="right_arm_1_washer_m4_10_simple.stl" />
+    <mesh name="right_arm_1_washer_m4_9_simple" file="right_arm_1_washer_m4_9_simple.stl" />
+    <mesh name="right_arm_1_washer_m4_8_simple" file="right_arm_1_washer_m4_8_simple.stl" />
+    <mesh name="right_arm_1_washer_m4_7_simple" file="right_arm_1_washer_m4_7_simple.stl" />
+    <mesh name="left_arm_1_robstride_01_mock_2_rs_01_stator_1_simple" file="left_arm_1_robstride_01_mock_2_rs_01_stator_1_simple.stl" />
+    <mesh name="right_arm_1_robstride_01_mock_3_rs_01_stator_1_simple" file="right_arm_1_robstride_01_mock_3_rs_01_stator_1_simple.stl" />
+    <mesh name="left_arm_1_washer_m4_7_simple" file="left_arm_1_washer_m4_7_simple.stl" />
+    <mesh name="left_arm_1_robstride_01_mock_2_rs_01_rotor_1_simple" file="left_arm_1_robstride_01_mock_2_rs_01_rotor_1_simple.stl" />
+    <mesh name="right_arm_1_washer_m4_12_simple" file="right_arm_1_washer_m4_12_simple.stl" />
+    <mesh name="right_arm_1_robstride_01_mock_3_rs_01_rotor_1_simple" file="right_arm_1_robstride_01_mock_3_rs_01_rotor_1_simple.stl" />
+    <mesh name="left_arm_1_left_arm_part_1b_1_simple" file="left_arm_1_left_arm_part_1b_1_simple.stl" />
+    <mesh name="left_arm_1_left_arm_part_2a_1_simple" file="left_arm_1_left_arm_part_2a_1_simple.stl" />
+    <mesh name="left_arm_1_left_arm_part_2b_1_simple" file="left_arm_1_left_arm_part_2b_1_simple.stl" />
+    <mesh name="right_arm_1_right_arm_part_1b_1_simple" file="right_arm_1_right_arm_part_1b_1_simple.stl" />
+    <mesh name="right_arm_1_rightt_arm_part_2b_1_simple" file="right_arm_1_rightt_arm_part_2b_1_simple.stl" />
+    <mesh name="left_arm_1_washer_m4_26_simple" file="left_arm_1_washer_m4_26_simple.stl" />
+    <mesh name="right_arm_1_washer_m4_11_simple" file="right_arm_1_washer_m4_11_simple.stl" />
+    <mesh name="right_arm_1_washer_m4_18_simple" file="right_arm_1_washer_m4_18_simple.stl" />
+    <mesh name="left_arm_1_robstride_01_mock_3_rs_01_stator_1_simple" file="left_arm_1_robstride_01_mock_3_rs_01_stator_1_simple.stl" />
+    <mesh name="right_arm_1_robstride_01_mock_2_rs_01_stator_1_simple" file="right_arm_1_robstride_01_mock_2_rs_01_stator_1_simple.stl" />
+    <mesh name="left_arm_1_robstride_01_mock_3_rs_01_rotor_1_simple" file="left_arm_1_robstride_01_mock_3_rs_01_rotor_1_simple.stl" />
+    <mesh name="right_arm_1_washer_m4_16_simple" file="right_arm_1_washer_m4_16_simple.stl" />
+    <mesh name="right_arm_1_robstride_01_mock_2_rs_01_rotor_1_simple" file="right_arm_1_robstride_01_mock_2_rs_01_rotor_1_simple.stl" />
+    <mesh name="left_arm_1_left_arm_part_3b_1_simple" file="left_arm_1_left_arm_part_3b_1_simple.stl" />
+    <mesh name="right_arm_1_right_arm_part_2a_1_simple" file="right_arm_1_right_arm_part_2a_1_simple.stl" />
+    <mesh name="right_arm_1_right_arm_part_3b_1_simple" file="right_arm_1_right_arm_part_3b_1_simple.stl" />
+    <mesh name="left_arm_1_washer_m4_28_simple" file="left_arm_1_washer_m4_28_simple.stl" />
+    <mesh name="right_arm_1_robstride_01_mock_4_rs_01_stator_1_simple" file="right_arm_1_robstride_01_mock_4_rs_01_stator_1_simple.stl" />
+    <mesh name="right_arm_1_washer_m4_29_simple" file="right_arm_1_washer_m4_29_simple.stl" />
+    <mesh name="left_arm_1_robstride_01_mock_4_rs_01_stator_1_simple" file="left_arm_1_robstride_01_mock_4_rs_01_stator_1_simple.stl" />
+    <mesh name="right_arm_1_right_arm_part_3a_1_simple" file="right_arm_1_right_arm_part_3a_1_simple.stl" />
+    <mesh name="right_arm_1_robstride_01_mock_4_rs_01_rotor_1_simple" file="right_arm_1_robstride_01_mock_4_rs_01_rotor_1_simple.stl" />
+    <mesh name="left_arm_1_washer_m4_31_simple" file="left_arm_1_washer_m4_31_simple.stl" />
+    <mesh name="left_arm_1_robstride_01_mock_4_rs_01_rotor_1_simple" file="left_arm_1_robstride_01_mock_4_rs_01_rotor_1_simple.stl" />
+    <mesh name="right_arm_1_washer_m4_31_simple" file="right_arm_1_washer_m4_31_simple.stl" />
+    <mesh name="right_arm_1_stub_1_simple" file="right_arm_1_stub_1_simple.stl" />
+    <mesh name="left_arm_1_left_arm_part_3a_1_simple" file="left_arm_1_left_arm_part_3a_1_simple.stl" />
+    <mesh name="left_arm_1_stub_1_simple" file="left_arm_1_stub_1_simple.stl" />
+  </asset>
+  <worldbody>
+    <body name="root" pos="0 0 0" quat="1 0 0 0"><geom type="mesh" rgba="0.972549 0.529412 0.00392157 1" mesh="torso_top_left_1_simple" />
+    <geom pos="0.0775878 0.0526287 0.0672824" quat="0.5 0.5 0.5 0.5" type="mesh" rgba="0.972549 0.529412 0.00392157 1" mesh="torso_top_half_right_2_simple" />
+    <geom pos="0.226964 0.00225416 -0.050148" quat="-0.531459 0.531459 -0.466424 0.466424" type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="washer_m4_6_simple" />
+    <geom pos="0.231175 -0.0299182 -0.050148" quat="-0.531459 0.531459 -0.466424 0.466424" type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="washer_m4_7_simple" />
+    <geom pos="0.234582 -0.0559461 -0.0310763" quat="-0.531459 0.531459 -0.466424 0.466424" type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="washer_m4_5_simple" />
+    <geom pos="0.235884 -0.0658879 -0.000217564" quat="-0.531459 0.531459 -0.466424 0.466424" type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="washer_m4_8_simple" />
+    <geom pos="0.234582 -0.0559461 0.0306412" quat="-0.531459 0.531459 -0.466424 0.466424" type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="washer_m4_9_simple" />
+    <geom pos="0.231175 -0.0299182 0.0497129" quat="-0.531459 0.531459 -0.466424 0.466424" type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="washer_m4_4_simple" />
+    <geom pos="0.226964 0.00225416 0.0497129" quat="-0.531459 0.531459 -0.466424 0.466424" type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="washer_m4_11_simple" />
+    <geom pos="0.187003 0.0263144 0.0672824" quat="1 1.33974e-08 -1.33974e-08 0" type="mesh" rgba="0.972549 0.529412 0.00392157 1" mesh="back_plate_upper_section_2_simple" />
+    <geom pos="0.198209 -0.00150985 0.0497129" quat="-0.531459 -0.531459 0.466424 0.466424" type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="washer_m4_33_simple" />
+    <geom pos="0.207129 -0.0696519 -0.000217565" quat="-0.531459 -0.531459 0.466424 0.466424" type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="washer_m4_26_simple" />
+    <geom pos="0.206336 -0.0697558 -0.000217565" quat="-0.0459863 -0.70561 -0.0459863 0.70561" type="mesh" rgba="0.231373 0.380392 0.705882 1" mesh="robstride_04_mock_1_rs_04_stator_1_simple" />
+    <geom pos="0.223557 0.0282821 0.0306412" quat="-0.531459 0.531459 -0.466424 0.466424" type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="washer_m4_3_simple" />
+    <geom pos="0.0775878 0.0144331 -0.0138176" quat="0.707107 -0.707107 -9.47343e-09 -9.47343e-09" type="mesh" rgba="0.615686 0.811765 0.929412 1" mesh="36v_battery_1_simple" />
+    <geom pos="-0.0318273 0.0263144 -0.0677176" quat="-2.32051e-08 1 0 0" type="mesh" rgba="0.972549 0.529412 0.00392157 1" mesh="front_plate_top_section_1_simple" />
+    <geom pos="0.0775878 -0.125688 -0.102718" quat="-0.707107 0.707107 0 0" type="mesh" rgba="0.972549 0.529412 0.00392157 1" mesh="front_plate_bottom_section_1_simple" />
+    <geom pos="-0.0111386 -0.214175 -0.0677176" quat="-2.32051e-08 1 0 0" type="mesh" rgba="0.972549 0.529412 0.00392157 1" mesh="torso_bottom_left_1_simple" />
+    <geom pos="0.0775878 -0.288567 -0.00021758" quat="-0.5 0.5 0.5 -0.5" type="mesh" rgba="0.972549 0.529412 0.00392157 1" mesh="torso_bottom_half_right_1_simple" />
+    <geom pos="-0.0111386 -0.214175 0.0672824" quat="-2.32051e-08 1 0 0" type="mesh" rgba="0.972549 0.529412 0.00392157 1" mesh="back_plate_lower_section_1_simple" />
+    <geom pos="0.0595878 -0.257634 -0.0614176" quat="2.32051e-08 0 0 1" type="mesh" rgba="0.615686 0.811765 0.929412 1" mesh="robot_side_connector_1_simple" />
+    <geom pos="0.0735878 -0.258634 -0.0582676" quat="0 2.32051e-08 1 -2.32051e-08" type="mesh" rgba="0.615686 0.811765 0.929412 1" mesh="removable_cap_1_simple" />
+    <geom pos="0.0775878 -0.212134 0.0630824" quat="-1.64085e-08 1.64085e-08 0.707107 -0.707107" type="mesh" rgba="0.615686 0.811765 0.929412 1" mesh="main_case_section_1_simple" />
+    <geom pos="-0.0717882 0.00225416 -0.050148" quat="0.531459 -0.531459 -0.466424 0.466424" type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="washer_m4_15_simple" />
+    <geom pos="-0.0759996 -0.0299182 -0.050148" quat="0.531459 -0.531459 -0.466424 0.466424" type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="washer_m4_10_simple" />
+    <geom pos="-0.0794067 -0.0559461 -0.0310763" quat="0.531459 -0.531459 -0.466424 0.466424" type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="washer_m4_13_simple" />
+    <geom pos="-0.080708 -0.0658879 -0.000217568" quat="0.531459 -0.531459 -0.466424 0.466424" type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="washer_m4_14_simple" />
+    <geom pos="-0.0794067 -0.0559461 0.0306412" quat="0.531459 -0.531459 -0.466424 0.466424" type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="washer_m4_16_simple" />
+    <geom pos="-0.0759996 -0.0299182 0.0497129" quat="0.531459 -0.531459 -0.466424 0.466424" type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="washer_m4_12_simple" />
+    <geom pos="-0.0717882 0.00225416 0.0497129" quat="0.531459 -0.531459 -0.466424 0.466424" type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="washer_m4_17_simple" />
+    <geom pos="-0.0683811 0.0282821 0.0306412" quat="0.531459 -0.531459 -0.466424 0.466424" type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="washer_m4_18_simple" />
+    <geom pos="-0.0472449 -0.0336822 0.0497129" quat="0.531459 0.531459 0.466424 0.466424" type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="washer_m4_19_simple" />
+    <geom pos="-0.0519534 -0.0696519 -0.000217568" quat="0.531459 0.531459 0.466424 0.466424" type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="washer_m4_24_simple" />
+    <geom pos="-0.0511601 -0.0697557 -0.000217568" quat="-0.531459 0.531459 0.466424 -0.466424" type="mesh" rgba="0.231373 0.380392 0.705882 1" mesh="robstride_04_mock_2_rs_04_stator_1_simple" />
+    <geom pos="0.00258776 0.0648243 -0.0352176" quat="-1.64085e-08 1.64085e-08 0.707107 -0.707107" type="mesh" rgba="0.972549 0.529412 0.00392157 1" mesh="head_assembly_1_neck_1_simple" />
+    <geom pos="0.0775878 0.124824 0.0165988" quat="-1.64085e-08 1.64085e-08 0.707107 -0.707107" type="mesh" rgba="0.498039 0.498039 0.498039 1" mesh="head_assembly_1_head_inner_1_simple" />
+    <geom pos="0.0775878 0.143789 0.0955988" quat="0 2.32051e-08 1 -2.67949e-08" type="mesh" rgba="0.972549 0.529412 0.00392157 1" mesh="head_assembly_1_head_outter_1_simple" />
+    <geom pos="0.0935878 0.134824 -0.0249012" quat="-1.64085e-08 -1.64085e-08 -0.707107 -0.707107" type="mesh" rgba="0.647059 0.647059 0.647059 1" mesh="head_assembly_1_camera_mount_1_simple" />
+    <geom pos="0.00956976 0.171842 -0.0449012" quat="-2.32051e-08 0 -5e-08 -1" type="mesh" rgba="0 0.501961 0 1" mesh="head_assembly_1_camera_2_board_1_simple" />
+    <geom pos="0.0265568 0.154827 -0.0465012" quat="-2.32051e-08 0 -5e-08 -1" type="mesh" rgba="0.647059 0.647059 0.647059 1" mesh="head_assembly_1_camera_2_lens_1_simple" />
+    <geom pos="0.145606 0.171842 -0.0449012" quat="0.707107 -1.64085e-08 -3.53553e-08 -0.707107" type="mesh" rgba="0 0.501961 0 1" mesh="head_assembly_1_camera_1_board_1_simple" />
+    <geom pos="0.128585 0.154793 -0.0465012" quat="0.707107 -1.64085e-08 -3.53553e-08 -0.707107" type="mesh" rgba="0.647059 0.647059 0.647059 1" mesh="head_assembly_1_camera_1_lens_1_simple" />
+    <body name="link_robstride_04_mock_1_rs_04_rotor_1" pos="0.160786 -0.022266 -0.000217567" quat="-0.531459 -0.531459 0.466424 0.466424">
+      <inertial pos="-0.000104055 0.00463401 -0.106599" quat="0.705937 0.0251672 -0.0237395 0.707429" mass="1.14259" diaginertia="0.00418213 0.00387503 0.00127872" />
+      <joint name="right shoulder pitch" pos="0 0 0" axis="0 0 -1" range="-1.01229 4.15388" actuatorfrcrange="-80 80" />
+      <geom type="mesh" rgba="0.917647 0.917647 0.917647 1" mesh="robstride_04_mock_1_rs_04_rotor_1_simple" />
+      <geom pos="0.00465874 -0.0173867 -0.0395" type="mesh" rgba="0.972549 0.529412 0.00392157 1" mesh="right_arm_1_shoulder_1_simple" />
+      <geom pos="0.0123127 0.014 -0.117929" quat="0.707107 0.707107 0 0" type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="right_arm_1_washer_m4_3_simple" />
+      <geom pos="0.0123127 0.0132 -0.117929" quat="0.707107 0.707107 0 0" type="mesh" rgba="0.615686 0.811765 0.929412 1" mesh="right_arm_1_robstride_01_mock_1_rs_01_stator_1_simple" />
+      <body name="link_right_arm_1_robstride_01_mock_1_rs_01_rotor_1" pos="-0.000346583 0.0117 -0.152164" quat="-0.707107 0.707107 0 0">
+        <inertial pos="0.0201535 0.0637372 -0.00848857" quat="0.631439 0.759578 -0.123635 -0.0950858" mass="1.07194" diaginertia="0.00293534 0.00238922 0.00198022" />
+        <joint name="right shoulder yaw" pos="0 0 0" axis="0 0 -1" range="-1.309 1.8326" actuatorfrcrange="-80 80" />
+        <geom type="mesh" rgba="0.647059 0.647059 0.647059 1" mesh="right_arm_1_robstride_01_mock_1_rs_01_rotor_1_simple" />
+        <geom pos="0.00289087 -0.0116466 -0.0305" quat="-2.32051e-08 1 0 0" type="mesh" rgba="0.972549 0.529412 0.00392157 1" mesh="right_arm_1_right_arm_part_1a_1_simple" />
+        <geom pos="0.0599989 0.0708333 -0.00166184" quat="-0.698877 0.698877 -0.107567 0.107567" type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="right_arm_1_washer_m4_10_simple" />
+        <geom pos="0.0376231 0.0778883 -0.0422988" quat="0.698877 0.698877 -0.107567 -0.107567" type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="right_arm_1_washer_m4_9_simple" />
+        <geom pos="0.0378636 0.0786513 -0.0422988" quat="-0.698877 0.698877 -0.107567 0.107567" type="mesh" rgba="0.615686 0.811765 0.929412 1" mesh="right_arm_1_robstride_01_mock_3_rs_01_stator_1_simple" />
+        <geom pos="0.0480292 0.0754461 0.0200161" quat="-0.698877 0.698877 -0.107567 0.107567" type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="right_arm_1_washer_m4_12_simple" />
+        <geom pos="0.0477886 0.0746832 0.0200161" quat="-0.698877 0.698877 -0.107567 0.107567" type="mesh" rgba="0.972549 0.529412 0.00392157 1" mesh="right_arm_1_right_arm_part_1b_1_simple" />
+        <geom pos="0.00303688 0.0887933 0.0200161" quat="-0.698877 0.698877 -0.107567 0.107567" type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="right_arm_1_washer_m4_11_simple" />
+        <geom pos="0.0138112 0.0853962 -0.0422988" quat="-0.698877 0.698877 -0.107567 0.107567" type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="right_arm_1_washer_m4_8_simple" />
+        <geom pos="-0.0085647 0.0924513 -0.00166184" quat="-0.698877 0.698877 -0.107567 0.107567" type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="right_arm_1_washer_m4_7_simple" />
+        <body name="link_right_arm_1_robstride_01_mock_3_rs_01_rotor_1" pos="0.0262413 0.0838886 -0.00806441" quat="-0.698877 -0.698877 0.107567 0.107567">
+          <inertial pos="-0.000306788 -0.00132224 -0.090196" quat="0.979331 0.00530054 -0.00519304 -0.20213" mass="1.25709" diaginertia="0.00308913 0.002742 0.00184073" />
+          <joint name="right shoulder roll" pos="0 0 0" axis="0 0 -1" range="-3.36849 -0.261799" actuatorfrcrange="-80 80" />
+          <geom type="mesh" rgba="0.647059 0.647059 0.647059 1" mesh="right_arm_1_robstride_01_mock_3_rs_01_rotor_1_simple" />
+          <geom pos="-0.00289087 0.0116466 -0.0305" quat="0.866025 0 0 -0.5" type="mesh" rgba="0.972549 0.529412 0.00392157 1" mesh="right_arm_1_rightt_arm_part_2b_1_simple" />
+          <geom pos="-0.0035654 0.0143641 -0.152" quat="0.701881 0.701881 0.0858071 0.0858071" type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="right_arm_1_washer_m4_18_simple" />
+          <geom pos="-0.00337268 0.0135877 -0.152" quat="0.43563 0.55698 -0.43563 0.55698" type="mesh" rgba="0.615686 0.811765 0.929412 1" mesh="right_arm_1_robstride_01_mock_2_rs_01_stator_1_simple" />
+          <geom pos="-0.00909623 -0.0166827 -0.0812661" quat="-0.55698 0.43563 0.55698 0.43563" type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="right_arm_1_washer_m4_16_simple" />
+          <geom pos="-0.0089035 -0.0174591 -0.0812661" quat="-0.701881 0.701881 0.0858071 -0.0858071" type="mesh" rgba="0.972549 0.529412 0.00392157 1" mesh="right_arm_1_right_arm_part_2a_1_simple" />
+          <body name="link_right_arm_1_robstride_01_mock_2_rs_01_rotor_1" pos="0.00282888 -0.0121771 -0.1155" quat="-0.0858071 0.0858071 -0.701881 0.701881">
+            <inertial pos="-0.0186998 -0.0637956 -0.0131645" quat="0.427079 0.00534779 -0.0553943 0.9025" mass="1.01641" diaginertia="0.00231366 0.0021886 0.00173622" />
+            <joint name="right elbow pitch" pos="0 0 0" axis="0 0 -1" range="1.8326 3.40339" actuatorfrcrange="-80 80" />
+            <geom type="mesh" rgba="0.647059 0.647059 0.647059 1" mesh="right_arm_1_robstride_01_mock_2_rs_01_rotor_1_simple" />
+            <geom pos="0.0086408 0.00832686 -0.0305" quat="-2.32051e-08 1 0 0" type="mesh" rgba="0.972549 0.529412 0.00392157 1" mesh="right_arm_1_right_arm_part_3b_1_simple" />
+            <geom pos="0.0109129 -0.0863597 -0.0249837" quat="-0.564721 0.425547 -0.564721 -0.425547" type="mesh" rgba="0.615686 0.811765 0.929412 1" mesh="right_arm_1_robstride_01_mock_4_rs_01_stator_1_simple" />
+            <geom pos="0.0110359 -0.086395 -1.65966e-05" quat="0.564721 0.425548 -0.564721 0.425547" type="mesh" rgba="0.972549 0.529412 0.00392157 1" mesh="right_arm_1_right_arm_part_3a_1_simple" />
+            <geom pos="0.0110359 -0.086395 -1.65966e-05" quat="0.564721 0.425548 -0.564721 0.425547" type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="right_arm_1_washer_m4_31_simple" />
+            <geom pos="-0.0489346 -0.0691987 -0.0359618" quat="0.564721 0.425548 -0.564721 0.425547" type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="right_arm_1_washer_m4_29_simple" />
+            <body name="link_right_arm_1_robstride_01_mock_4_rs_01_rotor_1" pos="-0.0224087 -0.0783654 -0.0123244" quat="-0.564721 0.425547 -0.564721 -0.425547">
+              <inertial pos="-5.62987e-06 -5.42532e-06 -0.0527898" quat="0.540712 0.456205 -0.539747 0.456269" mass="0.451151" diaginertia="0.000464658 0.000367864 0.000367863" />
+              <joint name="right wrist roll" pos="0 0 0" axis="0 0 -1" range="-3.14159 3.14159" actuatorfrcrange="-80 80" />
+              <geom type="mesh" rgba="0.647059 0.647059 0.647059 1" mesh="right_arm_1_robstride_01_mock_4_rs_01_rotor_1_simple" />
+              <geom pos="0 0 -0.0305" quat="0.707107 0 0 -0.707107" type="mesh" rgba="0 0 0 1" mesh="right_arm_1_stub_1_simple" />
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+    <body name="link_robstride_04_mock_2_rs_04_rotor_1" pos="-0.00561097 -0.022266 -0.000217569" quat="-0.531459 -0.531459 -0.466424 -0.466424">
+      <inertial pos="-0.00396115 -0.00240712 -0.106599" quat="0.646257 0.0356943 0.0616459 0.759787" mass="1.14259" diaginertia="0.00411848 0.00357833 0.00163905" />
+      <joint name="left shoulder pitch" pos="0 0 0" axis="0 0 -1" range="0.0349066 5.21853" actuatorfrcrange="-80 80" />
+      <geom type="mesh" rgba="0.917647 0.917647 0.917647 1" mesh="robstride_04_mock_2_rs_04_rotor_1_simple" />
+      <geom pos="0.0127279 -0.0127279 -0.0395" quat="-2.32051e-08 1 0 0" type="mesh" rgba="0.972549 0.529412 0.00392157 1" mesh="left_arm_1_shoulder_1_simple" />
+      <geom pos="-0.0182807 0.00366314 -0.117929" quat="0.353553 0.353553 0.612372 0.612372" type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="left_arm_1_washer_m4_1_simple" />
+      <geom pos="-0.0175879 0.00406314 -0.117929" quat="0.353553 0.353553 0.612372 0.612372" type="mesh" rgba="0.615686 0.811765 0.929412 1" mesh="left_arm_1_robstride_01_mock_1_rs_01_stator_1_simple" />
+      <body name="link_left_arm_1_robstride_01_mock_1_rs_01_rotor_1" pos="-0.00995921 -0.00615014 -0.152164" quat="-0.353553 0.353553 0.612372 -0.612372">
+        <inertial pos="0.0201895 0.0638047 -0.00960528" quat="0.641109 0.752468 -0.11401 -0.098859" mass="1.06957" diaginertia="0.00292077 0.00238129 0.00197051" />
+        <joint name="left shoulder yaw" pos="0 0 0" axis="0 0 -1" range="-1.309 1.87623" actuatorfrcrange="-80 80" />
+        <geom type="mesh" rgba="0.647059 0.647059 0.647059 1" mesh="left_arm_1_robstride_01_mock_1_rs_01_rotor_1_simple" />
+        <geom pos="0.00289087 -0.0116466 -0.0305" quat="-2.32051e-08 1 0 0" type="mesh" rgba="0.972549 0.529412 0.00392157 1" mesh="left_arm_1_left_arm_part_1a_1_simple" />
+        <geom pos="0.048093 0.0745872 -0.0359606" quat="0.698877 0.698877 -0.107567 -0.107567" type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="left_arm_1_washer_m4_11_simple" />
+        <geom pos="0.0483335 0.0753502 -0.0359606" quat="0.107567 -0.107567 -0.698877 0.698877" type="mesh" rgba="0.615686 0.811765 0.929412 1" mesh="left_arm_1_robstride_01_mock_2_rs_01_stator_1_simple" />
+        <geom pos="0.0137479 0.086255 0.0261138" quat="0.698877 -0.698877 0.107567 -0.107568" type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="left_arm_1_washer_m4_7_simple" />
+        <geom pos="0.0135074 0.085492 0.0261138" quat="0.698877 0.698877 -0.107568 -0.107567" type="mesh" rgba="0.972549 0.529412 0.00392157 1" mesh="left_arm_1_left_arm_part_1b_1_simple" />
+        <body name="link_left_arm_1_robstride_01_mock_2_rs_01_rotor_1" pos="0.0262724 0.0838788 -0.00812057" quat="0.107567 -0.107567 -0.698877 0.698877">
+          <inertial pos="-0.000635501 0.000252181 -0.0912747" quat="0.989465 -7.35711e-05 0.0212699 -0.143202" mass="1.29023" diaginertia="0.00322233 0.00293537 0.00179201" />
+          <joint name="left shoulder roll" pos="0 0 0" axis="0 0 -1" range="-1.27409 1.8326" actuatorfrcrange="-80 80" />
+          <geom type="mesh" rgba="0.647059 0.647059 0.647059 1" mesh="left_arm_1_robstride_01_mock_2_rs_01_rotor_1_simple" />
+          <geom pos="-0.0115317 0.00331973 -0.0305" quat="-2.32051e-08 1 0 0" type="mesh" rgba="0.972549 0.529412 0.00392157 1" mesh="left_arm_1_left_arm_part_2a_1_simple" />
+          <geom pos="-0.0107688 0.0160909 -0.0812012" quat="-0.425252 0.425252 -0.564943 0.564943" type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="left_arm_1_washer_m4_26_simple" />
+          <geom pos="-0.0100001 0.0158695 -0.0812012" quat="0.564943 -0.564943 -0.425252 0.425252" type="mesh" rgba="0.615686 0.811765 0.929412 1" mesh="left_arm_1_robstride_01_mock_3_rs_01_stator_1_simple" />
+          <geom pos="0.0115317 -0.00331973 -0.0305" quat="-2.32051e-08 1 0 0" type="mesh" rgba="0.972549 0.529412 0.00392157 1" mesh="left_arm_1_left_arm_part_2b_1_simple" />
+          <body name="link_left_arm_1_robstride_01_mock_3_rs_01_rotor_1" pos="-0.0120607 0.00328933 -0.115436" quat="0.564943 -0.564943 -0.425252 0.425252">
+            <inertial pos="0.0179451 0.0644089 -0.013485" quat="0.391681 0.018525 -0.0517631 0.918457" mass="1.01451" diaginertia="0.00239731 0.00207727 0.00175024" />
+            <joint name="left elbow pitch" pos="0 0 0" axis="0 0 -1" range="-1.309 1.8326" actuatorfrcrange="-80 80" />
+            <geom type="mesh" rgba="0.647059 0.647059 0.647059 1" mesh="left_arm_1_robstride_01_mock_3_rs_01_rotor_1_simple" />
+            <geom pos="0.0115317 -0.00331973 -0.0305" quat="-2.32051e-08 1 0 0" type="mesh" rgba="0.972549 0.529412 0.00392157 1" mesh="left_arm_1_left_arm_part_3b_1_simple" />
+            <geom pos="0.0550325 0.0674306 -0.0249837" quat="-0.425547 0.564721 0.425547 0.564721" type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="left_arm_1_washer_m4_28_simple" />
+            <geom pos="0.055253 0.0681996 -0.0249837" quat="-0.564721 -0.425548 0.564721 -0.425547" type="mesh" rgba="0.615686 0.811765 0.929412 1" mesh="left_arm_1_robstride_01_mock_4_rs_01_stator_1_simple" />
+            <geom pos="-0.0047708 0.0854111 0.0106423" quat="-0.564721 -0.425548 0.564721 -0.425547" type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="left_arm_1_washer_m4_31_simple" />
+            <geom pos="-0.00499131 0.0846421 0.0106423" quat="0.425548 -0.564721 -0.425547 -0.564721" type="mesh" rgba="0.972549 0.529412 0.00392157 1" mesh="left_arm_1_left_arm_part_3a_1_simple" />
+            <body name="link_left_arm_1_robstride_01_mock_4_rs_01_rotor_1" pos="0.0226353 0.079113 -0.0126759" quat="-0.564721 -0.425548 0.564721 -0.425547">
+              <inertial pos="-5.62987e-06 -5.42532e-06 -0.0527898" quat="0.540712 0.456205 -0.539747 0.456269" mass="0.451151" diaginertia="0.000464658 0.000367864 0.000367863" />
+              <joint name="left wrist roll" pos="0 0 0" axis="0 0 -1" range="-3.14159 0" actuatorfrcrange="-80 80" />
+              <geom type="mesh" rgba="0.647059 0.647059 0.647059 1" mesh="left_arm_1_robstride_01_mock_4_rs_01_rotor_1_simple" />
+              <geom pos="0 0 -0.0305" quat="0.707107 0 0 0.707107" type="mesh" rgba="0 0 0 1" mesh="left_arm_1_stub_1_simple" />
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+  </body></worldbody>
+</mujoco>

@@ -4,7 +4,6 @@ import argparse
 import asyncio
 import logging
 import math
-from collections import OrderedDict
 from copy import deepcopy
 from typing import Any, Dict
 import time
@@ -12,11 +11,10 @@ import time
 import numpy as np
 import pybullet as p
 import pybullet_data
+import yaml
 from numpy.typing import NDArray
 from vuer import Vuer, VuerSession
 from vuer.schemas import Hands, PointLight, Urdf
-
-from firmware.robot.robot import Robot
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -24,109 +22,68 @@ logger = logging.getLogger(__name__)
 
 # Constants
 DELTA = 10
-URDF_WEB = "https://raw.githubusercontent.com/kscalelabs/teleop/f4616b5f117842e5f7eb138b87af31258e1f7484/urdf/stompy/upper_limb_assembly_5_dof_merged_simplified.urdf"
-URDF_LOCAL = "urdf/stompy/upper_limb_assembly_5_dof_merged_simplified.urdf"
 UPDATE_RATE = 1
-
-# Robot configuration
-START_POS_TRUNK_PYBULLET: NDArray = np.array([0, 0, 1])
-START_EUL_TRUNK_PYBULLET: NDArray = np.array([-math.pi / 2, 0, 2.15])
-START_POS_TRUNK_VUER: NDArray = np.array([0, 1, 0])
-START_EUL_TRUNK_VUER: NDArray = np.array([-math.pi, -0.68, 0])
-
-# Starting positions for robot end effectors
-START_POS_EEL: NDArray = np.array([-0.35, -0.25, 0.0]) + START_POS_TRUNK_PYBULLET
-START_POS_EER: NDArray = np.array([-0.35, 0.25, 0.0]) + START_POS_TRUNK_PYBULLET
 
 PB_TO_VUER_AXES: NDArray = np.array([2, 0, 1], dtype=np.uint8)
 PB_TO_VUER_AXES_SIGN: NDArray = np.array([1, 1, 1], dtype=np.int8)
 
-
-# Starting joint positions in PyBullet (corresponds to 0 on real robot)
-START_Q: Dict[str, float] = OrderedDict(
-    [
-        # trunk
-        ("joint_torso_1_rmd_x8_90_mock_1_dof_x8", 0),
-        # left arm
-        ("joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8", 0.544),
-        ("joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8", -1.33),
-        ("joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4", 0),
-        ("joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4", 4.8),
-        ("joint_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4", 1.76),
-        # left gripper
-        ("joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1", 0.0),
-        ("joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2", 0.0),
-        # right arm
-        ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8", 0.68),
-        ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8", 1.24),
-        ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4", 0),
-        ("joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4", 3.45),
-        ("joint_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4", 0),
-        # right gripper
-        ("joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_1", 0.0),
-        ("joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_2", 0.0),
-    ]
-)
-
 # End effector links
 EEL_JOINT: str = "left_end_effector_joint"
 EER_JOINT: str = "right_end_effector_joint"
-
-# Kinematic chains for each arm
-EEL_CHAIN_ARM = [
-    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8",
-    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8",
-    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4",
-    "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4",
-    "joint_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4",
-]
-EER_CHAIN_ARM = [
-    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8",
-    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8",
-    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4",
-    "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4",
-    "joint_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4",
-]
-EEL_CHAIN_HAND = [
-    "joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1",
-    "joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2",
-]
-EER_CHAIN_HAND = [
-    "joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_1",
-    "joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_2",
-]
-
-OFFSET = list(START_Q.values())
-OFFSET_LEFT = [START_Q[joint] for joint in EEL_CHAIN_ARM + EEL_CHAIN_HAND]
 
 # Hand tracking parameters
 INDEX_FINGER_TIP_ID, THUMB_FINGER_TIP_ID, MIDDLE_FINGER_TIP_ID = 8, 4, 14
 PINCH_DIST_CLOSED, PINCH_DIST_OPENED = 0.1, 0.1  # 10 cm
 EE_S_MIN, EE_S_MAX = 0.0, 0.05
 
-# Global variables
-q_lock = asyncio.Lock()
-q = deepcopy(START_Q)
-goal_pos_eel, goal_pos_eer = START_POS_EEL, START_POS_EER
+def load_config(config_path: str) -> Dict[str, Any]:
+    with open(config_path, "r") as file:
+        return yaml.safe_load(file)
 
 
 class TeleopRobot:
-    def __init__(self, use_firmware: bool = False, shared_dict: dict = {}) -> None:
+    def __init__(
+        self, config: Dict[str, Any], embodiment: str, use_firmware: bool = False, shared_dict: dict = {}
+    ) -> None:
         self.app = Vuer()
         self.robot_id = None
         self.joint_info: dict = {}
-        self.actual_pos_eel, self.actual_pos_eer = START_POS_EEL, START_POS_EER
-        self.goal_pos_eel, self.goal_pos_eer = START_POS_EEL, START_POS_EER
-        self.q = deepcopy(START_Q)
+        self.config = config["embodiments"][embodiment]
+
+        self.actual_pos_eel, self.actual_pos_eer = (
+            np.array(self.config["start_pos_eel"]),
+            np.array(self.config["start_pos_eer"]),
+        )
+        self.goal_pos_eel, self.goal_pos_eer = (
+            np.array(self.config["start_pos_eel"]),
+            np.array(self.config["start_pos_eer"]),
+        )
+        self.q = deepcopy(self.config["start_q"])
         self.q_lock = asyncio.Lock()
 
-        if use_firmware:
-            self.robot = Robot(config_path="config.yaml", setup="teleop_test")
+        # Offset between Vuer and PyBullet trunk positions / coordinates
+        self.vuer_to_pb_trunk_offset = (
+            np.array(self.config["start_pos_trunk_pybullet"])
+            - np.array(self.config["start_pos_trunk_vuer"])[PB_TO_VUER_AXES] * PB_TO_VUER_AXES_SIGN
+        )
 
-            for i in range(5):
-                self.robot.zero_out()
-                time.sleep(0.1)
-            self.robot.update_motor_data()
+        self.eel_chain_arm = self.config["kinematic_chains"]["left_arm"]
+        self.eer_chain_arm = self.config["kinematic_chains"]["right_arm"]
+
+        self.eel_chain_hand = self.config["kinematic_chains"]["left_hand"]
+        self.eer_chain_hand = self.config["kinematic_chains"]["right_hand"]
+
+        self.offsets = {
+            "offset": list(self.config["start_q"].values()),
+            "offset_left": [self.config["start_q"][joint] for joint in self.eel_chain_arm + self.eel_chain_hand],
+            "offset_right": [self.config["start_q"][joint] for joint in self.eer_chain_arm + self.eer_chain_hand],
+        }
+
+        if use_firmware:
+            from firmware.robot.robot import Robot
+
+            self.robot = Robot(config_path=config["robot_config_path"], setup=self.config["robot_setup"])
+            self.robot.zero_out()
         else:
             self.robot = None
 
@@ -161,16 +118,19 @@ class TeleopRobot:
                 "upper_limit": info[9],
                 "child_link_name": info[12].decode("utf-8"),
             }
-            if name in START_Q:
-                p.resetJointState(self.robot_id, i, START_Q[name])
+            if name in self.config["start_q"]:
+                p.resetJointState(self.robot_id, i, self.config["start_q"][name])
 
         p.resetBasePositionAndOrientation(
             self.robot_id,
-            START_POS_TRUNK_PYBULLET,
-            p.getQuaternionFromEuler(START_EUL_TRUNK_PYBULLET),
+            self.config["start_pos_trunk_pybullet"],
+            p.getQuaternionFromEuler(self.config["start_eul_trunk_pybullet"]),
         )
         p.resetDebugVisualizerCamera(
-            cameraDistance=2.0, cameraYaw=50, cameraPitch=-35, cameraTargetPosition=START_POS_TRUNK_PYBULLET
+            cameraDistance=2.0,
+            cameraYaw=50,
+            cameraPitch=-35,
+            cameraTargetPosition=self.config["start_pos_trunk_pybullet"],
         )
 
         # Add goal position markers
@@ -180,9 +140,10 @@ class TeleopRobot:
     async def inverse_kinematics(self, arm: str, max_attempts: int = 20) -> float | np.floating[Any]:
         """Perform inverse kinematics calculation for the specified arm."""
         ee_id = self.joint_info[EEL_JOINT if arm == "left" else EER_JOINT]["index"]
-        ee_chain = EEL_CHAIN_ARM + EEL_CHAIN_HAND if arm == "left" else EER_CHAIN_ARM + EER_CHAIN_HAND
+        ee_chain = (
+            self.eel_chain_arm + self.eel_chain_hand if arm == "left" else self.eer_chain_arm + self.eer_chain_hand
+        )
         target_pos = self.goal_pos_eel if arm == "left" else self.goal_pos_eer
-        joint_damping = [0.1 if str(i) not in ee_chain else 100 for i in range(len(self.joint_info))]
 
         lower_limits = [self.joint_info[joint]["lower_limit"] for joint in ee_chain]
         upper_limits = [self.joint_info[joint]["upper_limit"] for joint in ee_chain]
@@ -205,8 +166,7 @@ class TeleopRobot:
             lowerLimits=lower_limits,
             upperLimits=upper_limits,
             jointRanges=joint_ranges,
-            restPoses=OFFSET,
-            jointDamping=joint_damping,
+            restPoses=self.offsets["offset_left" if arm == "left" else "offset_right"],
         )
 
         actual_pos, _ = p.getLinkState(self.robot_id, ee_id)[:2]
@@ -218,8 +178,10 @@ class TeleopRobot:
             self.actual_pos_eer = actual_pos
 
         async with self.q_lock:
-            for i, val in enumerate(solution):
-                joint_name = list(START_Q.keys())[i]
+            for i, val in enumerate(
+                solution, start=(0 if arm == "left" else len(self.eel_chain_arm + self.eel_chain_hand))
+            ):
+                joint_name = list(self.config["start_q"].keys())[i]
                 if joint_name in ee_chain:
                     self.q[joint_name] = val
                     p.resetJointState(self.robot_id, self.joint_info[joint_name]["index"], val)
@@ -232,14 +194,16 @@ class TeleopRobot:
         rthumb_pos = np.array(event.value["rightLandmarks"][THUMB_FINGER_TIP_ID])
         rpinch_dist = np.linalg.norm(np.array(event.value["rightLandmarks"][INDEX_FINGER_TIP_ID]) - rthumb_pos)
         if rpinch_dist < PINCH_DIST_CLOSED:
-            self.goal_pos_eer = np.multiply(rthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN)
+            self.goal_pos_eer = (
+                np.multiply(rthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN) + self.vuer_to_pb_trunk_offset
+            )
 
             # Gripper control
             rmiddl_pos = np.array(event.value["rightLandmarks"][MIDDLE_FINGER_TIP_ID])
             rgrip_dist = np.linalg.norm(rthumb_pos - rmiddl_pos) / PINCH_DIST_OPENED
             _s = EE_S_MIN + rgrip_dist * (EE_S_MAX - EE_S_MIN)
 
-            for slider in EER_CHAIN_HAND:
+            for slider in self.eer_chain_hand:
                 self.q[slider] = 0.05 - _s
                 p.resetJointState(self.robot_id, self.joint_info[slider]["index"], 0.05 - _s)
 
@@ -247,14 +211,15 @@ class TeleopRobot:
         lthumb_pos = np.array(event.value["leftLandmarks"][THUMB_FINGER_TIP_ID])
         lpinch_dist = np.linalg.norm(np.array(event.value["leftLandmarks"][INDEX_FINGER_TIP_ID]) - lthumb_pos)
         if lpinch_dist < PINCH_DIST_CLOSED:
-            self.goal_pos_eel = np.multiply(lthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN)
-
+            self.goal_pos_eel = (
+                np.multiply(lthumb_pos[PB_TO_VUER_AXES], PB_TO_VUER_AXES_SIGN) + self.vuer_to_pb_trunk_offset
+            )
             # Gripper control
             lmiddl_pos = np.array(event.value["leftLandmarks"][MIDDLE_FINGER_TIP_ID])
             lgrip_dist = np.linalg.norm(lthumb_pos - lmiddl_pos) / PINCH_DIST_OPENED
             _s = EE_S_MIN + lgrip_dist * (EE_S_MAX - EE_S_MIN)
 
-            for slider in EEL_CHAIN_HAND:
+            for slider in self.eel_chain_hand:
                 self.q[slider] = 0.05 - _s
                 p.resetJointState(self.robot_id, self.joint_info[slider]["index"], 0.05 - _s)
 
@@ -264,23 +229,30 @@ class TeleopRobot:
         session.upsert @ Hands(fps=30, stream=True, key="hands")
         await asyncio.sleep(0.1)
         session.upsert @ Urdf(
-            src=URDF_WEB,
-            jointValues=START_Q,
-            position=START_POS_TRUNK_VUER,
-            rotation=START_EUL_TRUNK_VUER,
+            src=self.config["urdf_web"],
+            jointValues=self.config["start_q"],
+            position=self.config["start_pos_trunk_vuer"],
+            rotation=self.config["start_eul_trunk_vuer"],
             key="robot",
         )
 
         if self.robot:
-            new_positions = {"left_arm": [self.q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]}
+            for side in self.config["sides"]:
+                new_positions = {
+                    f"{side}_arm": [
+                        self.q[pos]
+                        for pos in self.config["kinematic_chains"][f"{side}_arm"]
+                        + self.config["kinematic_chains"][f"{side}_hand"]
+                    ]
+                }
 
         counter = 0
         while True:
             await asyncio.gather(
-                self.inverse_kinematics("left"),
-                self.inverse_kinematics("right"),
-                # asyncio.sleep(1 / max_fps),
+                *[self.inverse_kinematics(side) for side in self.config["sides"]],
+                asyncio.sleep(1 / max_fps),
             )
+
             self.update_shared_data()
 
             # Skip updating positions every UPDATE_RATE frames (adjust if CAN buffer is being overflowed)
@@ -291,22 +263,28 @@ class TeleopRobot:
 
             async with self.q_lock:
                 session.upsert @ Urdf(
-                    src=URDF_WEB,
+                    src=self.config["urdf_web"],
                     jointValues=self.q,
-                    position=START_POS_TRUNK_VUER,
-                    rotation=START_EUL_TRUNK_VUER,
+                    position=self.config["start_pos_trunk_vuer"],
+                    rotation=self.config["start_eul_trunk_vuer"],
                     key="robot",
                 )
 
             if self.robot:
-                new_positions["left_arm"] = [self.q[pos] for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]
-                offset = {"left_arm": OFFSET_LEFT}
-                self.robot.set_position(new_positions, offset=offset, radians=True)
+                offset = {}
+                for side in self.config["sides"]:
+                    new_positions[f"{side}_arm"] = [
+                        self.q[pos]
+                        for pos in self.config["kinematic_chains"][f"{side}_arm"]
+                        + self.config["kinematic_chains"][f"{side}_hand"]
+                    ]
+                    offset[f"{side}_arm"] = self.offsets[f"offset_{side}"]
+                self.robot.set_position(new_positions, offset=offset, radians=False)
 
     def update_positions(self) -> None:
         if self.robot:
             self.robot.update_motor_data()
-            pos = self.robot.get_motor_positions()["left_arm"]
+            pos = self.robot.get_motor_positions()["right_arm"]
             self.positions = np.array(pos)
 
     def get_positions(self) -> dict[str, dict[str, NDArray]]:
@@ -314,7 +292,10 @@ class TeleopRobot:
             return {
                 "expected": {
                     "left": np.array(
-                        [math.degrees(self.q[pos] - START_Q[pos]) for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]
+                        [
+                            math.degrees(self.q[pos] - self.config["start_q"][pos])
+                            for pos in self.eel_chain_arm + self.eel_chain_hand
+                        ]
                     ),
                 },
                 "actual": {
@@ -324,7 +305,7 @@ class TeleopRobot:
         else:
             return {
                 "expected": {
-                    "left": np.array([math.degrees(self.q[pos]) for pos in EEL_CHAIN_ARM + EEL_CHAIN_HAND]),
+                    "left": np.array([math.degrees(self.q[pos]) for pos in self.eel_chain_arm + self.eel_chain_hand]),
                 },
                 "actual": {
                     "left": np.random.rand(6),
@@ -340,7 +321,7 @@ class TeleopRobot:
         self,
         use_gui: bool,
         max_fps: int,
-        urdf_path: str = URDF_LOCAL,
+        urdf_path: str,
     ) -> None:
         self.setup_pybullet(use_gui, urdf_path)
 
@@ -353,9 +334,16 @@ class TeleopRobot:
             await self.main_loop(session, max_fps)
 
 
-def run_teleop_app(use_gui: bool, max_fps: int, use_firmware: bool, shared_data: Dict[str, NDArray]) -> None:
-    teleop = TeleopRobot(use_firmware=use_firmware, shared_dict=shared_data)
-    teleop.run(use_gui, max_fps)
+def run_teleop_app(
+    config: Dict[str, Any],
+    embodiment: str,
+    use_gui: bool,
+    max_fps: int,
+    use_firmware: bool,
+    shared_data: Dict[str, NDArray],
+) -> None:
+    teleop = TeleopRobot(config, embodiment, use_firmware=use_firmware, shared_dict=shared_data)
+    teleop.run(use_gui, max_fps, config["embodiments"][embodiment]["urdf_local"])
 
 
 def main() -> None:
@@ -363,11 +351,14 @@ def main() -> None:
     parser.add_argument("--firmware", action="store_true", help="Enable firmware control")
     parser.add_argument("--gui", action="store_true", help="Use PyBullet GUI mode")
     parser.add_argument("--fps", type=int, default=60, help="Maximum frames per second")
-    parser.add_argument("--urdf", type=str, default=URDF_LOCAL, help="Path to URDF file")
-    args, _ = parser.parse_known_args()
+    parser.add_argument("--config", type=str, default="config.yaml", help="Path to configuration file")
+    parser.add_argument("--embodiment", type=str, default="stompy_mini", help="Robot embodiment to use")
+    args = parser.parse_args()
 
-    demo = TeleopRobot(use_firmware=args.firmware)
-    demo.run(args.gui, args.fps, args.urdf)
+    config = load_config(args.config)
+
+    demo = TeleopRobot(config, args.embodiment, use_firmware=args.firmware)
+    demo.run(args.gui, args.fps, config["embodiments"][args.embodiment]["urdf_local"])
 
 
 if __name__ == "__main__":

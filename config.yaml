@@ -1,71 +1,76 @@
-robots:
-  - setup: "full_body"
-    delta_change: 10
-    body_parts:
-      left_arm:
-        start_id: 1
-      right_arm:
-        start_id: 7
-      left_leg:
-        start_id: 13
-      right_leg:
-        start_id: 19
-    motor_config:
-      arm:
-        signs: [1, -1, 1, -1, 1, 1]
-        increments: [4, 4, 4, 4, 4, 4]
-        maximum_values: [60, 60, 60, 60, 0, 10]
-        offsets: [0, 0, 0, 0, 0, 0]
-      leg:
-        signs: [1, -1, 1, -1, 1, -1]
-        increments: [4, 4, 4, 4, 4, 4]
-        maximum_values: [60, 60, 60, 60, 60, 60]
-        offsets: [0, 0, 0, 0, 0, 0]
-  - setup: "left_arm_teleop"
-    delta_change: 10
-    body_parts:
-      left_arm:
-        start_id: 1
-    motor_config:
-      arm:
-        #signs: [1, -1, 1, -1, 1, -1]
-        signs: [1, -1, 1, 1, 1, -1]
-        increments: [4, 4, 4, 4, 4, 4]
-        maximum_values: [80, 80, 80, 70, 0, 10]
-        offsets: [0, 0, 0, 0, 0, 0]
-  - setup: "left_arm_replay"
-    delta_change: 10
-    body_parts:
-      left_arm:
-        start_id: 1
-    motor_config:
-      arm:
-        signs: [1, -1, 1, 1, 1, -1]
-        # signs: [1, 1, 1, -1, 1, -1]
-        increments: [4, 4, 4, 4, 4, 4]
-        maximum_values: [80, 80, 80, 70, 0, 10]
-        offsets: [0, 0, 0, 0, 0, 0]
-  - setup: "teleop_test"
-    motor_type: "bionic"
-    delta_change: 10
-    body_parts:
-      left_arm:
-        start_id: 1
-        canbus_id: 0
-        dof: 6
-    motor_config:
-      arm:
-        signs: [-1, 1, -1, -1, -1, 1]
-        increments: [4, 4, 4, 4, 4, 4]
-        maximum_values: [60, 60, 60, 60, 0, 10]
-        offsets: [0, 0, 0, 0, 0, 0]
-    params:
-      - motor_id: "default"
-        kp: 10
-        kd: 2
-      - motor_id: 1
-        kp: 30
-        kd: 2
-      - motor_id: 2
-        kp: 30
-        kd: 2
+embodiments:
+  stompy_mini:
+    sides: ["right"]
+    robot_setup: "right_arm_mini"
+    urdf_web: "https://raw.githubusercontent.com/kscalelabs/teleop/59796c35863461f8f32a4c21f41903b965cc878e/urdf/stompy_mini/upper_half_assembly_simplified.urdf"
+    urdf_local: "urdf/stompy_mini/upper_half_assembly_simplified.urdf"
+    start_pos_trunk_pybullet: [0, 0, 1]
+    start_eul_trunk_pybullet: [-1.5707963267948966, 0, -1.5707963267948966]
+    start_pos_trunk_vuer: [0, 1.2, 0]
+    start_eul_trunk_vuer: [0, 0, 0]
+    start_pos_eel: [-0.25, -0.25, 0.0]
+    start_pos_eer: [-0.25, 0.35, 0.0]
+    start_q:
+      left shoulder pitch: -1.02
+      left shoulder yaw: 1.38
+      left shoulder roll: -3.24
+      left elbow pitch: 1.2
+      right shoulder pitch: 3.15
+      right shoulder yaw: -1.92
+      right shoulder roll: -1.46
+      right elbow pitch: 1.32
+    kinematic_chains:
+      left_arm: ["left shoulder pitch", "left shoulder yaw", "left shoulder roll", "left elbow pitch"]
+      left_hand: []
+      right_arm: ["right shoulder pitch", "right shoulder yaw", "right shoulder roll", "right elbow pitch"]
+      right_hand: []
+
+  stompy:
+    sides: ["right"]
+    robot_setup: "left_arm_teleop"
+    urdf_web: "https://raw.githubusercontent.com/kscalelabs/teleop/f4616b5f117842e5f7eb138b87af31258e1f7484/urdf/stompy/upper_limb_assembly_5_dof_merged_simplified.urdf"
+    urdf_local: "urdf/stompy/upper_limb_assembly_5_dof_merged_simplified.urdf"
+    start_pos_trunk_pybullet: [0, 0, 1]
+    start_eul_trunk_pybullet: [-1.5707963267948966, 0, 2.15]
+    start_pos_trunk_vuer: [0, 1, 0]
+    start_eul_trunk_vuer: [-3.141592, -0.68, 0]
+    start_pos_eel: [-0.35, -0.25, 0.0]
+    start_pos_eer: [-0.35, 0.25, 0.0]
+    start_q:
+      # Trunk
+      joint_torso_1_rmd_x8_90_mock_1_dof_x8: 0
+      # Left arm
+      joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8: 0.544
+      joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8: -1.33
+      joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4: 0
+      joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4: 4.8
+      joint_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4: 1.76
+      # Left gripper
+      joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1: 0.0
+      joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2: 0.0
+      # Right arm
+      joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8: 0.68
+      joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8: 1.24
+      joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4: 0
+      joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4: 3.45
+      joint_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4: 0
+      # Right gripper
+      joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_1: 0.0
+      joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_2: 0.0
+    kinematic_chains:
+      left_arm: ["joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8",
+                 "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8",
+                 "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4",
+                 "joint_full_arm_5_dof_1_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4",
+                 "joint_full_arm_5_dof_1_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4"]
+      left_hand: ["joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_1",
+                  "joint_full_arm_5_dof_1_lower_arm_1_dof_1_hand_1_slider_2"]
+      right_arm: ["joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_1_dof_x8",
+                  "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x8_90_mock_2_dof_x8",
+                  "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_1_dof_x4",
+                  "joint_full_arm_5_dof_2_upper_left_arm_1_rmd_x4_24_mock_2_dof_x4",
+                  "joint_full_arm_5_dof_2_lower_arm_1_dof_1_rmd_x4_24_mock_2_dof_x4"]
+      right_hand: ["joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_1",
+                   "joint_full_arm_5_dof_2_lower_arm_1_dof_1_hand_1_slider_2"]
+
+robot_config_path: "firmware/firmware/robot/teleop_configs.yaml"

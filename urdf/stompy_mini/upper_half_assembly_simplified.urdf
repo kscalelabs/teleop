@@ -1,0 +1,2542 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot name="upper_half_assembly">
+  <link name="link_torso_top_left_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/torso_top_left_1_simple.stl" />
+        </geometry>
+      <material name="link_torso_top_left_1_material">
+        <color rgba="0.97254902 0.52941176 0.0039215686 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/torso_top_left_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="1.4082058" />
+      <inertia ixx="0.0056937695" iyy="0.0048367342" izz="0.006515341" ixy="-0.0010914973" ixz="3.5650766e-05" iyz="6.9389161e-05" />
+      <origin xyz="0 0 0" rpy="-0.025327426 0.047575449 3.1377706" />
+      </inertial>
+    </link>
+  <link name="link_torso_top_half_right_2">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/torso_top_half_right_2_simple.stl" />
+        </geometry>
+      <material name="link_torso_top_half_right_2_material">
+        <color rgba="0.97254902 0.52941176 0.0039215686 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/torso_top_half_right_2_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="1.4342783" />
+      <inertia ixx="0.0067183719" iyy="0.0057611306" izz="0.0050041417" ixy="-8.0190884e-05" ixz="9.5098445e-05" iyz="0.0011779547" />
+      <origin xyz="-0.051817322 -0.067698351 0.076230913" rpy="0.33813328 -0.43770451 -0.59590428" />
+      </inertial>
+    </link>
+  <joint name="joint_fastened_3" type="fixed">
+    <origin xyz="0.077587758 0.052628725 0.067282432" rpy="1.5707963 0 1.5707963" />
+    <parent link="link_torso_top_left_1" />
+    <child link="link_torso_top_half_right_2" />
+    </joint>
+  <link name="link_front_plate_top_section_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/front_plate_top_section_1_simple.stl" />
+        </geometry>
+      <material name="link_front_plate_top_section_1_material">
+        <color rgba="0.97254902 0.52941176 0.0039215686 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/front_plate_top_section_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.34600869" />
+      <inertia ixx="0.0011399389" iyy="0.0018748067" izz="0.0029434056" ixy="0" ixz="0" iyz="-4.5694949e-05" />
+      <origin xyz="0.1094129 0.070808195 0.020035041" rpy="0 -2.7168481e-05 3.1415921" />
+      </inertial>
+    </link>
+  <joint name="joint_fastened_4" type="fixed">
+    <origin xyz="-0.031827314 0.026314365 -0.067717568" rpy="3.1415927 0 0" />
+    <parent link="link_torso_top_left_1" />
+    <child link="link_front_plate_top_section_1" />
+    </joint>
+  <link name="link_washer_m4_15">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_15_simple.stl" />
+        </geometry>
+      <material name="link_washer_m4_15_material">
+        <color rgba="0.75294118 0.75294118 0.75294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_15_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="4.5615925e-05" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 0.0004" rpy="0 0 1.5707963" />
+      </inertial>
+    </link>
+  <joint name="joint_fastened_1" type="fixed">
+    <origin xyz="-0.0717882 0.0022541638 -0.050148036" rpy="-1.5707963 0 1.4406356" />
+    <parent link="link_torso_top_left_1" />
+    <child link="link_washer_m4_15" />
+    </joint>
+  <link name="link_washer_m4_10">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_10_simple.stl" />
+        </geometry>
+      <material name="link_washer_m4_10_material">
+        <color rgba="0.75294118 0.75294118 0.75294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_10_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="4.5615925e-05" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 0.0004" rpy="0 0 1.5707963" />
+      </inertial>
+    </link>
+  <joint name="joint_fastened_67" type="fixed">
+    <origin xyz="-0.075999581 -0.029918155 -0.050148036" rpy="-1.5707963 0 1.4406356" />
+    <parent link="link_torso_top_left_1" />
+    <child link="link_washer_m4_10" />
+    </joint>
+  <link name="link_washer_m4_13">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_13_simple.stl" />
+        </geometry>
+      <material name="link_washer_m4_13_material">
+        <color rgba="0.75294118 0.75294118 0.75294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_13_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="4.5615925e-05" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 0.0004" rpy="0 0 1.5707963" />
+      </inertial>
+    </link>
+  <joint name="joint_fastened_68" type="fixed">
+    <origin xyz="-0.079406661 -0.055946107 -0.031076294" rpy="-1.5707963 0 1.4406356" />
+    <parent link="link_torso_top_left_1" />
+    <child link="link_washer_m4_13" />
+    </joint>
+  <link name="link_washer_m4_14">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_14_simple.stl" />
+        </geometry>
+      <material name="link_washer_m4_14_material">
+        <color rgba="0.75294118 0.75294118 0.75294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_14_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="4.5615925e-05" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 0.0004" rpy="0 0 1.5707963" />
+      </inertial>
+    </link>
+  <joint name="joint_fastened_69" type="fixed">
+    <origin xyz="-0.080708049 -0.0658879 -0.00021756843" rpy="-1.5707963 0 1.4406356" />
+    <parent link="link_torso_top_left_1" />
+    <child link="link_washer_m4_14" />
+    </joint>
+  <link name="link_washer_m4_16">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_16_simple.stl" />
+        </geometry>
+      <material name="link_washer_m4_16_material">
+        <color rgba="0.75294118 0.75294118 0.75294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_16_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="4.5615925e-05" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 0.0004" rpy="0 0 1.5707963" />
+      </inertial>
+    </link>
+  <joint name="joint_fastened_70" type="fixed">
+    <origin xyz="-0.079406661 -0.055946107 0.030641157" rpy="-1.5707963 0 1.4406356" />
+    <parent link="link_torso_top_left_1" />
+    <child link="link_washer_m4_16" />
+    </joint>
+  <link name="link_washer_m4_12">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_12_simple.stl" />
+        </geometry>
+      <material name="link_washer_m4_12_material">
+        <color rgba="0.75294118 0.75294118 0.75294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_12_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="4.5615925e-05" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 0.0004" rpy="0 0 1.5707963" />
+      </inertial>
+    </link>
+  <joint name="joint_fastened_71" type="fixed">
+    <origin xyz="-0.075999581 -0.029918155 0.049712899" rpy="-1.5707963 0 1.4406356" />
+    <parent link="link_torso_top_left_1" />
+    <child link="link_washer_m4_12" />
+    </joint>
+  <link name="link_washer_m4_17">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_17_simple.stl" />
+        </geometry>
+      <material name="link_washer_m4_17_material">
+        <color rgba="0.75294118 0.75294118 0.75294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_17_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="4.5615925e-05" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 0.0004" rpy="0 0 1.5707963" />
+      </inertial>
+    </link>
+  <joint name="joint_fastened_72" type="fixed">
+    <origin xyz="-0.0717882 0.0022541638 0.049712899" rpy="-1.5707963 0 1.4406356" />
+    <parent link="link_torso_top_left_1" />
+    <child link="link_washer_m4_17" />
+    </joint>
+  <link name="link_washer_m4_18">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_18_simple.stl" />
+        </geometry>
+      <material name="link_washer_m4_18_material">
+        <color rgba="0.75294118 0.75294118 0.75294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_18_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="4.5615925e-05" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 0.0004" rpy="0 0 1.5707963" />
+      </inertial>
+    </link>
+  <joint name="joint_fastened_73" type="fixed">
+    <origin xyz="-0.06838112 0.028282116 0.030641157" rpy="-1.5707963 0 1.4406356" />
+    <parent link="link_torso_top_left_1" />
+    <child link="link_washer_m4_18" />
+    </joint>
+  <link name="link_washer_m4_19">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_19_simple.stl" />
+        </geometry>
+      <material name="link_washer_m4_19_material">
+        <color rgba="0.75294118 0.75294118 0.75294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_19_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="4.5615925e-05" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 0.0004" rpy="3.1415927 0 -1.5707963" />
+      </inertial>
+    </link>
+  <joint name="joint_fastened_75" type="fixed">
+    <origin xyz="-0.047244891 -0.033682166 0.049712899" rpy="1.5707963 0 1.4406356" />
+    <parent link="link_torso_top_left_1" />
+    <child link="link_washer_m4_19" />
+    </joint>
+  <link name="link_washer_m4_24">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_24_simple.stl" />
+        </geometry>
+      <material name="link_washer_m4_24_material">
+        <color rgba="0.75294118 0.75294118 0.75294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_24_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="4.5615925e-05" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 0.0004" rpy="3.1415927 0 -1.5707963" />
+      </inertial>
+    </link>
+  <joint name="joint_fastened_76" type="fixed">
+    <origin xyz="-0.051953359 -0.069651912 -0.00021756843" rpy="1.5707963 0 1.4406356" />
+    <parent link="link_torso_top_left_1" />
+    <child link="link_washer_m4_24" />
+    </joint>
+  <link name="link_head_assembly_1_neck_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/head_assembly_1_neck_1_simple.stl" />
+        </geometry>
+      <material name="link_head_assembly_1_neck_1_material">
+        <color rgba="0.97254902 0.52941176 0.0039215686 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/head_assembly_1_neck_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.3554213" />
+      <inertia ixx="0.00036937565" iyy="0.00073347597" izz="0.00093514459" ixy="0" ixz="0" iyz="-1.1684031e-05" />
+      <origin xyz="-0.075000003 -0.035790651 -0.013305487" rpy="0 0 0" />
+      </inertial>
+    </link>
+  <joint name="joint_fastened_10" type="fixed">
+    <origin xyz="0.0025877582 0.064824336 -0.035217568" rpy="-1.5707963 0 -3.1415927" />
+    <parent link="link_torso_top_left_1" />
+    <child link="link_head_assembly_1_neck_1" />
+    </joint>
+  <link name="link_washer_m4_6">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_6_simple.stl" />
+        </geometry>
+      <material name="link_washer_m4_6_material">
+        <color rgba="0.75294118 0.75294118 0.75294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_6_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="4.5615925e-05" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 0.0004" rpy="0 0 -1.5707963" />
+      </inertial>
+    </link>
+  <joint name="joint_fastened_33" type="fixed">
+    <origin xyz="-0.050374561 -0.11743047 0.14937596" rpy="0 -0.13016072 3.1415927" />
+    <parent link="link_torso_top_half_right_2" />
+    <child link="link_washer_m4_6" />
+    </joint>
+  <link name="link_washer_m4_7">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_7_simple.stl" />
+        </geometry>
+      <material name="link_washer_m4_7_material">
+        <color rgba="0.75294118 0.75294118 0.75294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_7_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="4.5615925e-05" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 0.0004" rpy="0 0 -1.5707963" />
+      </inertial>
+    </link>
+  <joint name="joint_fastened_34" type="fixed">
+    <origin xyz="-0.082546879 -0.11743047 0.15358734" rpy="0 -0.13016072 3.1415927" />
+    <parent link="link_torso_top_half_right_2" />
+    <child link="link_washer_m4_7" />
+    </joint>
+  <link name="link_washer_m4_5">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_5_simple.stl" />
+        </geometry>
+      <material name="link_washer_m4_5_material">
+        <color rgba="0.75294118 0.75294118 0.75294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_5_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="4.5615925e-05" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 0.0004" rpy="0 0 -1.5707963" />
+      </inertial>
+    </link>
+  <joint name="joint_fastened_35" type="fixed">
+    <origin xyz="-0.10857483 -0.098358726 0.15699442" rpy="0 -0.13016072 3.1415927" />
+    <parent link="link_torso_top_half_right_2" />
+    <child link="link_washer_m4_5" />
+    </joint>
+  <link name="link_washer_m4_8">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_8_simple.stl" />
+        </geometry>
+      <material name="link_washer_m4_8_material">
+        <color rgba="0.75294118 0.75294118 0.75294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_8_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="4.5615925e-05" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 0.0004" rpy="0 0 -1.5707963" />
+      </inertial>
+    </link>
+  <joint name="joint_fastened_36" type="fixed">
+    <origin xyz="-0.11851663 -0.0675 0.15829581" rpy="0 -0.13016072 3.1415927" />
+    <parent link="link_torso_top_half_right_2" />
+    <child link="link_washer_m4_8" />
+    </joint>
+  <link name="link_washer_m4_9">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_9_simple.stl" />
+        </geometry>
+      <material name="link_washer_m4_9_material">
+        <color rgba="0.75294118 0.75294118 0.75294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_9_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="4.5615925e-05" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 0.0004" rpy="0 0 -1.5707963" />
+      </inertial>
+    </link>
+  <joint name="joint_fastened_37" type="fixed">
+    <origin xyz="-0.10857483 -0.036641274 0.15699442" rpy="0 -0.13016072 3.1415927" />
+    <parent link="link_torso_top_half_right_2" />
+    <child link="link_washer_m4_9" />
+    </joint>
+  <link name="link_washer_m4_4">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_4_simple.stl" />
+        </geometry>
+      <material name="link_washer_m4_4_material">
+        <color rgba="0.75294118 0.75294118 0.75294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_4_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="4.5615925e-05" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 0.0004" rpy="0 0 -1.5707963" />
+      </inertial>
+    </link>
+  <joint name="joint_fastened_38" type="fixed">
+    <origin xyz="-0.082546879 -0.017569533 0.15358734" rpy="0 -0.13016072 3.1415927" />
+    <parent link="link_torso_top_half_right_2" />
+    <child link="link_washer_m4_4" />
+    </joint>
+  <link name="link_washer_m4_11">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_11_simple.stl" />
+        </geometry>
+      <material name="link_washer_m4_11_material">
+        <color rgba="0.75294118 0.75294118 0.75294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_11_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="4.5615925e-05" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 0.0004" rpy="0 0 -1.5707963" />
+      </inertial>
+    </link>
+  <joint name="joint_fastened_39" type="fixed">
+    <origin xyz="-0.050374561 -0.017569533 0.14937596" rpy="0 -0.13016072 3.1415927" />
+    <parent link="link_torso_top_half_right_2" />
+    <child link="link_washer_m4_11" />
+    </joint>
+  <link name="link_back_plate_upper_section_2">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/back_plate_upper_section_2_simple.stl" />
+        </geometry>
+      <material name="link_back_plate_upper_section_2_material">
+        <color rgba="0.97254902 0.52941176 0.0039215686 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/back_plate_upper_section_2_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.29699096" />
+      <inertia ixx="0.00095993414" iyy="0.0019372525" izz="0.0028437586" ixy="0" ixz="0" iyz="4.2191982e-05" />
+      <origin xyz="-0.10932046 -0.066164701 0.016189517" rpy="-3.1415926 -5.8545943e-05 -3.1415913" />
+      </inertial>
+    </link>
+  <joint name="joint_fastened_55" type="fixed">
+    <origin xyz="-0.026314359 0 0.10941507" rpy="-1.5707963 -1.5707963 0" />
+    <parent link="link_torso_top_half_right_2" />
+    <child link="link_back_plate_upper_section_2" />
+    </joint>
+  <link name="link_washer_m4_33">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_33_simple.stl" />
+        </geometry>
+      <material name="link_washer_m4_33_material">
+        <color rgba="0.75294118 0.75294118 0.75294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_33_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="4.5615925e-05" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 0.0004" rpy="0 0 -1.5707963" />
+      </inertial>
+    </link>
+  <joint name="joint_fastened_28" type="fixed">
+    <origin xyz="-0.054138572 -0.017569533 0.12062127" rpy="3.1415927 -0.13016072 3.1415927" />
+    <parent link="link_torso_top_half_right_2" />
+    <child link="link_washer_m4_33" />
+    </joint>
+  <link name="link_washer_m4_26">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_26_simple.stl" />
+        </geometry>
+      <material name="link_washer_m4_26_material">
+        <color rgba="0.75294118 0.75294118 0.75294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_26_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="4.5615925e-05" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 0.0004" rpy="0 0 -1.5707963" />
+      </inertial>
+    </link>
+  <joint name="joint_fastened_83" type="fixed">
+    <origin xyz="-0.12228064 -0.0675 0.12954112" rpy="3.1415927 -0.13016072 3.1415927" />
+    <parent link="link_torso_top_half_right_2" />
+    <child link="link_washer_m4_26" />
+    </joint>
+  <link name="link_washer_m4_3">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_3_simple.stl" />
+        </geometry>
+      <material name="link_washer_m4_3_material">
+        <color rgba="0.75294118 0.75294118 0.75294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/washer_m4_3_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="4.5615925e-05" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 0.0004" rpy="0 0 -1.5707963" />
+      </inertial>
+    </link>
+  <joint name="joint_fastened_24" type="fixed">
+    <origin xyz="-0.024346608 -0.036641274 0.14596888" rpy="0 -0.13016072 3.1415927" />
+    <parent link="link_torso_top_half_right_2" />
+    <child link="link_washer_m4_3" />
+    </joint>
+  <link name="link_36v_battery_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/36v_battery_1_simple.stl" />
+        </geometry>
+      <material name="link_36v_battery_1_material">
+        <color rgba="0.61568627 0.81176471 0.92941176 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/36v_battery_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="2.0955967" />
+      <inertia ixx="0.0084129816" iyy="0.0076952975" izz="0.0024341772" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 -0.098933" rpy="3.1415927 0 3.1415927" />
+      </inertial>
+    </link>
+  <joint name="joint_fastened_41" type="fixed">
+    <origin xyz="-0.038195612 -0.0811 0" rpy="-3.1415927 -1.5707963 0" />
+    <parent link="link_torso_top_half_right_2" />
+    <child link="link_36v_battery_1" />
+    </joint>
+  <link name="link_front_plate_bottom_section_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/front_plate_bottom_section_1_simple.stl" />
+        </geometry>
+      <material name="link_front_plate_bottom_section_1_material">
+        <color rgba="0.97254902 0.52941176 0.0039215686 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/front_plate_bottom_section_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.37044647" />
+      <inertia ixx="0.0011796221" iyy="0.0024890633" izz="0.0013863249" ixy="0" ixz="0" iyz="-8.8613506e-05" />
+      <origin xyz="-2.2498728e-06 -0.018554539 -0.086809475" rpy="0 0.00015558977 3.1414241" />
+      </inertial>
+    </link>
+  <joint name="joint_fastened_53" type="fixed">
+    <origin xyz="0.10941508 0.15200268 0.035" rpy="1.5707963 0 0" />
+    <parent link="link_front_plate_top_section_1" />
+    <child link="link_front_plate_bottom_section_1" />
+    </joint>
+  <link name="link_robstride_04_mock_2_rs_04_stator_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/robstride_04_mock_2_rs_04_stator_1_simple.stl" />
+        </geometry>
+      <material name="link_robstride_04_mock_2_rs_04_stator_1_material">
+        <color rgba="0.23137255 0.38039216 0.70588235 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/robstride_04_mock_2_rs_04_stator_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="1.2401215" />
+      <inertia ixx="0.0014258703" iyy="0.0014595009" izz="0.0023661617" ixy="0" ixz="0" iyz="-3.2654023e-06" />
+      <origin xyz="0.053 -0.00013786024 -0.024399367" rpy="3.1415927 0 0" />
+      </inertial>
+    </link>
+  <joint name="joint_fastened_30" type="fixed">
+    <origin xyz="0 0 0.0008" rpy="3.1415927 0 0" />
+    <parent link="link_washer_m4_24" />
+    <child link="link_robstride_04_mock_2_rs_04_stator_1" />
+    </joint>
+  <link name="link_head_assembly_1_head_inner_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/head_assembly_1_head_inner_1_simple.stl" />
+        </geometry>
+      <material name="link_head_assembly_1_head_inner_1_material">
+        <color rgba="0.49803922 0.49803922 0.49803922 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/head_assembly_1_head_inner_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.50934485" />
+      <inertia ixx="0.0016235943" iyy="0.0017599805" izz="0.0030161307" ixy="2.9008214e-06" ixz="-5.9913818e-06" iyz="0.00016836122" />
+      <origin xyz="0.00093888986 0.020417048 -0.017512282" rpy="0.13093988 -0.0039310025 3.1096118" />
+      </inertial>
+    </link>
+  <joint name="joint_head_assembly_1_fastened_2" type="fixed">
+    <origin xyz="-0.074999995 -0.051816349 -0.06" rpy="0 0 0" />
+    <parent link="link_head_assembly_1_neck_1" />
+    <child link="link_head_assembly_1_head_inner_1" />
+    </joint>
+  <link name="link_robstride_04_mock_1_rs_04_stator_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/robstride_04_mock_1_rs_04_stator_1_simple.stl" />
+        </geometry>
+      <material name="link_robstride_04_mock_1_rs_04_stator_1_material">
+        <color rgba="0.23137255 0.38039216 0.70588235 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/robstride_04_mock_1_rs_04_stator_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="1.2401215" />
+      <inertia ixx="0.0023661617" iyy="0.0014595009" izz="0.0014258703" ixy="-3.2654023e-06" ixz="0" iyz="0" />
+      <origin xyz="-0.00013786024 -0.053 0.024399367" rpy="3.1379911 0.0036015076 0" />
+      </inertial>
+    </link>
+  <joint name="joint_fastened_23" type="fixed">
+    <origin xyz="0 0 0.0008" rpy="0 0 -1.5707963" />
+    <parent link="link_washer_m4_26" />
+    <child link="link_robstride_04_mock_1_rs_04_stator_1" />
+    </joint>
+  <link name="link_torso_bottom_left_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/torso_bottom_left_1_simple.stl" />
+        </geometry>
+      <material name="link_torso_bottom_left_1_material">
+        <color rgba="0.97254902 0.52941176 0.0039215686 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/torso_bottom_left_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="1.3423316" />
+      <inertia ixx="0.0064336478" iyy="0.0038264467" izz="0.0065490736" ixy="-0.0014386119" ixz="3.9993789e-05" iyz="-2.7051109e-05" />
+      <origin xyz="0.00050395379 -0.0078380523 -0.068322386" rpy="1.7897936 -1.1442695 -0.2024662" />
+      </inertial>
+    </link>
+  <joint name="joint_fastened_5" type="fixed">
+    <origin xyz="-0.088726412 -0.035 -0.088486315" rpy="-1.5707963 0 0" />
+    <parent link="link_front_plate_bottom_section_1" />
+    <child link="link_torso_bottom_left_1" />
+    </joint>
+  <link name="link_robstride_04_mock_2_rs_04_rotor_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/robstride_04_mock_2_rs_04_rotor_1_simple.stl" />
+        </geometry>
+      <material name="link_robstride_04_mock_2_rs_04_rotor_1_material">
+        <color rgba="0.91764706 0.91764706 0.91764706 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/robstride_04_mock_2_rs_04_rotor_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.18007617" />
+      <inertia ixx="5.4934872e-05" iyy="5.4934872e-05" izz="6.258733e-05" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 -0.01983378" rpy="0 1.5707963 0" />
+      </inertial>
+    </link>
+  <joint name="left shoulder pitch" type="fixed">
+    <origin xyz="0.053 0 -0.039" rpy="3.1415927 0 0" />
+    <parent link="link_robstride_04_mock_2_rs_04_stator_1" />
+    <child link="link_robstride_04_mock_2_rs_04_rotor_1" />
+    <limit effort="6" velocity="5" lower="-4" upper="4" />
+    <axis xyz="0 0 -1" />
+    </joint>
+  <link name="link_head_assembly_1_head_outter_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/head_assembly_1_head_outter_1_simple.stl" />
+        </geometry>
+      <material name="link_head_assembly_1_head_outter_1_material">
+        <color rgba="0.97254902 0.52941176 0.0039215686 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/head_assembly_1_head_outter_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.38329746" />
+      <inertia ixx="0.0014575347" iyy="0.0026603996" izz="0.0017861547" ixy="0" ixz="0" iyz="-0.0001733053" />
+      <origin xyz="0 0.036248868 0.08885866" rpy="0 1.031357e-05 -1.246993e-05" />
+      </inertial>
+    </link>
+  <joint name="joint_head_assembly_1_fastened_1" type="fixed">
+    <origin xyz="0 -0.079 -0.018964466" rpy="-1.5707963 0 0" />
+    <parent link="link_head_assembly_1_head_inner_1" />
+    <child link="link_head_assembly_1_head_outter_1" />
+    </joint>
+  <link name="link_head_assembly_1_camera_mount_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/head_assembly_1_camera_mount_1_simple.stl" />
+        </geometry>
+      <material name="link_head_assembly_1_camera_mount_1_material">
+        <color rgba="0.64705882 0.64705882 0.64705882 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/head_assembly_1_camera_mount_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.048726412" />
+      <inertia ixx="2.8893768e-05" iyy="6.465193e-05" izz="4.8229483e-05" ixy="0" ixz="0" iyz="8.3375487e-06" />
+      <origin xyz="0.016000007 -0.018650499 0.026876772" rpy="0 0 0" />
+      </inertial>
+    </link>
+  <joint name="joint_head_assembly_1_fastened_3" type="fixed">
+    <origin xyz="-0.016 0.0415 -0.01" rpy="3.1415927 0 0" />
+    <parent link="link_head_assembly_1_head_inner_1" />
+    <child link="link_head_assembly_1_camera_mount_1" />
+    </joint>
+  <link name="link_robstride_04_mock_1_rs_04_rotor_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/robstride_04_mock_1_rs_04_rotor_1_simple.stl" />
+        </geometry>
+      <material name="link_robstride_04_mock_1_rs_04_rotor_1_material">
+        <color rgba="0.91764706 0.91764706 0.91764706 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/robstride_04_mock_1_rs_04_rotor_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.18007617" />
+      <inertia ixx="5.4934872e-05" iyy="5.4934872e-05" izz="6.258733e-05" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 -0.01983378" rpy="0 1.5707963 0" />
+      </inertial>
+    </link>
+  <joint name="right shoulder pitch" type="revolute">
+    <origin xyz="0 -0.053 0.039" rpy="0 0 1.5707963" />
+    <parent link="link_robstride_04_mock_1_rs_04_stator_1" />
+    <child link="link_robstride_04_mock_1_rs_04_rotor_1" />
+    <limit effort="6" velocity="5" lower="0.012291" upper="5.1538836" />
+    <axis xyz="0 0 -1" />
+    </joint>
+  <link name="link_torso_bottom_half_right_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/torso_bottom_half_right_1_simple.stl" />
+        </geometry>
+      <material name="link_torso_bottom_half_right_1_material">
+        <color rgba="0.97254902 0.52941176 0.0039215686 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/torso_bottom_half_right_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="1.3690608" />
+      <inertia ixx="0.0068665985" iyy="0.0065706323" izz="0.0040184444" ixy="-4.5420787e-05" ixz="-2.2134662e-05" iyz="0.0015853306" />
+      <origin xyz="0.08097111 -0.00087263965 -0.08660053" rpy="-1.570904 0.4465244 1.4633195" />
+      </inertial>
+    </link>
+  <joint name="joint_fastened_6" type="fixed">
+    <origin xyz="0.088726405 0.074392259 -0.0675" rpy="1.5707963 0 -1.5707963" />
+    <parent link="link_torso_bottom_left_1" />
+    <child link="link_torso_bottom_half_right_1" />
+    </joint>
+  <link name="link_back_plate_lower_section_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/back_plate_lower_section_1_simple.stl" />
+        </geometry>
+      <material name="link_back_plate_lower_section_1_material">
+        <color rgba="0.97254902 0.52941176 0.0039215686 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/back_plate_lower_section_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.28879992" />
+      <inertia ixx="0.00090059931" iyy="0.0013486015" izz="0.0022070793" ixy="0" ixz="0" iyz="-5.1540223e-05" />
+      <origin xyz="0.088819191 -0.00059776261 -0.013413402" rpy="3.1415925 -0.00022426108 3.141586" />
+      </inertial>
+    </link>
+  <joint name="joint_fastened_2" type="fixed">
+    <origin xyz="0 0 -0.135" rpy="0 0 0" />
+    <parent link="link_torso_bottom_left_1" />
+    <child link="link_back_plate_lower_section_1" />
+    </joint>
+  <link name="link_robot_side_connector_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/robot_side_connector_1_simple.stl" />
+        </geometry>
+      <material name="link_robot_side_connector_1_material">
+        <color rgba="0.61568627 0.81176471 0.92941176 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/robot_side_connector_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.0092367364" />
+      <inertia ixx="1.5800622e-06" iyy="2.4137235e-06" izz="1.5900155e-06" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="-0.018 0.0054170071 0.0088167221" rpy="1.8107026 0 1.5707963" />
+      </inertial>
+    </link>
+  <joint name="joint_fastened_7" type="fixed">
+    <origin xyz="0.070726405 0.043459259 -0.0063" rpy="3.1415927 0 3.1415927" />
+    <parent link="link_torso_bottom_left_1" />
+    <child link="link_robot_side_connector_1" />
+    </joint>
+  <link name="link_left_arm_1_shoulder_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_shoulder_1_simple.stl" />
+        </geometry>
+      <material name="link_left_arm_1_shoulder_1_material">
+        <color rgba="0.97254902 0.52941176 0.0039215686 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_shoulder_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.61456675" />
+      <inertia ixx="0.0011736791" iyy="0.001760988" izz="0.0014309867" ixy="0.00013866521" ixz="0.00022284171" iyz="-8.0033741e-05" />
+      <origin xyz="-0.018904716 -0.0091632833 0.06679915" rpy="2.407695 8.8012944e-06 2.4077603" />
+      </inertial>
+    </link>
+  <joint name="joint_fastened_42" type="fixed">
+    <origin xyz="0.012727922 -0.012727922 -0.0395" rpy="3.1415927 0 0" />
+    <parent link="link_robstride_04_mock_2_rs_04_rotor_1" />
+    <child link="link_left_arm_1_shoulder_1" />
+    </joint>
+  <link name="link_head_assembly_1_camera_2_board_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/head_assembly_1_camera_2_board_1_simple.stl" />
+        </geometry>
+      <material name="link_head_assembly_1_camera_2_board_1_material">
+        <color rgba="0 0.50196078 0 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/head_assembly_1_camera_2_board_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.0025890113" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="-0.01698703 0.017014974 -0.00079999967" rpy="3.1415927 0 0" />
+      </inertial>
+    </link>
+  <joint name="joint_head_assembly_1_fastened_4" type="fixed">
+    <origin xyz="0.084018 -0.02 0.037018" rpy="-1.5707963 0 0" />
+    <parent link="link_head_assembly_1_camera_mount_1" />
+    <child link="link_head_assembly_1_camera_2_board_1" />
+    </joint>
+  <link name="link_head_assembly_1_camera_1_board_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/head_assembly_1_camera_1_board_1_simple.stl" />
+        </geometry>
+      <material name="link_head_assembly_1_camera_1_board_1_material">
+        <color rgba="0 0.50196078 0 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/head_assembly_1_camera_1_board_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.0025890113" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0.01704897 -0.017021026 -0.00079999967" rpy="3.1415927 0 0" />
+      </inertial>
+    </link>
+  <joint name="joint_head_assembly_1_fastened_5" type="fixed">
+    <origin xyz="-0.052018 -0.02 0.037018" rpy="-1.5707963 1.5707963 0" />
+    <parent link="link_head_assembly_1_camera_mount_1" />
+    <child link="link_head_assembly_1_camera_1_board_1" />
+    </joint>
+  <link name="link_right_arm_1_shoulder_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_shoulder_1_simple.stl" />
+        </geometry>
+      <material name="link_right_arm_1_shoulder_1_material">
+        <color rgba="0.97254902 0.52941176 0.0039215686 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_shoulder_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.61456675" />
+      <inertia ixx="0.0015596464" iyy="0.001760988" izz="0.0010450195" ixy="0" ixz="0" iyz="0.00016010447" />
+      <origin xyz="-0.0046574135 0.024518245 -0.06679915" rpy="1.3604975 -9.1289906e-05 1.7811657" />
+      </inertial>
+    </link>
+  <joint name="joint_fastened_27" type="fixed">
+    <origin xyz="0.0046587428 -0.017386665 -0.0395" rpy="0 0 0" />
+    <parent link="link_robstride_04_mock_1_rs_04_rotor_1" />
+    <child link="link_right_arm_1_shoulder_1" />
+    </joint>
+  <link name="link_removable_cap_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/removable_cap_1_simple.stl" />
+        </geometry>
+      <material name="link_removable_cap_1_material">
+        <color rgba="0.61568627 0.81176471 0.92941176 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/removable_cap_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.27956099" />
+      <inertia ixx="0.00054243035" iyy="0.00070951242" izz="0.00032742126" ixy="0" ixz="0" iyz="-1.3057599e-06" />
+      <origin xyz="-0.0040000064 0.01551137 -0.070737853" rpy="-1.0496504 1.5707959 0.51772856" />
+      </inertial>
+    </link>
+  <joint name="joint_fastened_8" type="fixed">
+    <origin xyz="-0.014 0.001 0.00315" rpy="3.1415927 0 0" />
+    <parent link="link_robot_side_connector_1" />
+    <child link="link_removable_cap_1" />
+    </joint>
+  <link name="link_left_arm_1_washer_m4_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_washer_m4_1_simple.stl" />
+        </geometry>
+      <material name="link_left_arm_1_washer_m4_1_material">
+        <color rgba="0.75294118 0.75294118 0.75294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_washer_m4_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="4.5615925e-05" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 0.0004" rpy="0 0 0" />
+      </inertial>
+    </link>
+  <joint name="joint_left_arm_1_fastened_1" type="fixed">
+    <origin xyz="-0.03100864 -0.016391055 0.078429298" rpy="-1.5707963 0 -2.0943951" />
+    <parent link="link_left_arm_1_shoulder_1" />
+    <child link="link_left_arm_1_washer_m4_1" />
+    </joint>
+  <link name="link_head_assembly_1_camera_2_lens_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/head_assembly_1_camera_2_lens_1_simple.stl" />
+        </geometry>
+      <material name="link_head_assembly_1_camera_2_lens_1_material">
+        <color rgba="0.64705882 0.64705882 0.64705882 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/head_assembly_1_camera_2_lens_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.003823064" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 1.3817029e-05 -0.0083902766" rpy="-1.5707383 0 -1.5707963" />
+      </inertial>
+    </link>
+  <joint name="joint_head_assembly_1_camera_2_fastened_1" type="fixed">
+    <origin xyz="-0.01698703 0.017014974 -0.0015999993" rpy="0 0 0" />
+    <parent link="link_head_assembly_1_camera_2_board_1" />
+    <child link="link_head_assembly_1_camera_2_lens_1" />
+    </joint>
+  <link name="link_head_assembly_1_camera_1_lens_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/head_assembly_1_camera_1_lens_1_simple.stl" />
+        </geometry>
+      <material name="link_head_assembly_1_camera_1_lens_1_material">
+        <color rgba="0.64705882 0.64705882 0.64705882 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/head_assembly_1_camera_1_lens_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.003823064" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 1.3817029e-05 -0.0083902766" rpy="-1.5707383 0 -1.5707963" />
+      </inertial>
+    </link>
+  <joint name="joint_head_assembly_1_camera_1_fastened_1" type="fixed">
+    <origin xyz="0.01704897 -0.017021026 -0.0015999993" rpy="0 0 0" />
+    <parent link="link_head_assembly_1_camera_1_board_1" />
+    <child link="link_head_assembly_1_camera_1_lens_1" />
+    </joint>
+  <link name="link_right_arm_1_washer_m4_3">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_washer_m4_3_simple.stl" />
+        </geometry>
+      <material name="link_right_arm_1_washer_m4_3_material">
+        <color rgba="0.75294118 0.75294118 0.75294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_washer_m4_3_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="4.5615925e-05" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 0.0004" rpy="0 0 0" />
+      </inertial>
+    </link>
+  <joint name="joint_right_arm_1_fastened_12" type="fixed">
+    <origin xyz="0.0076539823 0.031386665 -0.078429298" rpy="1.5707963 0 0" />
+    <parent link="link_right_arm_1_shoulder_1" />
+    <child link="link_right_arm_1_washer_m4_3" />
+    </joint>
+  <link name="link_main_case_section_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/main_case_section_1_simple.stl" />
+        </geometry>
+      <material name="link_main_case_section_1_material">
+        <color rgba="0.61568627 0.81176471 0.92941176 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/main_case_section_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="1.3782715" />
+      <inertia ixx="0.0080610905" iyy="0.0069081306" izz="0.0032809871" ixy="0" ixz="0" iyz="-0.00015764622" />
+      <origin xyz="-3.12099e-06 0.058644644 -0.14779778" rpy="-1.5074579 -1.5705897 -1.5907808" />
+      </inertial>
+    </link>
+  <joint name="joint_fastened_9" type="fixed">
+    <origin xyz="-0.004 0.0465 -0.12135" rpy="1.5707963 0 0" />
+    <parent link="link_removable_cap_1" />
+    <child link="link_main_case_section_1" />
+    </joint>
+  <link name="link_left_arm_1_robstride_01_mock_1_rs_01_stator_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_robstride_01_mock_1_rs_01_stator_1_simple.stl" />
+        </geometry>
+      <material name="link_left_arm_1_robstride_01_mock_1_rs_01_stator_1_material">
+        <color rgba="0.61568627 0.81176471 0.92941176 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_robstride_01_mock_1_rs_01_stator_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.34790535" />
+      <inertia ixx="0.00017729433" iyy="0.00017583919" izz="0.00027827575" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="-0.012658427 -0.034108418 0.010580484" rpy="-0.00020475768 1.5635875 3.1354067" />
+      </inertial>
+    </link>
+  <joint name="joint_left_arm_1_fastened_16" type="fixed">
+    <origin xyz="0 0 0.0008" rpy="0 0 0" />
+    <parent link="link_left_arm_1_washer_m4_1" />
+    <child link="link_left_arm_1_robstride_01_mock_1_rs_01_stator_1" />
+    </joint>
+  <link name="link_right_arm_1_robstride_01_mock_1_rs_01_stator_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_robstride_01_mock_1_rs_01_stator_1_simple.stl" />
+        </geometry>
+      <material name="link_right_arm_1_robstride_01_mock_1_rs_01_stator_1_material">
+        <color rgba="0.61568627 0.81176471 0.92941176 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_robstride_01_mock_1_rs_01_stator_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.34790535" />
+      <inertia ixx="0.00017729433" iyy="0.00017583919" izz="0.00027827575" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="-0.012658427 -0.034108418 0.010580484" rpy="-0.00020475768 1.5635875 3.1354067" />
+      </inertial>
+    </link>
+  <joint name="joint_right_arm_1_fastened_16" type="fixed">
+    <origin xyz="0 0 0.0008" rpy="0 0 0" />
+    <parent link="link_right_arm_1_washer_m4_3" />
+    <child link="link_right_arm_1_robstride_01_mock_1_rs_01_stator_1" />
+    </joint>
+  <link name="link_left_arm_1_robstride_01_mock_1_rs_01_rotor_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_robstride_01_mock_1_rs_01_rotor_1_simple.stl" />
+        </geometry>
+      <material name="link_left_arm_1_robstride_01_mock_1_rs_01_rotor_1_material">
+        <color rgba="0.64705882 0.64705882 0.64705882 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_robstride_01_mock_1_rs_01_rotor_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.032" />
+      <inertia ixx="4.5591154e-06" iyy="4.5575352e-06" izz="4.1553172e-06" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="-7.9372476e-05 -7.648864e-05 -0.01525" rpy="3.1415927 0.76689767 -1.5707963" />
+      </inertial>
+    </link>
+  <joint name="left shoulder yaw" type="fixed">
+    <origin xyz="-0.012659308 -0.034234368 0.0015" rpy="3.1415927 0 0" />
+    <parent link="link_left_arm_1_robstride_01_mock_1_rs_01_stator_1" />
+    <child link="link_left_arm_1_robstride_01_mock_1_rs_01_rotor_1" />
+    <limit effort="6" velocity="5" lower="-3.3089969" upper="3.8762289" />
+    <axis xyz="0 0 -1" />
+    </joint>
+  <link name="link_right_arm_1_robstride_01_mock_1_rs_01_rotor_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_robstride_01_mock_1_rs_01_rotor_1_simple.stl" />
+        </geometry>
+      <material name="link_right_arm_1_robstride_01_mock_1_rs_01_rotor_1_material">
+        <color rgba="0.64705882 0.64705882 0.64705882 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_robstride_01_mock_1_rs_01_rotor_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.032" />
+      <inertia ixx="4.5591154e-06" iyy="4.5575352e-06" izz="4.1553172e-06" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="-7.9372476e-05 -7.648864e-05 -0.01525" rpy="3.1415927 0.76689767 -1.5707963" />
+      </inertial>
+    </link>
+  <joint name="right shoulder yaw" type="revolute">
+    <origin xyz="-0.012659308 -0.034234368 0.0015" rpy="3.1415927 0 0" />
+    <parent link="link_right_arm_1_robstride_01_mock_1_rs_01_stator_1" />
+    <child link="link_right_arm_1_robstride_01_mock_1_rs_01_rotor_1" />
+    <limit effort="6" velocity="5" lower="-3.3089969" upper="1.2325957" />
+    <axis xyz="0 0 -1" />
+    </joint>
+  <link name="link_left_arm_1_left_arm_part_1a_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_left_arm_part_1a_1_simple.stl" />
+        </geometry>
+      <material name="link_left_arm_1_left_arm_part_1a_1_material">
+        <color rgba="0.97254902 0.52941176 0.0039215686 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_left_arm_part_1a_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.40154625" />
+      <inertia ixx="0.0007271003" iyy="0.00053343486" izz="0.00097913846" ixy="7.6622927e-05" ixz="3.8274362e-05" iyz="-0.00010901997" />
+      <origin xyz="0.014378704 -0.065401379 0.011095478" rpy="2.9142296 -0.0079082335 -1.2941607" />
+      </inertial>
+    </link>
+  <joint name="joint_left_arm_1_fastened_4" type="fixed">
+    <origin xyz="0.0028908681 -0.011646582 -0.0305" rpy="3.1415927 0 0" />
+    <parent link="link_left_arm_1_robstride_01_mock_1_rs_01_rotor_1" />
+    <child link="link_left_arm_1_left_arm_part_1a_1" />
+    </joint>
+  <link name="link_right_arm_1_right_arm_part_1a_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_right_arm_part_1a_1_simple.stl" />
+        </geometry>
+      <material name="link_right_arm_1_right_arm_part_1a_1_material">
+        <color rgba="0.97254902 0.52941176 0.0039215686 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_right_arm_part_1a_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.38933182" />
+      <inertia ixx="0.00071901049" iyy="0.00053464047" izz="0.0009785123" ixy="7.8537308e-05" ixz="3.9393652e-05" iyz="-0.00011340311" />
+      <origin xyz="0.014346923 -0.064623282 0.010737388" rpy="2.906557 -0.0027148931 -1.3095368" />
+      </inertial>
+    </link>
+  <joint name="joint_right_arm_1_fastened_2" type="fixed">
+    <origin xyz="0.0028908681 -0.011646582 -0.0305" rpy="3.1415927 0 0" />
+    <parent link="link_right_arm_1_robstride_01_mock_1_rs_01_rotor_1" />
+    <child link="link_right_arm_1_right_arm_part_1a_1" />
+    </joint>
+  <link name="link_left_arm_1_washer_m4_11">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_washer_m4_11_simple.stl" />
+        </geometry>
+      <material name="link_left_arm_1_washer_m4_11_material">
+        <color rgba="0.75294118 0.75294118 0.75294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_washer_m4_11_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="4.5615925e-05" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 -0.0004" rpy="3.1415927 0 0" />
+      </inertial>
+    </link>
+  <joint name="joint_left_arm_1_fastened_19" type="fixed">
+    <origin xyz="0.045202114 -0.086233776 0.0054606222" rpy="-1.5707963 0 0.30543262" />
+    <parent link="link_left_arm_1_left_arm_part_1a_1" />
+    <child link="link_left_arm_1_washer_m4_11" />
+    </joint>
+  <link name="link_right_arm_1_washer_m4_10">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_washer_m4_10_simple.stl" />
+        </geometry>
+      <material name="link_right_arm_1_washer_m4_10_material">
+        <color rgba="0.75294118 0.75294118 0.75294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_washer_m4_10_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="4.5615925e-05" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 0.0004" rpy="3.1415927 0 0" />
+      </inertial>
+    </link>
+  <joint name="joint_right_arm_1_fastened_3" type="fixed">
+    <origin xyz="0.057108064 -0.082479844 -0.028838158" rpy="1.5707963 0 0.30543262" />
+    <parent link="link_right_arm_1_right_arm_part_1a_1" />
+    <child link="link_right_arm_1_washer_m4_10" />
+    </joint>
+  <link name="link_right_arm_1_washer_m4_9">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_washer_m4_9_simple.stl" />
+        </geometry>
+      <material name="link_right_arm_1_washer_m4_9_material">
+        <color rgba="0.75294118 0.75294118 0.75294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_washer_m4_9_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="4.5615925e-05" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 -0.0004" rpy="0 0 0" />
+      </inertial>
+    </link>
+  <joint name="joint_right_arm_1_fastened_17" type="fixed">
+    <origin xyz="0.034732197 -0.089534928 0.011798781" rpy="-1.5707963 0 0.30543262" />
+    <parent link="link_right_arm_1_right_arm_part_1a_1" />
+    <child link="link_right_arm_1_washer_m4_9" />
+    </joint>
+  <link name="link_right_arm_1_washer_m4_8">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_washer_m4_8_simple.stl" />
+        </geometry>
+      <material name="link_right_arm_1_washer_m4_8_material">
+        <color rgba="0.75294118 0.75294118 0.75294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_washer_m4_8_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="4.5615925e-05" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 0.0004" rpy="3.1415927 0 0" />
+      </inertial>
+    </link>
+  <joint name="joint_right_arm_1_fastened_18" type="fixed">
+    <origin xyz="0.010920297 -0.097042791 0.011798781" rpy="1.5707963 0 0.30543262" />
+    <parent link="link_right_arm_1_right_arm_part_1a_1" />
+    <child link="link_right_arm_1_washer_m4_8" />
+    </joint>
+  <link name="link_right_arm_1_washer_m4_7">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_washer_m4_7_simple.stl" />
+        </geometry>
+      <material name="link_right_arm_1_washer_m4_7_material">
+        <color rgba="0.75294118 0.75294118 0.75294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_washer_m4_7_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="4.5615925e-05" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 0.0004" rpy="3.1415927 0 0" />
+      </inertial>
+    </link>
+  <joint name="joint_right_arm_1_fastened_19" type="fixed">
+    <origin xyz="-0.011455569 -0.10409787 -0.028838158" rpy="1.5707963 0 0.30543262" />
+    <parent link="link_right_arm_1_right_arm_part_1a_1" />
+    <child link="link_right_arm_1_washer_m4_7" />
+    </joint>
+  <link name="link_left_arm_1_robstride_01_mock_2_rs_01_stator_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_robstride_01_mock_2_rs_01_stator_1_simple.stl" />
+        </geometry>
+      <material name="link_left_arm_1_robstride_01_mock_2_rs_01_stator_1_material">
+        <color rgba="0.61568627 0.81176471 0.92941176 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_robstride_01_mock_2_rs_01_stator_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.34790535" />
+      <inertia ixx="0.00017729433" iyy="0.00017583919" izz="0.00027827575" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0.023605582 -0.027965994 -0.010580484" rpy="3.1413879 -1.5635875 -3.1354067" />
+      </inertial>
+    </link>
+  <joint name="joint_left_arm_1_fastened_21" type="fixed">
+    <origin xyz="0 0 -0.0008" rpy="0 0 3.1415927" />
+    <parent link="link_left_arm_1_washer_m4_11" />
+    <child link="link_left_arm_1_robstride_01_mock_2_rs_01_stator_1" />
+    </joint>
+  <link name="link_right_arm_1_robstride_01_mock_3_rs_01_stator_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_robstride_01_mock_3_rs_01_stator_1_simple.stl" />
+        </geometry>
+      <material name="link_right_arm_1_robstride_01_mock_3_rs_01_stator_1_material">
+        <color rgba="0.61568627 0.81176471 0.92941176 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_robstride_01_mock_3_rs_01_stator_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.34790535" />
+      <inertia ixx="0.00017729433" iyy="0.00017583919" izz="0.00027827575" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="-0.012658427 -0.034108418 0.010580484" rpy="-0.00020475768 1.5635875 3.1354067" />
+      </inertial>
+    </link>
+  <joint name="joint_right_arm_1_fastened_21" type="fixed">
+    <origin xyz="0 0 -0.0008" rpy="3.1415927 0 0" />
+    <parent link="link_right_arm_1_washer_m4_9" />
+    <child link="link_right_arm_1_robstride_01_mock_3_rs_01_stator_1" />
+    </joint>
+  <link name="link_left_arm_1_washer_m4_7">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_washer_m4_7_simple.stl" />
+        </geometry>
+      <material name="link_left_arm_1_washer_m4_7_material">
+        <color rgba="0.75294118 0.75294118 0.75294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_washer_m4_7_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="4.5615925e-05" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 -0.0004" rpy="3.1415927 0 0" />
+      </inertial>
+    </link>
+  <joint name="joint_left_arm_1_fastened_22" type="fixed">
+    <origin xyz="0.036264009 -0.062074412 0" rpy="3.1415927 0 3.1415927" />
+    <parent link="link_left_arm_1_robstride_01_mock_2_rs_01_stator_1" />
+    <child link="link_left_arm_1_washer_m4_7" />
+    </joint>
+  <link name="link_left_arm_1_robstride_01_mock_2_rs_01_rotor_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_robstride_01_mock_2_rs_01_rotor_1_simple.stl" />
+        </geometry>
+      <material name="link_left_arm_1_robstride_01_mock_2_rs_01_rotor_1_material">
+        <color rgba="0.64705882 0.64705882 0.64705882 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_robstride_01_mock_2_rs_01_rotor_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.032" />
+      <inertia ixx="4.5591154e-06" iyy="4.5575352e-06" izz="4.1553172e-06" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="-7.9372476e-05 -7.648864e-05 -0.01525" rpy="3.1415927 0.76689767 -1.5707963" />
+      </inertial>
+    </link>
+  <joint name="left shoulder roll" type="fixed">
+    <origin xyz="0.023604701 -0.027840044 -0.0015" rpy="0 0 0" />
+    <parent link="link_left_arm_1_robstride_01_mock_2_rs_01_stator_1" />
+    <child link="link_left_arm_1_robstride_01_mock_2_rs_01_rotor_1" />
+    <limit effort="6" velocity="5" lower="-4.2740904" upper="-1.8325957" />
+    <axis xyz="0 0 -1" />
+    </joint>
+  <link name="link_right_arm_1_washer_m4_12">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_washer_m4_12_simple.stl" />
+        </geometry>
+      <material name="link_right_arm_1_washer_m4_12_material">
+        <color rgba="0.75294118 0.75294118 0.75294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_washer_m4_12_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="4.5615925e-05" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 -0.0004" rpy="3.1415927 0 0" />
+      </inertial>
+    </link>
+  <joint name="joint_right_arm_1_fastened_22" type="fixed">
+    <origin xyz="0.010658871 -0.062314834 0" rpy="0 0 0" />
+    <parent link="link_right_arm_1_robstride_01_mock_3_rs_01_stator_1" />
+    <child link="link_right_arm_1_washer_m4_12" />
+    </joint>
+  <link name="link_right_arm_1_robstride_01_mock_3_rs_01_rotor_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_robstride_01_mock_3_rs_01_rotor_1_simple.stl" />
+        </geometry>
+      <material name="link_right_arm_1_robstride_01_mock_3_rs_01_rotor_1_material">
+        <color rgba="0.64705882 0.64705882 0.64705882 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_robstride_01_mock_3_rs_01_rotor_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.032" />
+      <inertia ixx="4.5591154e-06" iyy="4.5575352e-06" izz="4.1553172e-06" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="-7.9372476e-05 -7.648864e-05 -0.01525" rpy="3.1415927 0.76689767 -1.5707963" />
+      </inertial>
+    </link>
+  <joint name="right shoulder roll" type="revolute">
+    <origin xyz="-0.012659308 -0.034234368 0.0015" rpy="3.1415927 0 0" />
+    <parent link="link_right_arm_1_robstride_01_mock_3_rs_01_stator_1" />
+    <child link="link_right_arm_1_robstride_01_mock_3_rs_01_rotor_1" />
+    <limit effort="6" velocity="5" lower="-3.3684855" upper=".26179939" />
+    <axis xyz="0 0 -1" />
+    </joint>
+  <link name="link_left_arm_1_left_arm_part_1b_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_left_arm_part_1b_1_simple.stl" />
+        </geometry>
+      <material name="link_left_arm_1_left_arm_part_1b_1_material">
+        <color rgba="0.97254902 0.52941176 0.0039215686 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_left_arm_part_1b_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.28803091" />
+      <inertia ixx="0.00047227225" iyy="0.0006510983" izz="0.0002384941" ixy="-1.1768311e-06" ixz="-6.3367913e-06" iyz="-3.662411e-05" />
+      <origin xyz="0.012860288 0.0075588781 0.032950436" rpy="1.5340192 1.5435416 3.0169735" />
+      </inertial>
+    </link>
+  <joint name="joint_left_arm_1_fastened_5" type="fixed">
+    <origin xyz="0 0 -0.0008" rpy="3.1415927 0 0" />
+    <parent link="link_left_arm_1_washer_m4_7" />
+    <child link="link_left_arm_1_left_arm_part_1b_1" />
+    </joint>
+  <link name="link_left_arm_1_left_arm_part_2a_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_left_arm_part_2a_1_simple.stl" />
+        </geometry>
+      <material name="link_left_arm_1_left_arm_part_2a_1_material">
+        <color rgba="0.97254902 0.52941176 0.0039215686 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_left_arm_part_2a_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.4651297" />
+      <inertia ixx="0.0012813803" iyy="0.00094418113" izz="0.00054688244" ixy="0.00010539314" ixz="-3.1782736e-05" iyz="-7.8725332e-06" />
+      <origin xyz="-0.011944156 -0.0035392338 0.056390146" rpy="-3.1382287 -0.2790713 -1.6144076" />
+      </inertial>
+    </link>
+  <joint name="joint_left_arm_1_fastened_7" type="fixed">
+    <origin xyz="-0.01153167 0.003319726 -0.0305" rpy="3.1415927 0 0" />
+    <parent link="link_left_arm_1_robstride_01_mock_2_rs_01_rotor_1" />
+    <child link="link_left_arm_1_left_arm_part_2a_1" />
+    </joint>
+  <link name="link_left_arm_1_left_arm_part_2b_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_left_arm_part_2b_1_simple.stl" />
+        </geometry>
+      <material name="link_left_arm_1_left_arm_part_2b_1_material">
+        <color rgba="0.97254902 0.52941176 0.0039215686 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_left_arm_part_2b_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.44514759" />
+      <inertia ixx="0.0011673198" iyy="0.00085112524" izz="0.00047898586" ixy="0.00010027486" ixz="1.3247558e-05" iyz="-1.9915899e-06" />
+      <origin xyz="0.013768767 0.00372048 0.052037826" rpy="3.1246001 -0.2820463 -1.5491107" />
+      </inertial>
+    </link>
+  <joint name="joint_left_arm_1_fastened_8" type="fixed">
+    <origin xyz="0.01153167 -0.003319726 -0.0305" rpy="3.1415927 0 0" />
+    <parent link="link_left_arm_1_robstride_01_mock_2_rs_01_rotor_1" />
+    <child link="link_left_arm_1_left_arm_part_2b_1" />
+    </joint>
+  <link name="link_right_arm_1_right_arm_part_1b_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_right_arm_part_1b_1_simple.stl" />
+        </geometry>
+      <material name="link_right_arm_1_right_arm_part_1b_1_material">
+        <color rgba="0.97254902 0.52941176 0.0039215686 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_right_arm_part_1b_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.30242788" />
+      <inertia ixx="0.00047890701" iyy="0.00065577879" izz="0.00023847931" ixy="0" ixz="1.9368669e-06" iyz="-3.4945664e-05" />
+      <origin xyz="-0.023348052 -0.014026626 -0.032003772" rpy="-1.8606024 -1.5620098 -2.7688162" />
+      </inertial>
+    </link>
+  <joint name="joint_right_arm_1_fastened_4" type="fixed">
+    <origin xyz="0 0 -0.0008" rpy="0 0 0" />
+    <parent link="link_right_arm_1_washer_m4_12" />
+    <child link="link_right_arm_1_right_arm_part_1b_1" />
+    </joint>
+  <link name="link_right_arm_1_rightt_arm_part_2b_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_rightt_arm_part_2b_1_simple.stl" />
+        </geometry>
+      <material name="link_right_arm_1_rightt_arm_part_2b_1_material">
+        <color rgba="0.97254902 0.52941176 0.0039215686 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_rightt_arm_part_2b_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.43643618" />
+      <inertia ixx="0.0011405801" iyy="0.00082638966" izz="0.00046502037" ixy="9.3790727e-05" ixz="-1.6286023e-05" iyz="3.2629257e-06" />
+      <origin xyz="-0.013965915 0.003561569 -0.052763867" rpy="-0.023051303 0.26814743 -1.5980477" />
+      </inertial>
+    </link>
+  <joint name="joint_right_arm_1_fastened_6" type="fixed">
+    <origin xyz="-0.0028908681 0.011646582 -0.0305" rpy="0 0 -1.0471976" />
+    <parent link="link_right_arm_1_robstride_01_mock_3_rs_01_rotor_1" />
+    <child link="link_right_arm_1_rightt_arm_part_2b_1" />
+    </joint>
+  <link name="link_left_arm_1_washer_m4_26">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_washer_m4_26_simple.stl" />
+        </geometry>
+      <material name="link_left_arm_1_washer_m4_26_material">
+        <color rgba="0.75294118 0.75294118 0.75294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_washer_m4_26_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="4.5615925e-05" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 0.0004" rpy="3.1415927 0 3.1415927" />
+      </inertial>
+    </link>
+  <joint name="joint_left_arm_1_fastened_35" type="fixed">
+    <origin xyz="0.00076282533 -0.012771129 0.050701219" rpy="1.5707963 0 1.8510962" />
+    <parent link="link_left_arm_1_left_arm_part_2a_1" />
+    <child link="link_left_arm_1_washer_m4_26" />
+    </joint>
+  <link name="link_right_arm_1_washer_m4_11">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_washer_m4_11_simple.stl" />
+        </geometry>
+      <material name="link_right_arm_1_washer_m4_11_material">
+        <color rgba="0.75294118 0.75294118 0.75294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_washer_m4_11_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="4.5615925e-05" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 0.0004" rpy="3.1415927 0 0" />
+      </inertial>
+    </link>
+  <joint name="joint_right_arm_1_fastened_20" type="fixed">
+    <origin xyz="-0.046923496 0 0" rpy="0 0 0" />
+    <parent link="link_right_arm_1_right_arm_part_1b_1" />
+    <child link="link_right_arm_1_washer_m4_11" />
+    </joint>
+  <link name="link_right_arm_1_washer_m4_18">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_washer_m4_18_simple.stl" />
+        </geometry>
+      <material name="link_right_arm_1_washer_m4_18_material">
+        <color rgba="0.75294118 0.75294118 0.75294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_washer_m4_18_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="4.5615925e-05" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 0.0004" rpy="3.1415927 0 1.5707963" />
+      </inertial>
+    </link>
+  <joint name="joint_right_arm_1_fastened_23" type="fixed">
+    <origin xyz="-0.0026907231 0.00077460274 -0.1215" rpy="1.5707963 0 1.2904964" />
+    <parent link="link_right_arm_1_rightt_arm_part_2b_1" />
+    <child link="link_right_arm_1_washer_m4_18" />
+    </joint>
+  <link name="link_left_arm_1_robstride_01_mock_3_rs_01_stator_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_robstride_01_mock_3_rs_01_stator_1_simple.stl" />
+        </geometry>
+      <material name="link_left_arm_1_robstride_01_mock_3_rs_01_stator_1_material">
+        <color rgba="0.61568627 0.81176471 0.92941176 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_robstride_01_mock_3_rs_01_stator_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.34790535" />
+      <inertia ixx="0.00017729433" iyy="0.00017583919" izz="0.00027827575" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="-0.012658427 0.034108418 -0.010580484" rpy="3.1413879 -1.5635875 -3.1354067" />
+      </inertial>
+    </link>
+  <joint name="joint_left_arm_1_fastened_9" type="fixed">
+    <origin xyz="0 0 0.0008" rpy="3.1415927 0 3.1415927" />
+    <parent link="link_left_arm_1_washer_m4_26" />
+    <child link="link_left_arm_1_robstride_01_mock_3_rs_01_stator_1" />
+    </joint>
+  <link name="link_right_arm_1_robstride_01_mock_2_rs_01_stator_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_robstride_01_mock_2_rs_01_stator_1_simple.stl" />
+        </geometry>
+      <material name="link_right_arm_1_robstride_01_mock_2_rs_01_stator_1_material">
+        <color rgba="0.61568627 0.81176471 0.92941176 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_robstride_01_mock_2_rs_01_stator_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.34790535" />
+      <inertia ixx="0.00027827575" iyy="0.00017583919" izz="0.00017729433" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0.036625466 0.00018885059 0.017419516" rpy="3.1413879 -1.5635875 -1.5646104" />
+      </inertial>
+    </link>
+  <joint name="joint_right_arm_1_fastened_5" type="fixed">
+    <origin xyz="0 0 0.0008" rpy="0 0 1.5707963" />
+    <parent link="link_right_arm_1_washer_m4_18" />
+    <child link="link_right_arm_1_robstride_01_mock_2_rs_01_stator_1" />
+    </joint>
+  <link name="link_left_arm_1_robstride_01_mock_3_rs_01_rotor_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_robstride_01_mock_3_rs_01_rotor_1_simple.stl" />
+        </geometry>
+      <material name="link_left_arm_1_robstride_01_mock_3_rs_01_rotor_1_material">
+        <color rgba="0.64705882 0.64705882 0.64705882 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_robstride_01_mock_3_rs_01_rotor_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.032" />
+      <inertia ixx="4.5591154e-06" iyy="4.5575352e-06" izz="4.1553172e-06" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="-7.9372476e-05 -7.648864e-05 -0.01525" rpy="3.1415927 0.76689767 -1.5707963" />
+      </inertial>
+    </link>
+  <joint name="left elbow pitch" type="fixed">
+    <origin xyz="-0.012659308 0.034234368 -0.0015" rpy="0 0 0" />
+    <parent link="link_left_arm_1_robstride_01_mock_3_rs_01_stator_1" />
+    <child link="link_left_arm_1_robstride_01_mock_3_rs_01_rotor_1" />
+    <limit effort="6" velocity="5" lower="-1.3089969" upper="1.8325957" />
+    <axis xyz="0 0 -1" />
+    </joint>
+  <link name="link_right_arm_1_washer_m4_16">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_washer_m4_16_simple.stl" />
+        </geometry>
+      <material name="link_right_arm_1_washer_m4_16_material">
+        <color rgba="0.75294118 0.75294118 0.75294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_washer_m4_16_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="4.5615925e-05" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 -0.0004" rpy="0 0 0" />
+      </inertial>
+    </link>
+  <joint name="joint_right_arm_1_fastened_29" type="fixed">
+    <origin xyz="0.070733884 0.012847278 0.028" rpy="3.1415927 0 0" />
+    <parent link="link_right_arm_1_robstride_01_mock_2_rs_01_stator_1" />
+    <child link="link_right_arm_1_washer_m4_16" />
+    </joint>
+  <link name="link_right_arm_1_robstride_01_mock_2_rs_01_rotor_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_robstride_01_mock_2_rs_01_rotor_1_simple.stl" />
+        </geometry>
+      <material name="link_right_arm_1_robstride_01_mock_2_rs_01_rotor_1_material">
+        <color rgba="0.64705882 0.64705882 0.64705882 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_robstride_01_mock_2_rs_01_rotor_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.032" />
+      <inertia ixx="4.5591154e-06" iyy="4.5575352e-06" izz="4.1553172e-06" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="-7.9372476e-05 -7.648864e-05 -0.01525" rpy="3.1415927 0.76689767 -1.5707963" />
+      </inertial>
+    </link>
+  <joint name="right elbow pitch" type="revolute">
+    <origin xyz="0.036499516 0.00018797018 0.0265" rpy="0 0 1.5707963" />
+    <parent link="link_right_arm_1_robstride_01_mock_2_rs_01_stator_1" />
+    <child link="link_right_arm_1_robstride_01_mock_2_rs_01_rotor_1" />
+    <limit effort="6" velocity="5" lower="0.8325957" upper="4.403392" />
+    <axis xyz="0 0 -1" />
+    </joint>
+  <link name="link_left_arm_1_left_arm_part_3b_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_left_arm_part_3b_1_simple.stl" />
+        </geometry>
+      <material name="link_left_arm_1_left_arm_part_3b_1_material">
+        <color rgba="0.97254902 0.52941176 0.0039215686 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_left_arm_part_3b_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.33079612" />
+      <inertia ixx="0.00033628569" iyy="0.000694832" izz="0.00053516723" ixy="4.8884468e-05" ixz="6.3929247e-06" iyz="5.9763309e-05" />
+      <origin xyz="0.0027894269 -0.056037373 0.019504198" rpy="-3.0795123 -0.044890733 -0.0063471754" />
+      </inertial>
+    </link>
+  <joint name="joint_left_arm_1_fastened_10" type="fixed">
+    <origin xyz="0.01153167 -0.003319726 -0.0305" rpy="3.1415927 0 0" />
+    <parent link="link_left_arm_1_robstride_01_mock_3_rs_01_rotor_1" />
+    <child link="link_left_arm_1_left_arm_part_3b_1" />
+    </joint>
+  <link name="link_right_arm_1_right_arm_part_2a_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_right_arm_part_2a_1_simple.stl" />
+        </geometry>
+      <material name="link_right_arm_1_right_arm_part_2a_1_material">
+        <color rgba="0.97254902 0.52941176 0.0039215686 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_right_arm_part_2a_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.44065493" />
+      <inertia ixx="0.00080879562" iyy="0.00046785002" izz="0.0011737646" ixy="-1.2355643e-05" ixz="3.6410201e-06" iyz="-6.1920629e-06" />
+      <origin xyz="0.011683303 0.0013538466 -0.012099696" rpy="-1.6901274 0.26650797 2.8399213" />
+      </inertial>
+    </link>
+  <joint name="joint_right_arm_1_fastened_1" type="fixed">
+    <origin xyz="0 0 -0.0008" rpy="0 0 1.5707963" />
+    <parent link="link_right_arm_1_washer_m4_16" />
+    <child link="link_right_arm_1_right_arm_part_2a_1" />
+    </joint>
+  <link name="link_right_arm_1_right_arm_part_3b_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_right_arm_part_3b_1_simple.stl" />
+        </geometry>
+      <material name="link_right_arm_1_right_arm_part_3b_1_material">
+        <color rgba="0.97254902 0.52941176 0.0039215686 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_right_arm_part_3b_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.33058491" />
+      <inertia ixx="0.00033677756" iyy="0.00070410945" izz="0.00052644634" ixy="-4.492402e-05" ixz="-2.0594578e-05" iyz="4.5361019e-05" />
+      <origin xyz="-0.024466188 0.060627695 0.019484844" rpy="3.0519254 -0.11324046 0.013359332" />
+      </inertial>
+    </link>
+  <joint name="joint_right_arm_1_fastened_8" type="fixed">
+    <origin xyz="0.0086408022 0.0083268564 -0.0305" rpy="3.1415927 0 0" />
+    <parent link="link_right_arm_1_robstride_01_mock_2_rs_01_rotor_1" />
+    <child link="link_right_arm_1_right_arm_part_3b_1" />
+    </joint>
+  <link name="link_left_arm_1_washer_m4_28">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_washer_m4_28_simple.stl" />
+        </geometry>
+      <material name="link_left_arm_1_washer_m4_28_material">
+        <color rgba="0.75294118 0.75294118 0.75294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_washer_m4_28_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="4.5615925e-05" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 0.0004" rpy="0 0 3.1415927" />
+      </inertial>
+    </link>
+  <joint name="joint_left_arm_1_fastened_12" type="fixed">
+    <origin xyz="0.04350085 -0.070750287 -0.0055162648" rpy="1.2915436 1.5707963 0" />
+    <parent link="link_left_arm_1_left_arm_part_3b_1" />
+    <child link="link_left_arm_1_washer_m4_28" />
+    </joint>
+  <link name="link_right_arm_1_robstride_01_mock_4_rs_01_stator_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_robstride_01_mock_4_rs_01_stator_1_simple.stl" />
+        </geometry>
+      <material name="link_right_arm_1_robstride_01_mock_4_rs_01_stator_1_material">
+        <color rgba="0.61568627 0.81176471 0.92941176 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_robstride_01_mock_4_rs_01_stator_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.34790535" />
+      <inertia ixx="0.00017729433" iyy="0.00017583919" izz="0.00027827575" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="-0.012658427 0.034108418 -0.010580484" rpy="3.1413879 -1.5635875 -3.1354067" />
+      </inertial>
+    </link>
+  <joint name="joint_right_arm_1_fastened_10" type="fixed">
+    <origin xyz="0.0022721399 0.094686589 -0.0055162648" rpy="1.850049 -1.5707963 0" />
+    <parent link="link_right_arm_1_right_arm_part_3b_1" />
+    <child link="link_right_arm_1_robstride_01_mock_4_rs_01_stator_1" />
+    </joint>
+  <link name="link_right_arm_1_washer_m4_29">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_washer_m4_29_simple.stl" />
+        </geometry>
+      <material name="link_right_arm_1_washer_m4_29_material">
+        <color rgba="0.75294118 0.75294118 0.75294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_washer_m4_29_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="4.5615925e-05" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 0.0004" rpy="0 0 1.5707963" />
+      </inertial>
+    </link>
+  <joint name="joint_right_arm_1_fastened_42" type="fixed">
+    <origin xyz="-0.057575439 0.077525572 0.0054617478" rpy="-1.850049 1.5707963 0" />
+    <parent link="link_right_arm_1_right_arm_part_3b_1" />
+    <child link="link_right_arm_1_washer_m4_29" />
+    </joint>
+  <link name="link_left_arm_1_robstride_01_mock_4_rs_01_stator_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_robstride_01_mock_4_rs_01_stator_1_simple.stl" />
+        </geometry>
+      <material name="link_left_arm_1_robstride_01_mock_4_rs_01_stator_1_material">
+        <color rgba="0.61568627 0.81176471 0.92941176 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_robstride_01_mock_4_rs_01_stator_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.34790535" />
+      <inertia ixx="0.00017729433" iyy="0.00017583919" izz="0.00027827575" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0.012308716 0.034236344 -0.010580484" rpy="3.1413879 -1.5635875 -3.1354067" />
+      </inertial>
+    </link>
+  <joint name="joint_left_arm_1_fastened_40" type="fixed">
+    <origin xyz="0 0 0.0008" rpy="3.1415927 0 0" />
+    <parent link="link_left_arm_1_washer_m4_28" />
+    <child link="link_left_arm_1_robstride_01_mock_4_rs_01_stator_1" />
+    </joint>
+  <link name="link_right_arm_1_right_arm_part_3a_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_right_arm_part_3a_1_simple.stl" />
+        </geometry>
+      <material name="link_right_arm_1_right_arm_part_3a_1_material">
+        <color rgba="0.97254902 0.52941176 0.0039215686 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_right_arm_part_3a_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.30582591" />
+      <inertia ixx="0.00062638318" iyy="0.00042898963" izz="0.00032454709" ixy="7.7420015e-06" ixz="5.921195e-05" iyz="-5.6354426e-06" />
+      <origin xyz="0.02591828 0.035067063 -0.021210621" rpy="-3.1081221 0.00096496072 -3.1011955" />
+      </inertial>
+    </link>
+  <joint name="joint_right_arm_1_fastened_9" type="fixed">
+    <origin xyz="-0.024967143 -0.00012792554 0" rpy="3.1415927 0 3.1415927" />
+    <parent link="link_right_arm_1_robstride_01_mock_4_rs_01_stator_1" />
+    <child link="link_right_arm_1_right_arm_part_3a_1" />
+    </joint>
+  <link name="link_right_arm_1_robstride_01_mock_4_rs_01_rotor_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_robstride_01_mock_4_rs_01_rotor_1_simple.stl" />
+        </geometry>
+      <material name="link_right_arm_1_robstride_01_mock_4_rs_01_rotor_1_material">
+        <color rgba="0.64705882 0.64705882 0.64705882 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_robstride_01_mock_4_rs_01_rotor_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.032" />
+      <inertia ixx="4.5591154e-06" iyy="4.5575352e-06" izz="4.1553172e-06" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="-7.9372476e-05 -7.648864e-05 -0.01525" rpy="3.1415927 0.76689767 -1.5707963" />
+      </inertial>
+    </link>
+  <joint name="right wrist roll" type="fixed">
+    <origin xyz="-0.012659308 0.034234368 -0.0015" rpy="0 0 0" />
+    <parent link="link_right_arm_1_robstride_01_mock_4_rs_01_stator_1" />
+    <child link="link_right_arm_1_robstride_01_mock_4_rs_01_rotor_1" />
+    <limit effort="6" velocity="5" lower="-3.1415927" upper="3.1415927" />
+    <axis xyz="0 0 -1" />
+    </joint>
+  <link name="link_left_arm_1_washer_m4_31">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_washer_m4_31_simple.stl" />
+        </geometry>
+      <material name="link_left_arm_1_washer_m4_31_material">
+        <color rgba="0.75294118 0.75294118 0.75294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_washer_m4_31_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="4.5615925e-05" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 0.0004" rpy="3.1415927 0 3.1415927" />
+      </inertial>
+    </link>
+  <joint name="joint_left_arm_1_fastened_42" type="fixed">
+    <origin xyz="0.035626013 0.062442759 0" rpy="0 0 0" />
+    <parent link="link_left_arm_1_robstride_01_mock_4_rs_01_stator_1" />
+    <child link="link_left_arm_1_washer_m4_31" />
+    </joint>
+  <link name="link_left_arm_1_robstride_01_mock_4_rs_01_rotor_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_robstride_01_mock_4_rs_01_rotor_1_simple.stl" />
+        </geometry>
+      <material name="link_left_arm_1_robstride_01_mock_4_rs_01_rotor_1_material">
+        <color rgba="0.64705882 0.64705882 0.64705882 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_robstride_01_mock_4_rs_01_rotor_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.032" />
+      <inertia ixx="4.5591154e-06" iyy="4.5575352e-06" izz="4.1553172e-06" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="-7.9372476e-05 -7.648864e-05 -0.01525" rpy="3.1415927 0.76689767 -1.5707963" />
+      </inertial>
+    </link>
+  <joint name="left wrist roll" type="fixed">
+    <origin xyz="0.012307835 0.034362293 -0.0015" rpy="0 0 0" />
+    <parent link="link_left_arm_1_robstride_01_mock_4_rs_01_stator_1" />
+    <child link="link_left_arm_1_robstride_01_mock_4_rs_01_rotor_1" />
+    <limit effort="6" velocity="5" lower="-3.1415927" upper="0" />
+    <axis xyz="0 0 -1" />
+    </joint>
+  <link name="link_right_arm_1_washer_m4_31">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_washer_m4_31_simple.stl" />
+        </geometry>
+      <material name="link_right_arm_1_washer_m4_31_material">
+        <color rgba="0.75294118 0.75294118 0.75294118 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_washer_m4_31_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="4.5615925e-05" />
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 0.0004" rpy="0 0 1.5707963" />
+      </inertial>
+    </link>
+  <joint name="joint_right_arm_1_fastened_39" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="link_right_arm_1_right_arm_part_3a_1" />
+    <child link="link_right_arm_1_washer_m4_31" />
+    </joint>
+  <link name="link_right_arm_1_stub_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_stub_1_simple.stl" />
+        </geometry>
+      <material name="link_right_arm_1_stub_1_material">
+        <color rgba="0 0 0 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/right_arm_1_stub_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.41915078" />
+      <inertia ixx="0.00031476661" iyy="0.0003147666" izz="0.00046050242" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 -0.025155751" rpy="0 0 0.84007407" />
+      </inertial>
+    </link>
+  <joint name="joint_right_arm_1_fastened_43" type="fixed">
+    <origin xyz="0 0 -0.0305" rpy="0 0 -1.5707963" />
+    <parent link="link_right_arm_1_robstride_01_mock_4_rs_01_rotor_1" />
+    <child link="link_right_arm_1_stub_1" />
+    </joint>
+  <link name="link_left_arm_1_left_arm_part_3a_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_left_arm_part_3a_1_simple.stl" />
+        </geometry>
+      <material name="link_left_arm_1_left_arm_part_3a_1_material">
+        <color rgba="0.97254902 0.52941176 0.0039215686 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_left_arm_part_3a_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.3037206" />
+      <inertia ixx="0.0006190917" iyy="0.00042167941" izz="0.00032414018" ixy="-7.6276885e-06" ixz="5.836096e-05" iyz="5.4971674e-06" />
+      <origin xyz="0.014903591 0.0271948 -0.020822001" rpy="3.1052841 0.0010195461 3.0977042" />
+      </inertial>
+    </link>
+  <joint name="joint_left_arm_1_fastened_38" type="fixed">
+    <origin xyz="0 0 0.0008" rpy="3.1415927 0 0" />
+    <parent link="link_left_arm_1_washer_m4_31" />
+    <child link="link_left_arm_1_left_arm_part_3a_1" />
+    </joint>
+  <link name="link_left_arm_1_stub_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_stub_1_simple.stl" />
+        </geometry>
+      <material name="link_left_arm_1_stub_1_material">
+        <color rgba="0 0 0 1" />
+        </material>
+      </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="./meshes/left_arm_1_stub_1_simple.stl" />
+        </geometry>
+      </collision>
+    <inertial>
+      <mass value="0.41915078" />
+      <inertia ixx="0.00031476661" iyy="0.0003147666" izz="0.00046050242" ixy="0" ixz="0" iyz="0" />
+      <origin xyz="0 0 -0.025155751" rpy="0 0 0.84007407" />
+      </inertial>
+    </link>
+  <joint name="joint_left_arm_1_fastened_43" type="fixed">
+    <origin xyz="0 0 -0.0305" rpy="0 0 1.5707963" />
+    <parent link="link_left_arm_1_robstride_01_mock_4_rs_01_rotor_1" />
+    <child link="link_left_arm_1_stub_1" />
+    </joint>
+
+    <link name="left_end_effector_link"/>
+    <joint name="left_end_effector_joint" type="fixed">
+      <parent link="link_left_arm_1_robstride_01_mock_4_rs_01_rotor_1"/>
+      <child link="left_end_effector_link"/>
+      <origin xyz="-.05 0 -.1" rpy="0 0 0"/>  <!-- Adjust these values to position it at the tip -->
+    </joint>
+  <link name="right_end_effector_link"/>
+    <joint name="right_end_effector_joint" type="fixed">
+      <parent link="link_right_arm_1_robstride_01_mock_4_rs_01_rotor_1"/>
+      <child link="right_end_effector_link"/>
+      <origin xyz="-.05 0 -.1" rpy="0 0 0"/>  <!-- Adjust these values to position it at the tip -->
+    </joint>
+  </robot>
