@@ -4,9 +4,9 @@ import argparse
 import asyncio
 import logging
 import math
+import time
 from copy import deepcopy
 from typing import Any, Dict
-import time
 
 import numpy as np
 import pybullet as p
@@ -35,6 +35,7 @@ EER_JOINT: str = "right_end_effector_joint"
 INDEX_FINGER_TIP_ID, THUMB_FINGER_TIP_ID, MIDDLE_FINGER_TIP_ID = 8, 4, 14
 PINCH_DIST_CLOSED, PINCH_DIST_OPENED = 0.1, 0.1  # 10 cm
 EE_S_MIN, EE_S_MAX = 0.0, 0.05
+
 
 def load_config(config_path: str) -> Dict[str, Any]:
     with open(config_path, "r") as file:
@@ -144,7 +145,7 @@ class TeleopRobot:
             self.eel_chain_arm + self.eel_chain_hand if arm == "left" else self.eer_chain_arm + self.eer_chain_hand
         )
         target_pos = self.goal_pos_eel if arm == "left" else self.goal_pos_eer
-
+        print(target_pos)
         lower_limits = [self.joint_info[joint]["lower_limit"] for joint in ee_chain]
         upper_limits = [self.joint_info[joint]["upper_limit"] for joint in ee_chain]
         joint_ranges = [upper - lower for upper, lower in zip(upper_limits, lower_limits)]
@@ -352,7 +353,13 @@ def main() -> None:
     parser.add_argument("--gui", action="store_true", help="Use PyBullet GUI mode")
     parser.add_argument("--fps", type=int, default=60, help="Maximum frames per second")
     parser.add_argument("--config", type=str, default="config.yaml", help="Path to configuration file")
-    parser.add_argument("--embodiment", type=str, default="stompy_mini", help="Robot embodiment to use")
+    parser.add_argument(
+        "--embodiment",
+        type=str,
+        default="stompy_mini",
+        choices=["stompy_mini", "stompy"],
+        help="Robot embodiment to use",
+    )
     args = parser.parse_args()
 
     config = load_config(args.config)
