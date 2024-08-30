@@ -59,6 +59,9 @@ class TeleopRobot:
             np.array(self.config["start_pos_eer"]),
         )
         self.q = deepcopy(self.config["start_q"])
+        # add left and right hand
+        self.q["left_gripper"] = 0.0
+        self.q["right_gripper"] = 0.0
         self.q_lock = asyncio.Lock()
 
         # Offset between Vuer and PyBullet trunk positions / coordinates
@@ -205,7 +208,7 @@ class TeleopRobot:
 
             for slider in self.eer_chain_hand:
                 self.q[slider] = 0.05 - _s
-                p.resetJointState(self.robot_id, self.joint_info[slider]["index"], 0.05 - _s)
+                #p.resetJointState(self.robot_id, self.joint_info[slider]["index"], 0.05 - _s)
 
         # Left hand
         lthumb_pos = np.array(event.value["leftLandmarks"][THUMB_FINGER_TIP_ID])
@@ -221,7 +224,7 @@ class TeleopRobot:
 
             for slider in self.eel_chain_hand:
                 self.q[slider] = 0.05 - _s
-                p.resetJointState(self.robot_id, self.joint_info[slider]["index"], 0.05 - _s)
+                #p.resetJointState(self.robot_id, self.joint_info[slider]["index"], 0.05 - _s)
 
     async def main_loop(self, session: VuerSession, max_fps: int) -> None:
         """Main application loop."""

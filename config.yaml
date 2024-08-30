@@ -21,12 +21,12 @@ embodiments:
       right elbow pitch: 1.32
     kinematic_chains:
       left_arm: ["left shoulder pitch", "left shoulder yaw", "left shoulder roll", "left elbow pitch"]
-      left_hand: []
+      left_hand: ["left_gripper"]
       right_arm: ["right shoulder pitch", "right shoulder yaw", "right shoulder roll", "right elbow pitch"]
-      right_hand: []
+      right_hand: ["right_gripper"]
 
   stompy:
-    sides: ["right"]
+    sides: ["left"]
     robot_setup: "left_arm_teleop"
     urdf_web: "https://raw.githubusercontent.com/kscalelabs/teleop/f4616b5f117842e5f7eb138b87af31258e1f7484/urdf/stompy/upper_limb_assembly_5_dof_merged_simplified.urdf"
     urdf_local: "urdf/stompy/upper_limb_assembly_5_dof_merged_simplified.urdf"
