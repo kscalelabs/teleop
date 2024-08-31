@@ -61,6 +61,9 @@ make install-dependencies
 pip install -r requirements.txt
 ```
 
+### Switching Embodiments
+Currently, two motor types are supported - Bionic and Robstride motors. To switch between the two, modify the robot config (example in firmware repo / robot module). This is NOT the main config.yaml, which just specifies the specific meshes, links, and offsets for IK and visualization.
+
 ### Scripts
 ```demo.py``` - POC for integrating PyBullet with Vuer for real-time robot control
 
@@ -99,10 +102,13 @@ python replay.py --dataset_dir PATH/TO/DATASET --episode_idx EPISODE_IDX
 
 ### Common Issues
 #### Large Errors in Robot State and Actions
-Check the units, offsets, and any other factors that might be causing the numbers being recorded to be different than you expect. Also, check that the motor configs are correct (signs, offsets, etc). The Robot class has a handy method to test motors. 
+Check the units, offsets, and any other factors that might be causing the numbers being recorded to be different than you expect. Also, check that the motor configs are correct (signs, offsets, etc). The Robot class has some handy methods to test motors. 
 
 ```python
+# Test motors
 robot.test_motors()
+# Calibrate robot
+robot.calibrate_motors()
 ```
 
 #### Robot Not Moving
@@ -114,6 +120,17 @@ Check that the robot is connected to the firmware and that the firmware is runni
 
 #### Jerky Robot Movement
 Depending on your setup (power supply, battery, etc), check that current draw is not too high. An abnormally high current draw is also indicative of large errors in motor state and actions since we are using a closed loop PD torque controller. 
+
+#### Useful tips
+To debug Robstride motors, install the robstride cli to quickly check individual motors
+```bash
+pip install robstride
+```
+EXAMPLE:
+```bash
+robstride --interface socketcan --channel can[1/2/3/...] read [motor_id] loc_ref
+robstride --interface socketcan --channel can[1/2/3/...] write [motor_id] spd_ref 2
+```
 
 ### Dependencies
 
